@@ -35,6 +35,6 @@ public class LargeMessagePayloadWrapTests
         var id = message.Header.DataRef;
         await Assert.That(string.IsNullOrEmpty(id)).IsFalse();
         await Assert.That(message.Body.Value).IsEqualTo($"Claim Check {id}");
-        await Assert.That(_inMemoryStorageProvider.HasClaim(id)).IsTrue();
+        await Assert.That(await _inMemoryStorageProvider.HasClaimAsync(id)).IsTrue();
     }
 }

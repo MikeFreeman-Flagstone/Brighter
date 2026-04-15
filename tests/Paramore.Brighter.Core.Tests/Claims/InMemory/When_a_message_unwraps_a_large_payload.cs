@@ -25,19 +25,19 @@ public class RetrieveClaimLargePayloadTests
         //arrange
         var stream = new MemoryStream();
         var writer = new StreamWriter(stream);
-        writer.Write(_contents);
-        writer.Flush();
+        await writer.WriteAsync(_contents);
+        await writer.FlushAsync();
         stream.Position = 0;
-        var id = _store.Store(stream);
+        var id = await _store.StoreAsync(stream);
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new RoutingKey("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow), new MessageBody($"Claim Check {id}"));
         message.Header.DataRef = id;
         //act
-        var unwrappedMessage = _transformerAsync.Unwrap(message);
+        var unwrappedMessage = await _transformerAsync.UnwrapAsync(message);
         //assert
         await Assert.That(unwrappedMessage.Body.Value).IsEqualTo(_contents);
         //clean up
         await Assert.That(message.Header.DataRef).IsNull();
         await Assert.That(message.Header.Bag.TryGetValue(ClaimCheckTransformer.CLAIM_CHECK, out object _)).IsFalse();
-        await Assert.That(_store.HasClaim(id)).IsFalse();
+        await Assert.That(await _store.HasClaimAsync(id)).IsFalse();
     }
 }

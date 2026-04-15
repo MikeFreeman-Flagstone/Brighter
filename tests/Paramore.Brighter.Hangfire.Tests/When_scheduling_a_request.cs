@@ -116,7 +116,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).ContainsKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -148,7 +148,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).ContainsKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -181,7 +181,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).ContainsKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -213,7 +213,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).ContainsKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -245,7 +245,7 @@ public class HangfireSchedulerRequestTests : IDisposable
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
     }
 
     [Test]
@@ -263,7 +263,7 @@ public class HangfireSchedulerRequestTests : IDisposable
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
     }
 
     #endregion
@@ -292,7 +292,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).ContainsKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -329,7 +329,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).ContainsKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -371,7 +371,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).DoesNotContainKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -406,7 +406,7 @@ public class HangfireSchedulerRequestTests : IDisposable
         await Assert.That(_receivedMessages).DoesNotContainKey(nameof(MyEventHandler));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);

@@ -100,7 +100,7 @@ public class SqsMessageConsumerUnacceptableFallbackToDlqTests : IAsyncDisposable
     public async Task When_rejecting_message_with_unacceptable_and_no_invalid_channel_should_fallback_to_dlq()
     {
         //Arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
         var message = _channel.Receive(TimeSpan.FromMilliseconds(5000));
 
         //Act

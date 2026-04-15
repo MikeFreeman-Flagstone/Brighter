@@ -80,7 +80,7 @@ public class KafkaMessageConsumerUnknownReasonTests : IDisposable
             new MessageHeader(messageId, routingKey, MessageType.MT_COMMAND) { PartitionKey = _partitionKey },
             new MessageBody($"test content for unknown reason")
         );
-        _producer.Send(sentMessage);
+        await _producer.SendAsync(sentMessage);
         _producer.Flush();
 
         //Act - consume and reject the message with unknown reason (None)

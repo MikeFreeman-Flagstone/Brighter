@@ -77,7 +77,7 @@ public class RocketMqNoChannelsConfiguredTests : IDisposable
     {
         // Arrange - send a message and consume it from the source topic
         _consumer.Purge();
-        _producer.Send(_message);
+        await _producer.SendAsync(_message);
         var receivedMessage = ConsumeMessage(_consumer);
 
         // Act - reject with DeliveryError (no channels configured)
@@ -94,7 +94,7 @@ public class RocketMqNoChannelsConfiguredTests : IDisposable
             new MessageBody(JsonSerializer.Serialize(
                 (object)new MyCommand { Value = "Follow-up" }, JsonSerialisationOptions.Options)));
 
-        _producer.Send(followUpMessage);
+        await _producer.SendAsync(followUpMessage);
         var nextMessage = ConsumeMessage(_consumer);
         await Assert.That(nextMessage.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
         await Assert.That(nextMessage.Body.Value).IsEqualTo(followUpMessage.Body.Value);

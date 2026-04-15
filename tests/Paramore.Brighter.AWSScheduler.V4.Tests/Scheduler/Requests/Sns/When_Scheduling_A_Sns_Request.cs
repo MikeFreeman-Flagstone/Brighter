@@ -84,7 +84,7 @@ public class SnsSchedulingMessageViaFireSchedulerRequestTest
         var stopAt = DateTimeOffset.UtcNow.AddMinutes(2);
         while (stopAt > DateTimeOffset.UtcNow)
         {
-            var messages = _consumer.Receive(TimeSpan.FromMinutes(1));
+            var messages = await _consumer.ReceiveAsync(TimeSpan.FromMinutes(1));
             await Assert.That(messages).HasSingleItem();
 
             if (messages[0].Header.MessageType != MessageType.MT_NONE)
@@ -97,7 +97,7 @@ public class SnsSchedulingMessageViaFireSchedulerRequestTest
                 await Assert.That(m.SchedulerType).IsEqualTo(schedulerType);
                 await Assert.That((string?)m.RequestType).IsEqualTo(typeof(MyCommand).FullName);
                 await Assert.That((bool)m.Async).IsFalse();
-                _consumer.Acknowledge(messages[0]);
+                await _consumer.AcknowledgeAsync(messages[0]);
                 return;
             }
 
@@ -124,7 +124,7 @@ public class SnsSchedulingMessageViaFireSchedulerRequestTest
         var stopAt = DateTimeOffset.UtcNow.AddMinutes(2);
         while (stopAt > DateTimeOffset.UtcNow)
         {
-            var messages = _consumer.Receive(TimeSpan.FromMinutes(1));
+            var messages = await _consumer.ReceiveAsync(TimeSpan.FromMinutes(1));
             
             await Assert.That(messages).HasSingleItem();
 
@@ -138,7 +138,7 @@ public class SnsSchedulingMessageViaFireSchedulerRequestTest
                 await Assert.That(m.SchedulerType).IsEqualTo(schedulerType);
                 await Assert.That((string?)m.RequestType).IsEqualTo(typeof(MyCommand).FullName);
                 await Assert.That((bool)m.Async).IsFalse();
-                _consumer.Acknowledge(messages[0]);
+                await _consumer.AcknowledgeAsync(messages[0]);
                 return;
             }
 
@@ -234,8 +234,8 @@ public class SnsSchedulingMessageViaFireSchedulerRequestTest
     {
         await _channelFactory.DeleteQueueAsync();
         await _channelFactory.DeleteTopicAsync();
-        _messageProducer.Dispose();
-        _consumer.Dispose();
+        await _messageProducer.DisposeAsync();
+        await _consumer.DisposeAsync();
         _scheduler.Dispose();
     }
 }

@@ -24,7 +24,7 @@ public class ClaimCheckSmallPayloadTests
     [Test]
     public async Task When_a_message_is_under_the_threshold()
     {
-        var luggageCheckedMessage = _transformer.Wrap(_message, new Publication { Topic = new RoutingKey(_topic) });
+        var luggageCheckedMessage = await _transformer.WrapAsync(_message, new Publication { Topic = new RoutingKey(_topic) });
         //assert
         bool hasLuggage = luggageCheckedMessage.Header.Bag.TryGetValue(ClaimCheckTransformer.CLAIM_CHECK, out object _);
         await Assert.That(hasLuggage).IsFalse();

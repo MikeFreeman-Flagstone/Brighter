@@ -70,11 +70,11 @@ namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
     public async Task When_posting_a_message_via_the_messaging_gateway()
     {
         //Need to receive to subscribe to feed, before we send a message. This returns an empty message we discard
-        _redisFixture.MessageConsumer.Receive(TimeSpan.FromMilliseconds(1000));
+        await _redisFixture.MessageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
 
-        _redisFixture.MessageProducer.Send(_message);
-        var sentMessage = _redisFixture.MessageConsumer.Receive(TimeSpan.FromMilliseconds(1000)).Single();
-        _redisFixture.MessageConsumer.Acknowledge(sentMessage);
+        await _redisFixture.MessageProducer.SendAsync(_message);
+        var sentMessage = (await _redisFixture.MessageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000))).Single();
+        await _redisFixture.MessageConsumer.AcknowledgeAsync(sentMessage);
 
         // Assert message body
         await Assert.That(sentMessage.Body.Value).IsEqualTo(_message.Body.Value);

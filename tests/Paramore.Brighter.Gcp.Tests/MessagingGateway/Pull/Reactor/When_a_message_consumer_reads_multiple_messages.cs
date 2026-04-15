@@ -75,10 +75,10 @@ public class PubSubBufferedConsumerTestsAsync
         );
 
         //send MESSAGE_COUNT messages
-        _messageProducer.Send(messageOne);
-        _messageProducer.Send(messageTwo);
-        _messageProducer.Send(messageThree);
-        _messageProducer.Send(messageFour);
+        await _messageProducer.SendAsync(messageOne);
+        await _messageProducer.SendAsync(messageTwo);
+        await _messageProducer.SendAsync(messageThree);
+        await _messageProducer.SendAsync(messageFour);
 
         for(var i = 0; i < MessageCount; i++)
         {
@@ -94,8 +94,8 @@ public class PubSubBufferedConsumerTestsAsync
     [After(Test)]
     public async Task Cleanup()
     {
-        _channelFactory.DeleteSubscription(_pubSubSubscription);
-        _channelFactory.DeleteTopic(_pubSubSubscription);
+        await _channelFactory.DeleteSubscriptionAsync(_pubSubSubscription);
+        await _channelFactory.DeleteTopicAsync(_pubSubSubscription);
         await _messageProducer.DisposeAsync();
     }
 }

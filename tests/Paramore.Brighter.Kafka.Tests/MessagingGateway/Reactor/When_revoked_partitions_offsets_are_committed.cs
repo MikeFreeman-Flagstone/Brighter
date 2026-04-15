@@ -91,7 +91,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             var msg = await ReadMessage(consumerA);
             if (msg.Header.MessageType != MessageType.MT_NONE)
             {
-                consumerA.Acknowledge(msg);
+                await consumerA.AcknowledgeAsync(msg);
                 firstBatchIds.Add(msg.Id);
             }
         }
@@ -108,7 +108,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             var msg = await ReadMessage(consumerA);
             if (msg.Header.MessageType != MessageType.MT_NONE)
             {
-                consumerA.Acknowledge(msg);
+                await consumerA.AcknowledgeAsync(msg);
                 secondBatchIds.Add(msg.Id);
             }
         }
@@ -124,17 +124,17 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
         using var consumerB = CreateConsumer(commitBatchSize: 100, partitionAssignmentStrategy: partitionAssignmentStrategy);
 
         //consumer B polls to join the group
-        _ = consumerB.Receive(TimeSpan.FromMilliseconds(5000));
+        _ = await consumerB.ReceiveAsync(TimeSpan.FromMilliseconds(5000));
 
         //consumer A polls to process the revoke callback
-        _ = consumerA.Receive(TimeSpan.FromMilliseconds(5000));
+        _ = await consumerA.ReceiveAsync(TimeSpan.FromMilliseconds(5000));
 
         //allow rebalance to settle
         await Task.Delay(5000);
 
         //poll both once more to ensure rebalance completes
-        _ = consumerA.Receive(TimeSpan.FromMilliseconds(2000));
-        _ = consumerB.Receive(TimeSpan.FromMilliseconds(2000));
+        _ = await consumerA.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
+        _ = await consumerB.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
 
         //close both consumers to release group membership
         consumerA.Close();
@@ -150,7 +150,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
         //try to read messages — any we get that A already consumed are replays
         for (int j = 0; j < 5; j++)
         {
-            var messages = consumerC.Receive(TimeSpan.FromMilliseconds(2000));
+            var messages = await consumerC.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
             foreach (var msg in messages)
             {
                 if (msg.Header.MessageType != MessageType.MT_NONE)
@@ -207,7 +207,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             try
             {
                 maxTries++;
-                messages = consumer.Receive(TimeSpan.FromMilliseconds(1000));
+                messages = await consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
 
                 if (messages[0].Header.MessageType != MessageType.MT_NONE)
                 {

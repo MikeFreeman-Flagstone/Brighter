@@ -106,13 +106,13 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
                 new AzureServiceBusChannelFactory(new AzureServiceBusConsumerFactory(_clientProvider));
             _channel = channelFactory.CreateSyncChannel(_subscription);
 
-            _producerRegistry = new AzureServiceBusProducerRegistryFactory(
-                _clientProvider,
-                [
-                    new AzureServiceBusPublication { Topic = new RoutingKey(_topicName) }
-                ]
+            _producerRegistry = await new AzureServiceBusProducerRegistryFactory(
+                    _clientProvider,
+                    [
+                        new AzureServiceBusPublication { Topic = new RoutingKey(_topicName) }
+                    ]
                 )
-                .Create();
+                .CreateAsync();
         }
         
         [Test]

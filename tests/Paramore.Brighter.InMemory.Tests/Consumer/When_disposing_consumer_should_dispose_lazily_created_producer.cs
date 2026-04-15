@@ -63,8 +63,8 @@ public class AsyncInMemoryMessageConsumerDisposeTests
 
         // Put message on bus, receive it, then requeue with delay (creates producer)
         bus.Enqueue(message);
-        consumer.Receive();
-        consumer.Requeue(message, TimeSpan.FromSeconds(30));
+        await consumer.ReceiveAsync();
+        await consumer.RequeueAsync(message, TimeSpan.FromSeconds(30));
 
         // Act & Assert - should not throw
         await Assert.That(() => consumer.Dispose()).ThrowsNothing();
@@ -99,8 +99,8 @@ public class AsyncInMemoryMessageConsumerDisposeTests
 
         // Put message on bus, receive it, then requeue with delay (creates producer)
         bus.Enqueue(message);
-        consumer.Receive();
-        consumer.Requeue(message, TimeSpan.FromSeconds(30));
+        await consumer.ReceiveAsync();
+        await consumer.RequeueAsync(message, TimeSpan.FromSeconds(30));
 
         // Act & Assert - should not throw
         await Assert.That(async () => await consumer.DisposeAsync()).ThrowsNothing();

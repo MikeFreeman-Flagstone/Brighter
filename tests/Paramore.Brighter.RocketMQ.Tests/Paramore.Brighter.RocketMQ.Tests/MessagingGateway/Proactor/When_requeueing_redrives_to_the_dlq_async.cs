@@ -49,7 +49,7 @@ public class MessageProducerDlqTestsAsync
             publication);
 
         RocketMqChannelFactory channelFactory = new(new RocketMessageConsumerFactory(connection));
-        _channel = channelFactory.CreateAsyncChannel(subscription);
+        _channel = await channelFactory.CreateAsyncChannelAsync(subscription);
     }
 
     [Test]

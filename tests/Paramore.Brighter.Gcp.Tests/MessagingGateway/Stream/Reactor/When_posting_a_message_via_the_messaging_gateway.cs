@@ -65,7 +65,7 @@ public class MessageProducerSendAsyncTests : IDisposable
     {
         // arrange
         _message.Header.Subject = "test subject";
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
 
         Thread.Sleep(1000);
 

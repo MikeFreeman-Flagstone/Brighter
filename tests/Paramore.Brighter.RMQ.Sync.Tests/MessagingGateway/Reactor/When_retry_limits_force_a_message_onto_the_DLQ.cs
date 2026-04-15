@@ -125,7 +125,7 @@ public class RMQMessageConsumerRetryDLQTests : IDisposable
         await Task.Delay(20000);
 
         //put something on an SNS topic, which will be delivered to our SQS queue
-        _sender.Send(_message);
+        await _sender.SendAsync(_message);
 
         //Let the message be handled and deferred until it reaches the DLQ
         await Task.Delay(20000);

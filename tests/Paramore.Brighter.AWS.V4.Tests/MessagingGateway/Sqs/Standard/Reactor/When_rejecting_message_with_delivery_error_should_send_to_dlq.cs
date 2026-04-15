@@ -99,7 +99,7 @@ public class SqsMessageConsumerDeliveryErrorDlqTests : IAsyncDisposable
     public async Task When_rejecting_message_with_delivery_error_should_send_to_dlq()
     {
         //Arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
         var message = _channel.Receive(TimeSpan.FromMilliseconds(5000));
 
         //Act

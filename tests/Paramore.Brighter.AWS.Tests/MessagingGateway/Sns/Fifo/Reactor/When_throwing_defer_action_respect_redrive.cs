@@ -143,7 +143,7 @@ public class SnsReDrivePolicySDlqTests : IAsyncDisposable
     public async Task When_throwing_defer_action_respect_redrive()
     {
         //put something on an SNS topic, which will be delivered to our SQS queue
-        _sender.Send(_message);
+        await _sender.SendAsync(_message);
 
         //start a message pump, let it process messages
         var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);

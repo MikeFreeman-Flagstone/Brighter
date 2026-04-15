@@ -37,10 +37,10 @@ public class LargeMessagePayloadUnwrapTests
         var commandAsJson = JsonSerializer.Serialize(myCommand, new JsonSerializerOptions(JsonSerializerDefaults.General));
         using var stream = new MemoryStream();
         using var writer = new StreamWriter(stream);
-        writer.Write(commandAsJson);
-        writer.Flush();
+        await writer.WriteAsync(commandAsJson);
+        await writer.FlushAsync();
         stream.Position = 0;
-        var id = _luggageStore.Store(stream);
+        var id = await _luggageStore.StoreAsync(stream);
         //pretend we ran through the claim check
         myCommand.Value = $"Claim Check {id}";
         //set the headers, so that we have a claim check listed
@@ -53,7 +53,7 @@ public class LargeMessagePayloadUnwrapTests
         //assert
         //contents should be from storage
         await Assert.That(transformedMessage.Value).IsEqualTo(contents);
-        await Assert.That(_luggageStore.HasClaim(id)).IsFalse();
+        await Assert.That(await _luggageStore.HasClaimAsync(id)).IsFalse();
     }
 
     [After(Test)]

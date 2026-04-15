@@ -150,7 +150,7 @@ public class MongoDbEntityFrameworkTransactionProviderAsyncTest
         var context = A.Fake<DbContext>();
         var mockTransaction = A.Fake<IDbContextTransaction>();
         var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await cts.CancelAsync();
 
         A.CallTo(() => context.Database.CurrentTransaction).Returns(mockTransaction);
         A.CallTo(() => mockTransaction.CommitAsync(cts.Token))
@@ -170,7 +170,7 @@ public class MongoDbEntityFrameworkTransactionProviderAsyncTest
         var context = A.Fake<DbContext>();
         var mockTransaction = A.Fake<IDbContextTransaction>();
         var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await cts.CancelAsync();
 
         A.CallTo(() => context.Database.CurrentTransaction).Returns(mockTransaction);
         A.CallTo(() => mockTransaction.RollbackAsync(cts.Token))

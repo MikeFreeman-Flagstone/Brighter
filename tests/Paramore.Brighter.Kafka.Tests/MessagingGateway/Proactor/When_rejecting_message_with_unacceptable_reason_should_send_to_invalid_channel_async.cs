@@ -199,7 +199,11 @@ public class KafkaMessageConsumerInvalidMessageAsyncTests : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        _producer?.Dispose();
+        if(_producer != null)
+        {
+            await _producer.DisposeAsync();
+        }        
+        
         await Task.CompletedTask;
     }
 }

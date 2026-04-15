@@ -98,7 +98,7 @@ public class KafkaConsumerRequeueSchedulerTests : IDisposable
         await Assert.That(received.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
 
         // Act - requeue with non-zero delay (should use scheduler via producer)
-        _consumer.Requeue(received, TimeSpan.FromSeconds(5));
+        await _consumer.RequeueAsync(received, TimeSpan.FromSeconds(5));
 
         // Assert - scheduler should have been called (proves producer has scheduler configured)
         await Assert.That(_scheduler.ScheduleCalled).IsTrue();
@@ -114,11 +114,11 @@ public class KafkaConsumerRequeueSchedulerTests : IDisposable
             try
             {
                 maxTries++;
-                messages = _consumer.Receive(TimeSpan.FromMilliseconds(1000));
+                messages = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
 
                 if (messages[0].Header.MessageType != MessageType.MT_NONE)
                 {
-                    _consumer.Acknowledge(messages[0]);
+                    await _consumer.AcknowledgeAsync(messages[0]);
                     break;
                 }
             }

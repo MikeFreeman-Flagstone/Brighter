@@ -113,7 +113,7 @@ public class RMQMessageConsumerProducerTopicSchedulerTestsAsync : IAsyncDisposab
 
     public async ValueTask DisposeAsync()
     {
-        _consumer.Dispose();
+        await _consumer.DisposeAsync();
         await _messageProducer.DisposeAsync();
     }
 

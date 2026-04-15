@@ -44,9 +44,9 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Post
         {
             var context = new RequestContext();
             _commandProcessor.Post(_myCommand, context);
-            await Assert.That(_outbox.Get(_myCommand.Id, context)).IsNotNull();
+            await Assert.That(await _outbox.GetAsync(_myCommand.Id, context)).IsNotNull();
             await Assert.That(_internalBus.Stream(new RoutingKey(_routingKey))).IsNotEmpty();
-            await Assert.That(_outbox.Get(_myCommand.Id, context)).IsEqualTo(_message);
+            await Assert.That(await _outbox.GetAsync(_myCommand.Id, context)).IsEqualTo(_message);
         }
     }
 }

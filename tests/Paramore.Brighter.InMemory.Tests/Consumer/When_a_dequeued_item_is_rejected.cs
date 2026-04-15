@@ -24,8 +24,8 @@ public class InMemoryConsumerRejectTests
         var consumer = new InMemoryMessageConsumer(routingKey, bus, timeProvider, ackTimeout: TimeSpan.FromMilliseconds(1000));
         
         //act
-        var receivedMessage = consumer.Receive().Single();
-        consumer.Reject(receivedMessage);
+        var receivedMessage = (await consumer.ReceiveAsync()).Single();
+        await consumer.RejectAsync(receivedMessage);
         
         timeProvider.Advance(TimeSpan.FromSeconds(2));  //-- the message should be returned to the bus if there is no Acknowledge or Reject
         

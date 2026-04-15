@@ -225,8 +225,8 @@ public class SqsSchedulingRequestTest
     public async Task Cleanup()
     {
         await _channelFactory.DeleteQueueAsync();
-        _messageProducer.Dispose();
-        _consumer.Dispose();
+        await _messageProducer.DisposeAsync();
+        await _consumer.DisposeAsync();
         _scheduler.Dispose();
     }
 }

@@ -71,11 +71,11 @@ public class MsSqlMessageConsumerUnacceptableInvalidChannelTests : IDisposable
     public async Task When_rejecting_message_with_unacceptable_reason_should_send_to_invalid_channel()
     {
         // Arrange - send a message and consume it from the source topic
-        _producer.Send(_message);
+        await _producer.SendAsync(_message);
         var receivedMessage = ConsumeMessage(_consumer);
 
         // Act - reject with Unacceptable reason
-        var result = _consumer.Reject(receivedMessage,
+        var result = await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.Unacceptable, "Bad message format"));
 
         // Assert - reject returns true
@@ -88,7 +88,7 @@ public class MsSqlMessageConsumerUnacceptableInvalidChannelTests : IDisposable
         await Assert.That(invalidMessage.Header.Bag["rejectionReason"].ToString()).IsEqualTo(RejectionReason.Unacceptable.ToString());
 
         // Assert - DLQ should be empty
-        var dlqMessage = _dlqConsumer.Receive(TimeSpan.FromMilliseconds(1000)).First();
+        var dlqMessage = (await _dlqConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000))).First();
         await Assert.That(dlqMessage.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 

@@ -55,7 +55,7 @@ public class WhenAddingAMessageWithinTransactionAndRollbackItShouldNotBeStored :
         var outbox = _outboxProvider.CreateOutbox();
 
         var transaction = _outboxProvider.CreateTransactionProvider();
-        _ = transaction.GetTransaction();
+        _ = await transaction.GetTransactionAsync();
 
         var context = new RequestContext();
         var message = _messageFactory.Create();
@@ -64,7 +64,7 @@ public class WhenAddingAMessageWithinTransactionAndRollbackItShouldNotBeStored :
 
         // Act
         outbox.Add(message, context, transactionProvider: transaction);
-        transaction.Rollback();
+        await transaction.RollbackAsync();
 
         var storedMessage = outbox.Get(message.Id, context);
         

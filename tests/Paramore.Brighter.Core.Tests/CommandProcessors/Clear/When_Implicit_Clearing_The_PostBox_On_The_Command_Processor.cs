@@ -50,8 +50,8 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Clear
         public async Task When_Implicit_Clearing_The_PostBox_On_The_Command_Processor()
         {
             var context = new RequestContext();
-            _outbox.Add(_message, context);
-            _outbox.Add(_message2, context);
+            await _outbox.AddAsync(_message, context);
+            await _outbox.AddAsync(_message2, context);
             await _mediator.ClearOutstandingFromOutboxAsync(1, TimeSpan.Zero, true, context);
             var topic = new RoutingKey(Topic);
             for (var i = 1; i <= 10; i++)

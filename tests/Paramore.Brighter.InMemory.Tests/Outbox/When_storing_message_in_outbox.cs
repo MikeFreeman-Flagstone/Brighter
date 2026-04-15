@@ -25,9 +25,9 @@ namespace Paramore.Brighter.InMemory.Tests.Outbox
             
             //Act
             var context = new RequestContext();
-            outbox.Add(messageToAdd, context);
+            await outbox.AddAsync(messageToAdd, context);
 
-            var retrievedMessage = outbox.Get(messageId, context);
+            var retrievedMessage = await outbox.GetAsync(messageId, context);
             
             //Assert
             await Assert.That(retrievedMessage).IsNotNull();
@@ -52,13 +52,13 @@ namespace Paramore.Brighter.InMemory.Tests.Outbox
             
             //Act
             var context = new RequestContext();
-            outbox.Add(messageToAdd, context);
+            await outbox.AddAsync(messageToAdd, context);
             var dispatchedAt = _timeProvider.GetUtcNow();
-            outbox.MarkDispatched(messageId, context, dispatchedAt);
+            await outbox.MarkDispatchedAsync(messageId, context, dispatchedAt);
             
             _timeProvider.Advance(TimeSpan.FromSeconds(10));
 
-            var dispatchedMessages = outbox.DispatchedMessages(TimeSpan.FromSeconds(5), context);
+            var dispatchedMessages = await outbox.DispatchedMessagesAsync(TimeSpan.FromSeconds(5), context);
 
             //Assert
             IEnumerable<Message> collection = dispatchedMessages as Message[] ?? dispatchedMessages.ToArray();
@@ -81,11 +81,11 @@ namespace Paramore.Brighter.InMemory.Tests.Outbox
             
             //Act
             var context = new RequestContext();
-            outbox.Add(messageToAdd, context);
+            await outbox.AddAsync(messageToAdd, context);
             
             _timeProvider.Advance(TimeSpan.FromMilliseconds(500));
 
-            var outstandingMessages = outbox.OutstandingMessages(TimeSpan.Zero, context);
+            var outstandingMessages = await outbox.OutstandingMessagesAsync(TimeSpan.Zero, context);
             
             //Assert
             IEnumerable<Message> collection = outstandingMessages as Message[] ?? outstandingMessages.ToArray();
@@ -105,11 +105,11 @@ namespace Paramore.Brighter.InMemory.Tests.Outbox
             for(int i =0; i <= 4; i++)
             {
                 RequestContext requestContext = context;
-                outbox.Add(new MessageTestDataBuilder().WithId(messageIds[i]), requestContext);
+                await outbox.AddAsync(new MessageTestDataBuilder().WithId(messageIds[i]), requestContext);
             }
 
             //Act 
-            var message = outbox.Get(messageIds[2], context);
+            var message = await outbox.GetAsync(messageIds[2], context);
             
             //Assert
             await Assert.That(message.Id).IsEqualTo(messageIds[2]);
@@ -126,18 +126,18 @@ namespace Paramore.Brighter.InMemory.Tests.Outbox
             for(int i =0; i <= 4; i++)
             {
                 RequestContext requestContext = context;
-                outbox.Add(new MessageTestDataBuilder().WithId(messageIds[i]), requestContext);
+                await outbox.AddAsync(new MessageTestDataBuilder().WithId(messageIds[i]), requestContext);
             }
 
             //Act 
             var now = _timeProvider.GetUtcNow();
-            outbox.MarkDispatched(messageIds[0], context, now);
-            outbox.MarkDispatched(messageIds[4], context, now);
+            await outbox.MarkDispatchedAsync(messageIds[0], context, now);
+            await outbox.MarkDispatchedAsync(messageIds[4], context, now);
 
             _timeProvider.Advance(TimeSpan.FromSeconds(10));
 
-            var sentMessages = outbox.DispatchedMessages(TimeSpan.FromSeconds(5), context);
-            var outstandingMessages = outbox.OutstandingMessages(TimeSpan.Zero, context);
+            var sentMessages = await outbox.DispatchedMessagesAsync(TimeSpan.FromSeconds(5), context);
+            var outstandingMessages = await outbox.OutstandingMessagesAsync(TimeSpan.Zero, context);
 
             //Assert
             var messages = sentMessages as Message[] ?? sentMessages.ToArray();

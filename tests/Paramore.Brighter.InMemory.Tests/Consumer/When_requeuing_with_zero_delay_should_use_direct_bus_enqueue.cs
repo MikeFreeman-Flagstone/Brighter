@@ -65,7 +65,7 @@ public class InMemoryConsumerRequeueWithZeroDelayTests
     public async Task Should_enqueue_message_directly_when_delay_is_zero()
     {
         // Act
-        _consumer.Requeue(_message, TimeSpan.Zero);
+        await _consumer.RequeueAsync(_message, TimeSpan.Zero);
 
         // Assert - message should be immediately on the bus
         var messagesOnBus = _bus.Stream(_routingKey);
@@ -77,7 +77,7 @@ public class InMemoryConsumerRequeueWithZeroDelayTests
     public async Task Should_enqueue_message_directly_when_delay_is_null()
     {
         // Act
-        _consumer.Requeue(_message, null);
+        await _consumer.RequeueAsync(_message, null);
 
         // Assert - message should be immediately on the bus
         var messagesOnBus = _bus.Stream(_routingKey);
@@ -89,7 +89,7 @@ public class InMemoryConsumerRequeueWithZeroDelayTests
     public async Task Should_not_invoke_scheduler_when_delay_is_zero()
     {
         // Act
-        _consumer.Requeue(_message, TimeSpan.Zero);
+        await _consumer.RequeueAsync(_message, TimeSpan.Zero);
 
         // Assert
         await Assert.That(_scheduler.ScheduleCalled).IsFalse();

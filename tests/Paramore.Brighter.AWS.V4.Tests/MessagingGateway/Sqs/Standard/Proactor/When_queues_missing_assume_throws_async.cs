@@ -40,7 +40,7 @@ public class AWSAssumeQueuesTestsAsync : IAsyncDisposable
         await producer.ConfirmTopicExistsAsync(queueName);
 
         _channelFactory = new ChannelFactory(awsConnection);
-        var channel = _channelFactory.CreateAsyncChannel(subscription);
+        var channel = await _channelFactory.CreateAsyncChannelAsync(subscription);
 
         //We need to create the topic at least, to check the queues
         _consumer = new SqsMessageConsumerFactory(awsConnection).CreateAsync(subscription);

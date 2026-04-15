@@ -51,7 +51,7 @@ public class AwsValidateInfrastructureByArnTestsAsync : IAsyncDisposable
         var awsConnection = GatewayFactory.CreateFactory();
 
         _channelFactory = new ChannelFactory(awsConnection);
-        var channel = _channelFactory.CreateAsyncChannel(subscription);
+        var channel = await _channelFactory.CreateAsyncChannelAsync(subscription);
 
         var topicArn = await FindTopicArn(awsConnection, routingKey.ToValidSNSTopicName(true));
         var routingKeyArn = new RoutingKey(topicArn);
@@ -103,7 +103,7 @@ public class AwsValidateInfrastructureByArnTestsAsync : IAsyncDisposable
         await _channelFactory.DeleteTopicAsync();
         await _channelFactory.DeleteQueueAsync();
         ((IAmAMessageConsumerSync)_consumer).Dispose();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

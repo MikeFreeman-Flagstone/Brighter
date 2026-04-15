@@ -63,7 +63,7 @@ public class RmqMutualTlsAcceptanceTests : IDisposable
 
         // Assert - Should NOT throw TLS handshake exception
         // Actual TLS handshake occurs when Send() is called
-        producer.Send(message);
+        await producer.SendAsync(message);
 
         // If we reach here, TLS handshake succeeded
         await Assert.That(true).IsTrue();
@@ -103,7 +103,7 @@ public class RmqMutualTlsAcceptanceTests : IDisposable
             new MessageHeader(Id.Random(), routingKey, MessageType.MT_EVENT),
             new MessageBody("Round-trip test over mTLS (sync)")
         );
-        producer.Send(sentMessage);
+        await producer.SendAsync(sentMessage);
 
         // Act - Consume
         var receivedMessages = consumer.Receive(TimeSpan.FromSeconds(5));

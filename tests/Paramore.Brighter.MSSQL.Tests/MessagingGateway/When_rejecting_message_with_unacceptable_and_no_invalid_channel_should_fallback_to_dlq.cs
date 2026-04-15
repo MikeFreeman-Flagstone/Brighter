@@ -68,11 +68,11 @@ public class MsSqlMessageConsumerUnacceptableFallbackToDlqTests : IDisposable
     public async Task When_rejecting_message_with_unacceptable_and_no_invalid_channel_should_fallback_to_dlq()
     {
         // Arrange - send a message and consume it from the source topic
-        _producer.Send(_message);
+        await _producer.SendAsync(_message);
         var receivedMessage = ConsumeMessage(_consumer);
 
         // Act - reject with Unacceptable reason (no invalid channel configured)
-        var result = _consumer.Reject(receivedMessage,
+        var result = await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.Unacceptable, "Bad message format"));
 
         // Assert - reject returns true

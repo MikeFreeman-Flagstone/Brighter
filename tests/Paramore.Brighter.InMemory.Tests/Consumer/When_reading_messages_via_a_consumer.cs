@@ -28,8 +28,8 @@ public class InMemoryConsumerReceiveTests
         var consumer = new InMemoryMessageConsumer(routingKey, bus, new FakeTimeProvider(), ackTimeout: TimeSpan.FromMilliseconds(1000));
         
         //act
-        var receivedMessage = consumer.Receive().Single();
-        consumer.Acknowledge(receivedMessage);
+        var receivedMessage = (await consumer.ReceiveAsync()).Single();
+        await consumer.AcknowledgeAsync(receivedMessage);
 
         //assert
         await Assert.That(receivedMessage).IsEqualTo(expectedMessage);

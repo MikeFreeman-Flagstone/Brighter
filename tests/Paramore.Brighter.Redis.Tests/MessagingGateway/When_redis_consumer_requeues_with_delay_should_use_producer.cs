@@ -59,7 +59,7 @@ public class When_redis_consumer_requeues_with_delay_should_use_producer : IDisp
     public async Task When_requeuing_with_delay_should_use_producer()
     {
         // Act - requeue with non-zero delay
-        var result = _consumer.Requeue(_message, TimeSpan.FromSeconds(5));
+        var result = await _consumer.RequeueAsync(_message, TimeSpan.FromSeconds(5));
 
         // Assert - should return true
         await Assert.That(result).IsTrue();

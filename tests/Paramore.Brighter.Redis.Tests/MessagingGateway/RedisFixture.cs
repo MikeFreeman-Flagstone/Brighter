@@ -37,9 +37,9 @@ namespace Paramore.Brighter.Redis.Tests.MessagingGateway
         [After(Test)]
         public async Task Cleanup()
         {
-            MessageConsumer.Purge();
-            MessageConsumer.Dispose();
-            MessageProducer.Dispose();
+            await MessageConsumer.PurgeAsync();
+            await MessageConsumer.DisposeAsync();
+            await MessageProducer.DisposeAsync();
         }
 
         public async ValueTask DisposeAsync()

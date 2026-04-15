@@ -31,7 +31,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).ContainsKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -63,7 +63,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).ContainsKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -96,7 +96,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).ContainsKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -128,7 +128,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).ContainsKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -158,7 +158,7 @@ namespace Paramore.Brighter.TickerQ.Tests
 
             Thread.Sleep(TimeSpan.FromSeconds(2));
 
-            await Assert.That(_fixture.Outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+            await Assert.That(await _fixture.Outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
 
             await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
         }
@@ -178,7 +178,7 @@ namespace Paramore.Brighter.TickerQ.Tests
 
             await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
 
-            await Assert.That(_fixture.Outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+            await Assert.That(await _fixture.Outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
         }
 
         #endregion
@@ -207,7 +207,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).ContainsKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -244,7 +244,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).ContainsKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -286,7 +286,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).DoesNotContainKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -321,7 +321,7 @@ namespace Paramore.Brighter.TickerQ.Tests
             await Assert.That(_fixture.ReceivedMessages).DoesNotContainKey(nameof(MyEventHandler));
 
             var expected = Message.Empty;
-            var actual = _fixture.Outbox.Get(req.Id, new RequestContext());
+            var actual = await _fixture.Outbox.GetAsync(req.Id, new RequestContext());
 
             await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
             await Assert.That(actual.Id).IsEqualTo(expected.Id);

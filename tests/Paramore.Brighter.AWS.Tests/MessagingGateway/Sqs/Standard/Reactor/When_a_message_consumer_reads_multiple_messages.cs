@@ -82,10 +82,10 @@ public class SQSBufferedConsumerTests : IAsyncDisposable
         );
              
         //send MESSAGE_COUNT messages 
-        _messageProducer.Send(messageOne);
-        _messageProducer.Send(messageTwo);
-        _messageProducer.Send(messageThree);
-        _messageProducer.Send(messageFour);
+        await _messageProducer.SendAsync(messageOne);
+        await _messageProducer.SendAsync(messageTwo);
+        await _messageProducer.SendAsync(messageThree);
+        await _messageProducer.SendAsync(messageFour);
 
 
         int iteration = 0;
@@ -97,7 +97,7 @@ public class SQSBufferedConsumerTests : IAsyncDisposable
             var outstandingMessageCount = MessageCount - messagesReceivedCount;
 
             //retrieve  messages
-            var messages = _consumer.Receive(TimeSpan.FromMilliseconds(10000));
+            var messages = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(10000));
                 
             await Assert.That(messages.Length <= outstandingMessageCount).IsTrue();
                 
@@ -108,7 +108,7 @@ public class SQSBufferedConsumerTests : IAsyncDisposable
             foreach (var message in moreMessages)
             {
                 messagesReceived.Add(message);
-                _consumer.Acknowledge(message);
+                await _consumer.AcknowledgeAsync(message);
             }
                  
             messagesReceivedCount = messagesReceived.Count;
@@ -128,7 +128,7 @@ public class SQSBufferedConsumerTests : IAsyncDisposable
         //Clean up resources that we have created
         await _channelFactory.DeleteTopicAsync();
         await _channelFactory.DeleteQueueAsync();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

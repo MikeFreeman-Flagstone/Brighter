@@ -21,7 +21,7 @@ public class MassTransitMessageMapperTests
         var mapper = new MassTransitMessageMapper<TestCommand> { Context = _context };
 
         var request = new TestCommand();
-        var message = mapper.MapToMessage(request, _publication);
+        var message = await mapper.MapToMessageAsync(request, _publication);
 
         await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
     }
@@ -32,7 +32,7 @@ public class MassTransitMessageMapperTests
         var mapper = new MassTransitMessageMapper<TestEvent> { Context = _context };
 
         var request = new TestEvent();
-        var message = mapper.MapToMessage(request, _publication);
+        var message = await mapper.MapToMessageAsync(request, _publication);
 
         await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_EVENT);
     }
@@ -43,7 +43,7 @@ public class MassTransitMessageMapperTests
         var mapper = new MassTransitMessageMapper<TestOtherRequest> { Context = _context };
 
         var request = new TestOtherRequest();
-        var message = mapper.MapToMessage(request, _publication);
+        var message = await mapper.MapToMessageAsync(request, _publication);
 
         await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_DOCUMENT);
     }
@@ -57,7 +57,7 @@ public class MassTransitMessageMapperTests
         var mapper = new MassTransitMessageMapper<TestOtherRequest> { Context = _context };
 
         var request = new TestOtherRequest();
-        var message = mapper.MapToMessage(request, _publication);
+        var message = await mapper.MapToMessageAsync(request, _publication);
 
         await Assert.That(message.Header.CorrelationId).IsEqualTo(correlationId);
     }
@@ -68,7 +68,7 @@ public class MassTransitMessageMapperTests
         var mapper = new MassTransitMessageMapper<TestOtherRequest> { Context = _context };
 
         var request = new TestOtherRequest();
-        var message = mapper.MapToMessage(request, _publication);
+        var message = await mapper.MapToMessageAsync(request, _publication);
 
         await Assert.That(message.Header.CorrelationId.Value).IsNotEqualTo(Guid.Empty.ToString());
     }
@@ -98,7 +98,7 @@ public class MassTransitMessageMapperTests
         );
 
         var mapper = new MassTransitMessageMapper<TestOtherRequest>();
-        var result = mapper.MapToRequest(message);
+        var result = await mapper.MapToRequestAsync(message);
 
         await Assert.That(result.Id).IsEqualTo(expectedId);
     }
@@ -112,7 +112,7 @@ public class MassTransitMessageMapperTests
         var mapper = new MassTransitMessageMapper<TestOtherRequest> { Context = _context };
 
         var request = new TestOtherRequest();
-        var message = mapper.MapToMessage(request, _publication);
+        var message = await mapper.MapToMessageAsync(request, _publication);
 
         var envelope = JsonSerializer.Deserialize<MassTransitMessageEnvelop<TestOtherRequest>>(message.Body.Bytes, JsonSerialisationOptions.Options);
 

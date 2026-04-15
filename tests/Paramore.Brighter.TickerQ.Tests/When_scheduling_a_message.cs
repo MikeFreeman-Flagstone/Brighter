@@ -30,7 +30,7 @@ namespace Paramore.Brighter.TickerQ.Tests;
 
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
-        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _fixture.Outbox.GetAsync(message.Id, new RequestContext())).IsEquivalentTo(message);
 
         await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
     }
@@ -49,7 +49,7 @@ namespace Paramore.Brighter.TickerQ.Tests;
 
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
-        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _fixture.Outbox.GetAsync(message.Id, new RequestContext())).IsEquivalentTo(message);
 
         await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
     }
@@ -73,7 +73,7 @@ namespace Paramore.Brighter.TickerQ.Tests;
         Thread.Sleep(TimeSpan.FromSeconds(5));
 
         await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
-        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _fixture.Outbox.GetAsync(message.Id, new RequestContext())).IsEquivalentTo(message);
     }
 
     [Test]
@@ -95,7 +95,7 @@ namespace Paramore.Brighter.TickerQ.Tests;
         await Task.Delay(TimeSpan.FromSeconds(5));
 
         await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
-        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _fixture.Outbox.GetAsync(message.Id, new RequestContext())).IsEquivalentTo(message);
     }
     [Test]
     public async Task When_cancel_scheduler_message_with_a_datetimeoffset()
@@ -112,7 +112,7 @@ namespace Paramore.Brighter.TickerQ.Tests;
         Thread.Sleep(TimeSpan.FromSeconds(3));
 
         var expected = Message.Empty;
-        var actual = _fixture.Outbox.Get(message.Id, new RequestContext());
+        var actual = await _fixture.Outbox.GetAsync(message.Id, new RequestContext());
 
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -144,7 +144,7 @@ namespace Paramore.Brighter.TickerQ.Tests;
         Thread.Sleep(TimeSpan.FromSeconds(3));
 
         var expected = Message.Empty;
-        var actual = _fixture.Outbox.Get(message.Id, new RequestContext());
+        var actual = await _fixture.Outbox.GetAsync(message.Id, new RequestContext());
 
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);

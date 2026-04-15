@@ -270,10 +270,10 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway.Proactor
 
             var producer = useQueues ? _queueProducer : _producer;
             
-            producer.SendWithDelay(new Message(
-               new MessageHeader(Id.Random(), new RoutingKey("topic"), MessageType.MT_NONE), 
-               new MessageBody(messageBody, new ContentType(MediaTypeNames.Application.Json)))
-           );
+            await producer.SendWithDelayAsync(new Message(
+                new MessageHeader(Id.Random(), new RoutingKey("topic"), MessageType.MT_NONE), 
+                new MessageBody(messageBody, new ContentType(MediaTypeNames.Application.Json)))
+            );
 
             await Assert.That(_topicClient.SentMessages).HasSingleItem();
         }

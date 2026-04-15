@@ -27,15 +27,15 @@ public class RetrieveClaimLeaveLuggage
         writer.WriteAsync(_contents);
         writer.FlushAsync();
         stream.Position = 0;
-        var id = _store.Store(stream);
+        var id = await _store.StoreAsync(stream);
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow), new MessageBody($"Claim Check {id}"));
         message.Header.DataRef = id;
         message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK] = id;
         //act
-        _ = _transformer.Unwrap(message);
+        _ = await _transformer.UnwrapAsync(message);
         //assert
         bool hasLuggage = message.Header.Bag.TryGetValue(ClaimCheckTransformer.CLAIM_CHECK, out object _);
         await Assert.That(hasLuggage).IsTrue();
-        await Assert.That(_store.HasClaim(id)).IsTrue();
+        await Assert.That(await _store.HasClaimAsync(id)).IsTrue();
     }
 }

@@ -105,7 +105,7 @@ public class RocketMqUnacceptableInvalidChannelTests : IDisposable
         _consumer.Purge();
         _invalidConsumer.Purge();
         _dlqConsumer.Purge();
-        _producer.Send(_message);
+        await _producer.SendAsync(_message);
         var receivedMessage = ConsumeMessage(_consumer);
 
         // Act - reject with Unacceptable reason

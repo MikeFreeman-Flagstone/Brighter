@@ -49,7 +49,7 @@ public class LargeMessagePayloadWrapTests : IDisposable
     [Test]
     public async Task When_wrapping_a_large_message()
     {
-        _luggageStore.EnsureStoreExists();
+        await _luggageStore.EnsureStoreExistsAsync();
         
         //act
         _transformPipeline = _pipelineBuilder.BuildWrapPipeline<MyLargeCommand>();

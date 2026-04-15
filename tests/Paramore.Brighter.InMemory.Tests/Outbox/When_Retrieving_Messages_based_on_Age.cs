@@ -19,23 +19,23 @@ public class When_Retrieving_Messages_based_on_Age
         var outbox = new InMemoryOutbox(timeProvider) { Tracer = new BrighterTracer(timeProvider) };
 
         var context = new RequestContext();
-        outbox.Add(new MessageTestDataBuilder(), context);
-        outbox.Add(new MessageTestDataBuilder(), context);
+        await outbox.AddAsync(new MessageTestDataBuilder(), context);
+        await outbox.AddAsync(new MessageTestDataBuilder(), context);
         
         timeProvider.Advance(TimeSpan.FromSeconds(5));
         
-        outbox.Add(new MessageTestDataBuilder(), context);
-        outbox.Add(new MessageTestDataBuilder(), context);
+        await outbox.AddAsync(new MessageTestDataBuilder(), context);
+        await outbox.AddAsync(new MessageTestDataBuilder(), context);
 
-        var messagesToDispatch = outbox.OutstandingMessages(TimeSpan.FromMilliseconds(2000), context);
-        var allMessages = outbox.OutstandingMessages(TimeSpan.Zero, context).ToArray();
+        var messagesToDispatch = await outbox.OutstandingMessagesAsync(TimeSpan.FromMilliseconds(2000), context);
+        var allMessages = (await outbox.OutstandingMessagesAsync(TimeSpan.Zero, context)).ToArray();
 
         foreach (var message in allMessages)
         {
-            outbox.MarkDispatched(message.Id, context);
+            await outbox.MarkDispatchedAsync(message.Id, context);
         }
 
-        var messagesAfterDispatch = outbox.OutstandingMessages(TimeSpan.Zero, context);
+        var messagesAfterDispatch = await outbox.OutstandingMessagesAsync(TimeSpan.Zero, context);
 
         await Assert.That(messagesToDispatch.Count()).IsEqualTo(2);
         await Assert.That(allMessages.Length).IsEqualTo(4);

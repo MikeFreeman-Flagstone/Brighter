@@ -27,7 +27,7 @@ public class UncompressLargePayloadTests
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new RoutingKey("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow, contentType: new ContentType(mimeType)), body);
         message.Header.Bag[CompressPayloadTransformer.ORIGINAL_CONTENTTYPE_HEADER] = MediaTypeNames.Application.Json;
         //act
-        var msg = transformer.Unwrap(message);
+        var msg = await transformer.UnwrapAsync(message);
         //assert
         await Assert.That(msg.Body.Value).IsEqualTo(largeContent);
         await Assert.That(msg.Body.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Application.Json) { CharSet = CharacterEncoding.UTF8.FromCharacterEncoding() });
@@ -51,7 +51,7 @@ public class UncompressLargePayloadTests
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new RoutingKey("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow, contentType: new ContentType(mimeType)), body);
         message.Header.Bag[CompressPayloadTransformer.ORIGINAL_CONTENTTYPE_HEADER] = MediaTypeNames.Application.Json;
         //act
-        var msg = transformer.Unwrap(message);
+        var msg = await transformer.UnwrapAsync(message);
         //assert
         await Assert.That(msg.Body.Value).IsEqualTo(largeContent);
         await Assert.That(msg.Body.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Application.Json) { CharSet = CharacterEncoding.UTF8.FromCharacterEncoding() });
@@ -75,7 +75,7 @@ public class UncompressLargePayloadTests
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new RoutingKey("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow, contentType: new ContentType(mimeType)), body);
         message.Header.Bag[CompressPayloadTransformer.ORIGINAL_CONTENTTYPE_HEADER] = MediaTypeNames.Application.Json;
         //act
-        var msg = transformer.Unwrap(message);
+        var msg = await transformer.UnwrapAsync(message);
         //assert
         await Assert.That(msg.Body.Value).IsEqualTo(largeContent);
         await Assert.That(msg.Body.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Application.Json) { CharSet = CharacterEncoding.UTF8.FromCharacterEncoding() });

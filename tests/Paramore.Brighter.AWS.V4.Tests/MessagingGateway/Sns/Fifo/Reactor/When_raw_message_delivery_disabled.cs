@@ -71,7 +71,7 @@ public class SqsRawMessageDeliveryTests : IAsyncDisposable
         var messageToSent = new Message(messageHeader, new MessageBody("test content one"));
 
         //act
-        _messageProducer.Send(messageToSent);
+        await _messageProducer.SendAsync(messageToSent);
 
         var messageReceived = _channel.Receive(TimeSpan.FromMilliseconds(10000));
 

@@ -24,7 +24,7 @@ public class InMemoryConsumerAcknowledgeTests
         var consumer = new InMemoryMessageConsumer(routingKey, bus, timeProvider, ackTimeout: TimeSpan.FromMilliseconds(1000));
         
         //act
-        var receivedMessage = consumer.Receive().Single();
+        var receivedMessage = (await consumer.ReceiveAsync()).Single();
         
         timeProvider.Advance(TimeSpan.FromSeconds(2));
         
@@ -51,8 +51,8 @@ public class InMemoryConsumerAcknowledgeTests
         var consumer = new InMemoryMessageConsumer(routingKey, bus, timeProvider, ackTimeout: TimeSpan.FromMilliseconds(1000));
         
         //act
-        var receivedMessage = consumer.Receive().Single();
-        consumer.Acknowledge(receivedMessage);
+        var receivedMessage = (await consumer.ReceiveAsync()).Single();
+        await consumer.AcknowledgeAsync(receivedMessage);
         
         timeProvider.Advance(TimeSpan.FromSeconds(2));  //-- the message should be returned to the bus if there is no Acknowledge or Reject
         

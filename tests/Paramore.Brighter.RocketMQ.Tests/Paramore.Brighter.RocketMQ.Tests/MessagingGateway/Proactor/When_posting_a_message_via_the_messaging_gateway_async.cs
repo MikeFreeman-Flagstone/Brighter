@@ -43,7 +43,7 @@ public class MessageProducerSendAsyncTests  : IAsyncDisposable
 
         var connection = GatewayFactory.CreateConnection();
         var channelFactory = new RocketMqChannelFactory(new RocketMessageConsumerFactory(connection));
-        _channel = channelFactory.CreateAsyncChannel(mqSubscription);
+        _channel = await channelFactory.CreateAsyncChannelAsync(mqSubscription);
         _messageProducer = new RocketMqMessageProducer(
             connection,
             await GatewayFactory.CreateProducer(connection, publication),

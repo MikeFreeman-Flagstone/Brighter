@@ -80,7 +80,7 @@ public class KafkaMessageConsumerDLQTests : IDisposable
             new MessageHeader(messageId, routingKey, MessageType.MT_COMMAND) { PartitionKey = _partitionKey },
             new MessageBody($"test content for DLQ")
         );
-        _producer.Send(sentMessage);
+        await _producer.SendAsync(sentMessage);
         _producer.Flush();
 
         //Act - consume and reject the message

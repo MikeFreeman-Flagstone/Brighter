@@ -238,8 +238,8 @@ public class SnsSchedulingRequestAsyncTest
     {
         await _channelFactory.DeleteQueueAsync();
         await _channelFactory.DeleteTopicAsync();
-        _messageProducer.Dispose();
-        _consumer.Dispose();
+        await _messageProducer.DisposeAsync();
+        await _consumer.DisposeAsync();
         _scheduler.Dispose();
     }
 }

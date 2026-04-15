@@ -79,7 +79,7 @@ public class SqsMessageProducerResourcesAreTaggedAsyncTests : IAsyncDisposable
     public async Task Cleanup()
     {
         await _channelFactory.DeleteQueueAsync();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

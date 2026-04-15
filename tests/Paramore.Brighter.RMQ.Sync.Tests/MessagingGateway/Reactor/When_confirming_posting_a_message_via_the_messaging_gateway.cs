@@ -72,7 +72,7 @@ public class RmqMessageProducerConfirmationsSendMessageTests : IDisposable
     [Test]
     public async Task When_confirming_posting_a_message_via_the_messaging_gateway()
     {
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
 
         await Task.Delay(500);
 

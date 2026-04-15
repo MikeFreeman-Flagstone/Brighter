@@ -99,7 +99,7 @@ public class RmqMutualTlsQuorumObservabilityAsyncTests : IDisposable
 
         // Act - Create consumer first to ensure queue exists
         using var consumer = new RmqMessageConsumer(connection, queueName.Value, routingKey.Value, false);
-        consumer.Purge();
+        await consumer.PurgeAsync();
 
         // Publish message with trace context
         using var producer = new RmqMessageProducer(connection)
@@ -161,7 +161,7 @@ public class RmqMutualTlsQuorumObservabilityAsyncTests : IDisposable
         {
             // Act
             using var consumer = new RmqMessageConsumer(connection, queueName.Value, routingKey.Value, false);
-            consumer.Purge();
+            await consumer.PurgeAsync();
 
             using var producer = new RmqMessageProducer(connection)
             {

@@ -25,7 +25,7 @@ public class CombinedProducerRegistryTests
         var firstProducerFactory = new InMemoryMessageProducerFactory(bus, firstProducers, InstrumentationOptions.All);
         var secondProducerFactory = new InMemoryMessageProducerFactory(bus, secondProducers, InstrumentationOptions.All);
         var combinedRegistryFactory = new CombinedProducerRegistryFactory(firstProducerFactory, secondProducerFactory);
-        var producerRegistry = combinedRegistryFactory.Create();
+        var producerRegistry = await combinedRegistryFactory.CreateAsync();
         // Producer registry should contain producers for both topics
         var producers = producerRegistry.Producers.ToList();
         await Assert.That(producers.Count).IsEqualTo(2);

@@ -76,7 +76,7 @@ public class SnsSchedulingMessageTest
         var stopAt = DateTimeOffset.UtcNow.AddMinutes(2);
         while (stopAt > DateTimeOffset.UtcNow)
         {
-            var messages = _consumer.Receive();
+            var messages = await _consumer.ReceiveAsync();
             await Assert.That(messages).HasSingleItem();
 
             if (messages[0].Header.MessageType != MessageType.MT_NONE)
@@ -84,7 +84,7 @@ public class SnsSchedulingMessageTest
                 await Assert.That(messages[0].Header.MessageType).IsEqualTo(message.Header.MessageType);
                 await Assert.That((string?)messages[0].Body.Value).IsEqualTo((string?)message.Body.Value);
                 await Assert.That(messages[0].Header).IsEquivalentTo(message.Header);
-                _consumer.Acknowledge(messages[0]);
+                await _consumer.AcknowledgeAsync(messages[0]);
                 return;
             }
 
@@ -99,8 +99,8 @@ public class SnsSchedulingMessageTest
     {
         await _channelFactory.DeleteQueueAsync();
         await _channelFactory.DeleteTopicAsync();
-        _messageProducer.Dispose();
-        _consumer.Dispose();
+        await _messageProducer.DisposeAsync();
+        await _consumer.DisposeAsync();
     }
 }
 

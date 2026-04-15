@@ -85,7 +85,7 @@ public class AwsValidateInfrastructureByUrlTests : IAsyncDisposable
     public async Task When_infrastructure_exists_can_verify()
     {
         //arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
 
         await Task.Delay(1000);
 
@@ -106,7 +106,7 @@ public class AwsValidateInfrastructureByUrlTests : IAsyncDisposable
         await _channelFactory.DeleteTopicAsync();
         await _channelFactory.DeleteQueueAsync();
         _consumer.Dispose();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

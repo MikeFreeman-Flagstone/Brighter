@@ -74,11 +74,11 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Deposit
             await Assert.That(_internalBus.Stream(new RoutingKey(_commandTopic)).Any()).IsFalse();
             await Assert.That(_internalBus.Stream(new RoutingKey(_eventTopic)).Any()).IsFalse();
             //message should be in the store
-            var depositedPost = _outbox.OutstandingMessages(TimeSpan.Zero, context).SingleOrDefault(msg => msg.Id == _message.Id);
+            var depositedPost = (await _outbox.OutstandingMessagesAsync(TimeSpan.Zero, context)).SingleOrDefault(msg => msg.Id == _message.Id);
             //message should be in the store
-            var depositedPost2 = _outbox.OutstandingMessages(TimeSpan.Zero, context).SingleOrDefault(msg => msg.Id == _message2.Id);
+            var depositedPost2 = (await _outbox.OutstandingMessagesAsync(TimeSpan.Zero, context)).SingleOrDefault(msg => msg.Id == _message2.Id);
             //message should be in the store
-            var depositedPost3 = _outbox.OutstandingMessages(TimeSpan.Zero, context).SingleOrDefault(msg => msg.Id == _message3.Id);
+            var depositedPost3 = (await _outbox.OutstandingMessagesAsync(TimeSpan.Zero, context)).SingleOrDefault(msg => msg.Id == _message3.Id);
             await Assert.That(depositedPost).IsNotNull();
             //message should correspond to the command
             await Assert.That(depositedPost.Id).IsEqualTo(_message.Id);

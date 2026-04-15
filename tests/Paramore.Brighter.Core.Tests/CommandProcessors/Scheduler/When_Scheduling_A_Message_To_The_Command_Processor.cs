@@ -113,7 +113,7 @@ public class CommandProcessorSchedulerCommandTests
         await Assert.That(_internalBus.Stream(new RoutingKey(Topic)).Any()).IsFalse();
         _timeProvider.Advance(TimeSpan.FromSeconds(10));
         await Assert.That(_internalBus.Stream(new RoutingKey(Topic)).Any()).IsTrue();
-        var actual = _outbox.Get(_myCommand.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(_myCommand.Id, new RequestContext());
         await Assert.That(actual).IsNotNull();
         var expected = new Message(new MessageHeader(_myCommand.Id, new RoutingKey(Topic), MessageType.MT_COMMAND), new MessageBody(JsonSerializer.Serialize(_myCommand, JsonSerialisationOptions.Options)));
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
@@ -137,7 +137,7 @@ public class CommandProcessorSchedulerCommandTests
         await Assert.That(_internalBus.Stream(new RoutingKey(Topic)).Any()).IsFalse();
         _timeProvider.Advance(TimeSpan.FromSeconds(10));
         await Assert.That(_internalBus.Stream(new RoutingKey(Topic)).Any()).IsTrue();
-        var actual = _outbox.Get(_myCommand.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(_myCommand.Id, new RequestContext());
         await Assert.That(actual).IsNotNull();
         var expected = new Message(new MessageHeader(_myCommand.Id, new RoutingKey(Topic), MessageType.MT_COMMAND), new MessageBody(JsonSerializer.Serialize(_myCommand, JsonSerialisationOptions.Options)));
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);

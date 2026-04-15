@@ -55,7 +55,7 @@ public class LargeMessagePayloadWrapTests : IDisposable
         _id = (string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK];
         await Assert.That(message.Body.Value).IsEqualTo($"Claim Check {_id}");
             
-        await Assert.That(_luggageStore.HasClaim(_id)).IsTrue();
+        await Assert.That(await _luggageStore.HasClaimAsync(_id)).IsTrue();
     }
 
     public void Dispose()

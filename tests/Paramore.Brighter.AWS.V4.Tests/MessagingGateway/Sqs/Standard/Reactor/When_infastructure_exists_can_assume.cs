@@ -71,16 +71,16 @@ public class AWSAssumeInfrastructureTests : IAsyncDisposable
     public async Task When_infastructure_exists_can_assume()
     {
         //arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
 
-        var messages = _consumer.Receive(TimeSpan.FromMilliseconds(5000));
+        var messages = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(5000));
 
         //Assert
         var message = messages.First();
         await Assert.That(message.Id).IsEqualTo(_myCommand.Id);
 
         //clear the queue
-        _consumer.Acknowledge(message);
+        await _consumer.AcknowledgeAsync(message);
     }
 
     [After(Test)]

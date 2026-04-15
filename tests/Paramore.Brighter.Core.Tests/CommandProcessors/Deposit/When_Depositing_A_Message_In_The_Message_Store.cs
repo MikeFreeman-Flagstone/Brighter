@@ -49,13 +49,13 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Deposit
             //message should not be posted
             await Assert.That(_internalBus.Stream(new RoutingKey(_routingKey)).Any()).IsFalse();
             //message should correspond to the command
-            var depositedPost = _fakeOutbox.Get(postedMessageId, context);
+            var depositedPost = await _fakeOutbox.GetAsync(postedMessageId, context);
             await Assert.That(depositedPost.Id).IsEqualTo(_message.Id);
             await Assert.That(depositedPost.Body.Value).IsEqualTo(_message.Body.Value);
             await Assert.That(depositedPost.Header.Topic).IsEqualTo(_message.Header.Topic);
             await Assert.That(depositedPost.Header.MessageType).IsEqualTo(_message.Header.MessageType);
             //message should be marked as outstanding if not sent
-            var outstandingMessages = _fakeOutbox.OutstandingMessages(TimeSpan.Zero, context);
+            var outstandingMessages = await _fakeOutbox.OutstandingMessagesAsync(TimeSpan.Zero, context);
             var outstandingMessage = outstandingMessages.Single();
             await Assert.That(outstandingMessage.Id).IsEqualTo(_message.Id);
         }

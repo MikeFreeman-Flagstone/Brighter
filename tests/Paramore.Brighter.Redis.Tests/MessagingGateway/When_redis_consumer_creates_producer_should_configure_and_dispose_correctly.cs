@@ -53,7 +53,7 @@ public class When_redis_consumer_creates_producer_should_configure_and_dispose_c
             new MessageBody("test scheduler wiring"));
 
         // Act - requeue with non-zero delay to exercise the scheduler path
-        consumer.Requeue(message, TimeSpan.FromSeconds(5));
+        await consumer.RequeueAsync(message, TimeSpan.FromSeconds(5));
 
         // Assert - scheduler was called, proving it was wired through to the producer
         await Assert.That(scheduler.ScheduleCalled).IsTrue();
@@ -61,7 +61,7 @@ public class When_redis_consumer_creates_producer_should_configure_and_dispose_c
         await Assert.That(scheduler.ScheduledDelay).IsEqualTo(TimeSpan.FromSeconds(5));
 
         // Cleanup
-        consumer.Dispose();
+        await consumer.DisposeAsync();
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class When_redis_consumer_creates_producer_should_configure_and_dispose_c
             new MessageHeader(Guid.NewGuid().ToString(), topic, MessageType.MT_COMMAND),
             new MessageBody("test dispose after requeue"));
 
-        consumer.Requeue(message, TimeSpan.FromSeconds(5));
+        await consumer.RequeueAsync(message, TimeSpan.FromSeconds(5));
 
         // Act & Assert - dispose after producer was created should not throw
         await Assert.That(() => consumer.Dispose()).ThrowsNothing();
@@ -118,7 +118,7 @@ public class When_redis_consumer_creates_producer_should_configure_and_dispose_c
             new MessageHeader(Guid.NewGuid().ToString(), topic, MessageType.MT_COMMAND),
             new MessageBody("test async dispose after requeue"));
 
-        consumer.Requeue(message, TimeSpan.FromSeconds(5));
+        await consumer.RequeueAsync(message, TimeSpan.FromSeconds(5));
 
         // Act & Assert - async dispose after producer was created should not throw
         await Assert.That(async () => await consumer.DisposeAsync()).ThrowsNothing();

@@ -112,10 +112,10 @@ public class MsSqlMessageConsumerDeliveryErrorDlqAsyncTests : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         await _consumer.PurgeAsync();
-        _consumer.Dispose();
+        await _consumer.DisposeAsync();
         await _dlqConsumer.PurgeAsync();
-        _dlqConsumer.Dispose();
-        _producer.Dispose();
+        await _dlqConsumer.DisposeAsync();
+        await _producer.DisposeAsync();
         GC.SuppressFinalize(this);
     }
 }

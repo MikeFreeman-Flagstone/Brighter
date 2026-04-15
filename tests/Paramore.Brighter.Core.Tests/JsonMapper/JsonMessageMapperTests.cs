@@ -21,7 +21,7 @@ public class JsonMessageMapperTests
         {
             Topic = new RoutingKey(Guid.NewGuid().ToString())
         };
-        var message = mapper.MapToMessage(command, publication);
+        var message = await mapper.MapToMessageAsync(command, publication);
         await Assert.That(message).IsNotNull();
         await Assert.That(message.Header.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Application.Json));
         await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
@@ -69,7 +69,7 @@ public class JsonMessageMapperTests
         {
             Topic = new RoutingKey(Guid.NewGuid().ToString())
         };
-        var message = mapper.MapToMessage(@event, publication);
+        var message = await mapper.MapToMessageAsync(@event, publication);
         await Assert.That(message).IsNotNull();
         await Assert.That(message.Header.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Application.Json));
         await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_EVENT);
@@ -143,7 +143,7 @@ public class JsonMessageMapperTests
             Value = Guid.NewGuid().ToString()
         };
         var mapper = new JsonMessageMapper<MyCommand>();
-        var request = mapper.MapToRequest(new Message(new MessageHeader(), new MessageBody(JsonSerializer.Serialize(command))));
+        var request = await mapper.MapToRequestAsync(new Message(new MessageHeader(), new MessageBody(JsonSerializer.Serialize(command))));
         await Assert.That(request).IsNotNull();
         await Assert.That(request.Value).IsEqualTo(command.Value);
     }

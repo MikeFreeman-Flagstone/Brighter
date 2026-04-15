@@ -88,7 +88,7 @@ public class AwsValidateInfrastructureTestsAsync : IAsyncDisposable
         await _channelFactory.DeleteTopicAsync();
         await _channelFactory.DeleteQueueAsync();
         ((IAmAMessageConsumerSync)_consumer).Dispose();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

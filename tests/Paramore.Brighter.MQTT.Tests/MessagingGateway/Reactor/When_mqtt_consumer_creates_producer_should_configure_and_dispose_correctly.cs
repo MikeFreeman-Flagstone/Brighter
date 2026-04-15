@@ -94,7 +94,7 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
         var received = ReceiveMessage();
 
         // Act - requeue with delay (triggers lazy producer creation with scheduler)
-        _consumer.Requeue(received, TimeSpan.FromSeconds(5));
+        await _consumer.RequeueAsync(received, TimeSpan.FromSeconds(5));
 
         // Assert - scheduler should have been called (proves producer has scheduler configured)
         await Assert.That(_scheduler.ScheduleCalled).IsTrue();
@@ -111,7 +111,7 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
 
         ((IAmAMessageProducerSync)_producer).Send(message);
         var received = ReceiveMessage();
-        _consumer.Requeue(received, TimeSpan.FromSeconds(5));
+        await _consumer.RequeueAsync(received, TimeSpan.FromSeconds(5));
 
         // Act + Assert - disposing should not throw (producer cleanup succeeds)
         await Assert.That(() => _consumer.Dispose()).ThrowsNothing();

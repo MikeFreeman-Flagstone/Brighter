@@ -54,8 +54,8 @@ public class LargeMessagePayloadAUnwrapTests : IDisposable
         
         var stream = new MemoryStream();                                                                               
         var writer = new StreamWriter(stream);
-        writer.Write(commandAsJson);
-        writer.Flush();
+        await writer.WriteAsync(commandAsJson);
+        await writer.FlushAsync();
         stream.Position = 0;
         var id = _luggageStore.Store(stream);
 

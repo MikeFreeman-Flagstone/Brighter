@@ -80,7 +80,7 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
             new MessageHeader(messageId, routingKey, MessageType.MT_COMMAND) { PartitionKey = _partitionKey },
             new MessageBody($"test content for make channels")
         );
-        _producer.Send(sentMessage);
+        await _producer.SendAsync(sentMessage);
         _producer.Flush();
 
         //Act - create consumer with OnMissingChannel.Create and reject a message

@@ -61,7 +61,7 @@ public class SqsMessageConsumerRejectTests
     public async Task When_rejecting_a_message_should_delete_from_queue()
     {
         //Arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
         var message = _channel.Receive(TimeSpan.FromMilliseconds(5000));
 
         //Act

@@ -76,7 +76,7 @@ public class InMemoryConsumerRequeueWithDelayTests
     public async Task Should_not_have_message_immediately_available_after_requeue_with_delay()
     {
         // Act - handler defers the message (simulated by calling Requeue with delay)
-        _consumer.Requeue(_message, _delay);
+        await _consumer.RequeueAsync(_message, _delay);
 
         // Assert - message should NOT be immediately available on bus (scheduler holds it)
         var messagesOnBus = _bus.Stream(_routingKey);
@@ -87,7 +87,7 @@ public class InMemoryConsumerRequeueWithDelayTests
     public async Task Should_have_message_available_after_delay_expires()
     {
         // Act - handler defers the message
-        _consumer.Requeue(_message, _delay);
+        await _consumer.RequeueAsync(_message, _delay);
 
         // Advance time past the delay
         _timeProvider.Advance(_delay + TimeSpan.FromSeconds(1));
@@ -101,13 +101,13 @@ public class InMemoryConsumerRequeueWithDelayTests
     public async Task Should_be_able_to_receive_message_again_after_delay()
     {
         // Act - handler defers the message
-        _consumer.Requeue(_message, _delay);
+        await _consumer.RequeueAsync(_message, _delay);
 
         // Advance time past the delay
         _timeProvider.Advance(_delay + TimeSpan.FromSeconds(1));
 
         // Receive the message again
-        var receivedMessages = _consumer.Receive();
+        var receivedMessages = await _consumer.ReceiveAsync();
 
         // Assert - should receive the same message
         await Assert.That(receivedMessages).HasSingleItem();
@@ -118,13 +118,13 @@ public class InMemoryConsumerRequeueWithDelayTests
     public async Task Should_preserve_message_content_through_delayed_requeue()
     {
         // Act - handler defers the message
-        _consumer.Requeue(_message, _delay);
+        await _consumer.RequeueAsync(_message, _delay);
 
         // Advance time past the delay
         _timeProvider.Advance(_delay + TimeSpan.FromSeconds(1));
 
         // Receive the message again
-        var receivedMessages = _consumer.Receive();
+        var receivedMessages = await _consumer.ReceiveAsync();
 
         // Assert - message content should be preserved through the scheduler flow
         await Assert.That(receivedMessages).HasSingleItem();

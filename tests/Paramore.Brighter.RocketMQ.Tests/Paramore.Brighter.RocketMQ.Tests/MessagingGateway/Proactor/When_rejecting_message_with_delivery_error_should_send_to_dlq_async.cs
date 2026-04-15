@@ -139,6 +139,6 @@ public class RocketMqDeliveryErrorDlqAsyncTests : IAsyncDisposable
         await _consumer.DisposeAsync();
         await _dlqConsumer.PurgeAsync();
         await _dlqConsumer.DisposeAsync();
-        _producer.Dispose();
+        await _producer.DisposeAsync();
     }
 }

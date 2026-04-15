@@ -76,7 +76,7 @@ public class RmqMessageProducerConfirmationsMultipleMessagesTests : IDisposable
         // Send all messages
         for (int i = 0; i < _messages.Count; i++)
         {
-            _messageProducer.Send(_messages[i]);
+            await _messageProducer.SendAsync(_messages[i]);
         }
 
         // Wait for confirmations

@@ -25,12 +25,12 @@ namespace Paramore.Brighter.InMemory.Tests.Outbox
 
             var context = new RequestContext();
             for(int i =1; i <= limit; i++)
-                outbox.Add(new MessageTestDataBuilder(), context);
+                await outbox.AddAsync(new MessageTestDataBuilder(), context);
 
             //Act
             await Assert.That(outbox.EntryCount).IsEqualTo(5);
             
-            outbox.Add(new MessageTestDataBuilder(), context);
+            await outbox.AddAsync(new MessageTestDataBuilder(), context);
 
             //Poll for compaction to complete - can be slow in CI environments
             int retries = 0;

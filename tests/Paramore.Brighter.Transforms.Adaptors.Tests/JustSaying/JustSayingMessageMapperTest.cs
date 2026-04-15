@@ -24,7 +24,7 @@ public class JustSayingMessageMapperTest
             Name = $"Name{Guid.NewGuid().ToString()}",
         };
         
-        var message = mapper.MapToMessage(command, new Publication());
+        var message = await mapper.MapToMessageAsync(command, new Publication());
 
         var obj = JsonSerializer.Deserialize<SomeJustSayingCommand>(message.Body.Bytes, JsonSerialisationOptions.Options);
         await Assert.That(obj).IsNotNull();
@@ -54,7 +54,7 @@ public class JustSayingMessageMapperTest
             SourceIp = IPAddress.Loopback
         };
         
-        var message = mapper.MapToMessage(@event, new Publication());
+        var message = await mapper.MapToMessageAsync(@event, new Publication());
 
         var obj = JsonSerializer.Deserialize<SomeJustSayingCommand>(message.Body.Bytes, JsonSerialisationOptions.Options);
         await Assert.That(obj).IsNotNull();
@@ -84,7 +84,7 @@ public class JustSayingMessageMapperTest
             Name = $"Name{Guid.NewGuid().ToString()}",
         };
         
-        var message = mapper.MapToMessage(command, new Publication());
+        var message = await mapper.MapToMessageAsync(command, new Publication());
 
         var obj = JsonSerializer.Deserialize<WithJustSayingProperty>(message.Body.Bytes, JsonSerialisationOptions.Options);
         await Assert.That(obj).IsNotNull();
@@ -124,7 +124,7 @@ public class JustSayingMessageMapperTest
             }
         };
         
-        var message = mapper.MapToMessage(command, new Publication());
+        var message = await mapper.MapToMessageAsync(command, new Publication());
         await Assert.That(message.Header.Subject).IsEqualTo(subject);
 
         var obj = JsonSerializer.Deserialize<SomeJustSayingCommand>(message.Body.Bytes, JsonSerialisationOptions.Options);
@@ -167,7 +167,7 @@ public class JustSayingMessageMapperTest
             }
         };
         
-        var message = mapper.MapToMessage(command, new Publication());
+        var message = await mapper.MapToMessageAsync(command, new Publication());
         await Assert.That(message.Header.Subject).IsEqualTo(subject);
 
         var obj = JsonSerializer.Deserialize<WithJustSayingProperty>(message.Body.Bytes, JsonSerialisationOptions.Options);
@@ -210,7 +210,7 @@ public class JustSayingMessageMapperTest
             }
         };
         
-        var message = mapper.MapToMessage(command, new Publication());
+        var message = await mapper.MapToMessageAsync(command, new Publication());
         await Assert.That(message.Header.Subject).IsEqualTo(subject);
 
         var obj = JsonSerializer.Deserialize<WithPartialJustSayingProperty>(message.Body.Bytes, JsonSerialisationOptions.Options);
@@ -262,7 +262,7 @@ public class JustSayingMessageMapperTest
             }
         };
         
-        var message = mapper.MapToMessage(command, new Publication());
+        var message = await mapper.MapToMessageAsync(command, new Publication());
         await Assert.That(message.Header.Subject).IsEqualTo(subject);
 
         var obj = JsonSerializer.Deserialize<NonJustSayingProperty>(message.Body.Bytes, JsonSerialisationOptions.Options);
@@ -305,7 +305,7 @@ public class JustSayingMessageMapperTest
         var subject = $"Subject{Guid.NewGuid().ToString()}";
         var source = new Uri($"Raising{Guid.NewGuid().ToString()}", UriKind.Relative);
 
-        var message = mapper.MapToMessage(command, new Publication
+        var message = await mapper.MapToMessageAsync(command, new Publication
         {
             Subject = subject,
             Source = source

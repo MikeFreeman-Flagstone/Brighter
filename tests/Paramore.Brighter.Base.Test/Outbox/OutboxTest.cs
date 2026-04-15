@@ -349,7 +349,7 @@ public abstract class OutboxTest<TTransaction> : IDisposable
     {
         // Arrange
         var transaction = CreateTransactionProvider();
-        _ = transaction.GetTransaction();
+        _ = await transaction.GetTransactionAsync();
         
         var message = CreateRandomMessage();
         var context = new RequestContext();
@@ -357,7 +357,7 @@ public abstract class OutboxTest<TTransaction> : IDisposable
         
         // Act
         Outbox.Add(message, context, transactionProvider: transaction);
-        transaction.Commit();
+        await transaction.CommitAsync();
         
         var storedMessage = Outbox.Get(message.Id, context);
         
@@ -402,14 +402,14 @@ public abstract class OutboxTest<TTransaction> : IDisposable
     {
         // Arrange
         var transaction = CreateTransactionProvider();
-        _ = transaction.GetTransaction();
+        _ = await transaction.GetTransactionAsync();
         
         var context = new RequestContext();
         var message = CreateRandomMessage();
         
         // Act
         Outbox.Add(message, context, transactionProvider: transaction);
-        transaction.Rollback();
+        await transaction.RollbackAsync();
         var storedMessage = Outbox.Get(message.Id, context);
         
         // Assert

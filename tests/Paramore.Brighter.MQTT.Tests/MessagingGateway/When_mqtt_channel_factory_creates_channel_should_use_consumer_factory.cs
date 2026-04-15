@@ -45,7 +45,7 @@ public class When_mqtt_channel_factory_creates_channel_should_use_consumer_facto
     public async Task Should_create_async_channel()
     {
         // Act
-        var channel = _channelFactory.CreateAsyncChannel(_subscription);
+        var channel = await _channelFactory.CreateAsyncChannelAsync(_subscription);
 
         // Assert
         await Assert.That(channel).IsNotNull();

@@ -30,10 +30,10 @@ public class CombinedChannelFactoryTest
         var sub2 = new MockSubscription(typeof(MockChannel2Factory), dataType: typeof(string), messagePumpType: MessagePumpType.Proactor);
         var factory2 = new MockChannel2Factory(sub2);
         var channelFactory = new CombinedChannelFactory([factory1, factory2]);
-        var channel = channelFactory.CreateAsyncChannel(sub1);
+        var channel = await channelFactory.CreateAsyncChannelAsync(sub1);
         await Assert.That(channel).IsNotNull();
         await Assert.That(channel).IsEqualTo(factory1.ChannelAsync);
-        channel = channelFactory.CreateAsyncChannel(sub2);
+        channel = await channelFactory.CreateAsyncChannelAsync(sub2);
         await Assert.That(channel).IsNotNull();
         await Assert.That(channel).IsEqualTo(factory2.ChannelAsync);
     }

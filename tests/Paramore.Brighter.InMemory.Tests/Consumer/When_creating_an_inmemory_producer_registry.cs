@@ -14,7 +14,7 @@ public class InMemoryProducerRegistryFactoryTests
        var inMemoryProducerRegistryFactory = new InMemoryProducerRegistryFactory(bus, [publication], InstrumentationOptions.All);
 
        //act
-       var producerRegistry = inMemoryProducerRegistryFactory.Create();
+       var producerRegistry = await inMemoryProducerRegistryFactory.CreateAsync();
 
        //assert
        await Assert.That(producerRegistry).IsNotNull();

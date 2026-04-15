@@ -90,7 +90,7 @@ namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Proactor
             await _channelFactory.DeleteTopicAsync();
             await _channelFactory.DeleteQueueAsync();
             ((IAmAMessageConsumerSync)_consumer).Dispose();
-            _messageProducer.Dispose();
+            await _messageProducer.DisposeAsync();
         }
 
         public async ValueTask DisposeAsync()

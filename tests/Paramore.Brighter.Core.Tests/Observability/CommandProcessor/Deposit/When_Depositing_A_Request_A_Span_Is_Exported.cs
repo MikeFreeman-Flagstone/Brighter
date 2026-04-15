@@ -85,7 +85,7 @@ public class CommandProcessorDepositObservabilityTests
         await Assert.That(mapperEvent.Tags.Any(a => a.Key == BrighterSemanticConventions.MapperName && (string)a.Value == nameof(MyEventMessageMapper))).IsTrue();
         await Assert.That(mapperEvent.Tags.Any(a => a.Key == BrighterSemanticConventions.MapperType && (string)a.Value == "sync")).IsTrue();
         //depositing a message should be an event
-        var message = _outbox.OutstandingMessages(TimeSpan.Zero, context).Single();
+        var message = (await _outbox.OutstandingMessagesAsync(TimeSpan.Zero, context)).Single();
         var depositEvent = events.Single(e => e.Name == BoxDbOperation.Add.ToSpanName());
         await Assert.That(depositEvent.Tags.Any(a => a is { Value: not null, Key: BrighterSemanticConventions.OutboxSharedTransaction } && (bool)a.Value == false)).IsTrue();
         await Assert.That(depositEvent.Tags.Any(a => a.Key == BrighterSemanticConventions.OutboxType && (string)a.Value == "sync")).IsTrue();

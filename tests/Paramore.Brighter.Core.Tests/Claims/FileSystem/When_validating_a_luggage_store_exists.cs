@@ -12,7 +12,7 @@ public class LuggageStoreExistsTests
         var pathName = $"brightertestbucket-{Guid.NewGuid()}";
         //arrange
         var luggageStore = new FileSystemStorageProvider(new FileSystemOptions($"./{pathName}"));
-        luggageStore.EnsureStoreExists();
+        await luggageStore.EnsureStoreExistsAsync();
         //act
         luggageStore = new FileSystemStorageProvider(new FileSystemOptions($"./{pathName}"));
         await Assert.That(luggageStore).IsNotNull();

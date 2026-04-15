@@ -77,7 +77,7 @@ public class ExternalServiceBusArchiveObservabilityTests
         var dispatchedSince = TimeSpan.FromSeconds(100);
         var archiveProvider = new InMemoryArchiveProvider();
         var archiver = new OutboxArchiver<Message, CommittableTransaction>(_outbox, archiveProvider, tracer: _tracer, instrumentationOptions: instrumentationOptions);
-        archiver.Archive(dispatchedSince, context);
+        await archiver.ArchiveAsync(dispatchedSince, context);
         //should be no messages in the outbox
         await Assert.That(_outbox.EntryCount).IsEqualTo(0);
         parentActivity?.Stop();

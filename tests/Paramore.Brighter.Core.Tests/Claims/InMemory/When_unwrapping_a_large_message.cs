@@ -34,10 +34,10 @@ public class LargeMessagePaylodUnwrapTests
         var commandAsJson = JsonSerializer.Serialize(myCommand, new JsonSerializerOptions(JsonSerializerDefaults.General));
         var stream = new MemoryStream();
         var writer = new StreamWriter(stream);
-        writer.Write(commandAsJson);
-        writer.Flush();
+        await writer.WriteAsync(commandAsJson);
+        await writer.FlushAsync();
         stream.Position = 0;
-        var id = _inMemoryStorageProvider.Store(stream);
+        var id = await _inMemoryStorageProvider.StoreAsync(stream);
         //pretend we ran through the claim check
         myCommand.Value = $"Claim Check {id}";
         //set the headers, so that we have a claim check listed
@@ -49,6 +49,6 @@ public class LargeMessagePaylodUnwrapTests
         //assert
         //contents should be from storage
         await Assert.That(transformedMessage.Value).IsEqualTo(contents);
-        await Assert.That(_inMemoryStorageProvider.HasClaim(id)).IsFalse();
+        await Assert.That(await _inMemoryStorageProvider.HasClaimAsync(id)).IsFalse();
     }
 }

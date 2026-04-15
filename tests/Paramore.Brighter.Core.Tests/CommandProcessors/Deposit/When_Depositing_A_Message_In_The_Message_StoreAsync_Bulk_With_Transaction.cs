@@ -71,7 +71,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Deposit
             await Assert.That(_spyOutbox.Messages).DoesNotContain(m => m.Message.Id == _myCommandTwo.Id);
             await Assert.That(_spyOutbox.Messages).DoesNotContain(m => m.Message.Id == _myEvent.Id);
             //messages should be in the current transaction
-            var transaction = _transactionProvider.GetTransaction();
+            var transaction = await _transactionProvider.GetTransactionAsync();
             List<Message?> messages = requests.Select(r => transaction.Get(r.Id)).ToList();
             await Assert.That(messages).DoesNotContain(m => m is null);
             //messages should not be posted

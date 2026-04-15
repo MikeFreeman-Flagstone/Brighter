@@ -280,7 +280,7 @@ public class AzureServiceBusConsumerTestsAsync
         var message = new Message(messageHeader, new MessageBody("body"));
         message.Header.Bag.Add("LockToken", messageLockTokenOne);
 
-        _azureServiceBusConsumer.Requeue(message, TimeSpan.FromMilliseconds(100));
+        await _azureServiceBusConsumer.RequeueAsync(message, TimeSpan.FromMilliseconds(100));
 
         await Assert.That(_fakeMessageProducer.SentMessages).HasSingleItem();
     }
@@ -339,8 +339,8 @@ public class AzureServiceBusConsumerTestsAsync
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
-        _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
+        await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
             
         //Subscription is only created once
         await Assert.That(_nameSpaceManagerWrapper.Topics["topic"].Count(s => s.Equals("subscription"))).IsEqualTo(1);
@@ -367,8 +367,8 @@ public class AzureServiceBusConsumerTestsAsync
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
-        _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
+        await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
             
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
 
@@ -394,7 +394,7 @@ public class AzureServiceBusConsumerTestsAsync
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Body.Value).IsEqualTo(string.Empty);
     }
@@ -403,9 +403,9 @@ public class AzureServiceBusConsumerTestsAsync
     public async Task When_receiving_messages_and_the_receiver_is_closing_a_MT_QUIT_message_is_sent()
     {
         _nameSpaceManagerWrapper.Topics.Add("topic", new ());
-        _messageReceiver.Close();
+        await _messageReceiver.CloseAsync();
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Header.MessageType).IsEqualTo(MessageType.MT_QUIT);
 

@@ -24,7 +24,7 @@ public class CompressLargePayloadTests
     public async Task When_a_message_gzip_compresses_a_large_payload()
     {
         _transformer.InitializeWrapFromAttributeParams(CompressionMethod.GZip, CompressionLevel.Optimal, 5);
-        var compressedMessage = _transformer.Wrap(_message, new Publication { Topic = new RoutingKey(_topic) });
+        var compressedMessage = await _transformer.WrapAsync(_message, new Publication { Topic = new RoutingKey(_topic) });
         //look for gzip in the bytes
         await Assert.That(compressedMessage.Body.Bytes).IsNotNull();
         await Assert.That(compressedMessage.Body.Bytes.Length >= 2).IsTrue();
@@ -39,7 +39,7 @@ public class CompressLargePayloadTests
     public async Task When_a_message_zlib_compresses_a_large_payload()
     {
         _transformer.InitializeWrapFromAttributeParams(CompressionMethod.Zlib, CompressionLevel.Optimal, 5);
-        var compressedMessage = _transformer.Wrap(_message, new Publication { Topic = new RoutingKey(_topic) });
+        var compressedMessage = await _transformer.WrapAsync(_message, new Publication { Topic = new RoutingKey(_topic) });
         //look for gzip in the bytes
         await Assert.That(compressedMessage.Body.Bytes).IsNotNull();
         await Assert.That(compressedMessage.Body.Bytes.Length >= 2).IsTrue();
@@ -55,7 +55,7 @@ public class CompressLargePayloadTests
     public async Task When_a_message_brotli_compresses_a_large_payload()
     {
         _transformer.InitializeWrapFromAttributeParams(CompressionMethod.Brotli, CompressionLevel.Optimal, 5);
-        var compressedMessage = _transformer.Wrap(_message, new Publication { Topic = new RoutingKey(_topic) });
+        var compressedMessage = await _transformer.WrapAsync(_message, new Publication { Topic = new RoutingKey(_topic) });
         //look for gzip in the bytes
         await Assert.That(compressedMessage.Body.Bytes).IsNotNull();
         await Assert.That(compressedMessage.Body.Bytes.Length >= 2).IsTrue();

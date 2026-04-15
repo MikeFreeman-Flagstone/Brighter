@@ -63,7 +63,7 @@ public class CustomisingAwsClientConfigTests : IAsyncDisposable
     public async Task When_customising_aws_client_config()
     {
         //arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
 
         await Task.Delay(1000);
 

@@ -82,7 +82,7 @@ public class SqsMessageConsumerNoChannelsRejectTests : IAsyncDisposable
     public async Task When_rejecting_message_with_no_channels_configured_should_acknowledge_and_log()
     {
         //Arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
         var message = _channel.Receive(TimeSpan.FromMilliseconds(5000));
 
         //Act - reject with a DeliveryError reason but no DLQ configured

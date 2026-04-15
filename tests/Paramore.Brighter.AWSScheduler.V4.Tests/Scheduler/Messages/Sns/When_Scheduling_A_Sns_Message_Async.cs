@@ -56,7 +56,7 @@ public class SnsSchedulingAsyncMessageTest : IAsyncDisposable
             new MessageBody("test content one")
         ));
 
-        _consumer.Purge();
+        await _consumer.PurgeAsync();
 
         _factory = new AwsSchedulerFactory(_awsConnection, $"brighter-scheduler-{Guid.NewGuid():N}")
         {

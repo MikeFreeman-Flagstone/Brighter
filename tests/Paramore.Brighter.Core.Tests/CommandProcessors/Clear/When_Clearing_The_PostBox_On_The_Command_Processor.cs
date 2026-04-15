@@ -65,7 +65,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Clear
         {
             //arrange
             var context = new RequestContext();
-            _outbox.Add(_message, context);
+            await _outbox.AddAsync(_message, context);
             _commandProcessor.ClearOutbox(new[] { _message.Id });
             //_should_send_a_message_via_the_messaging_gateway
             var topic = new RoutingKey(_routingKey);

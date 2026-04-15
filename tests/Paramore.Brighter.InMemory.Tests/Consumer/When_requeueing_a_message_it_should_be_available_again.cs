@@ -98,8 +98,8 @@ public class InMemoryConsumerRequeueTests
             ackTimeout: TimeSpan.FromMilliseconds(1000), scheduler: _scheduler);
         
         //act
-        var receivedMessage = consumer.Receive().Single();
-        consumer.Requeue(receivedMessage, TimeSpan.Zero);
+        var receivedMessage = (await consumer.ReceiveAsync()).Single();
+        await consumer.RequeueAsync(receivedMessage, TimeSpan.Zero);
         
         //assert
         await Assert.That(_internalBus.Stream(_routingKey)).HasSingleItem();
@@ -121,10 +121,10 @@ public class InMemoryConsumerRequeueTests
             ackTimeout: TimeSpan.FromMilliseconds(1000), scheduler: _scheduler);
         
         //act
-        var receivedMessage = consumer.Receive().Single();
+        var receivedMessage = (await consumer.ReceiveAsync()).Single();
         await Assert.That(_internalBus.Stream(_routingKey)).IsEmpty();
         
-        consumer.Requeue(receivedMessage, TimeSpan.FromMilliseconds(1000));
+        await consumer.RequeueAsync(receivedMessage, TimeSpan.FromMilliseconds(1000));
         
         //assert
         await Assert.That(_internalBus.Stream(_routingKey)).IsEmpty();

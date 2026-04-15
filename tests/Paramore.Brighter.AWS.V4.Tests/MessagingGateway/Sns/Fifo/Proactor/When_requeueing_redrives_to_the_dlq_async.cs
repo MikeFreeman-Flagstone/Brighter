@@ -70,7 +70,7 @@ public class SqsMessageProducerDlqTestsAsync : IAsyncDisposable
         await _sender.ConfirmTopicExistsAsync(topicName);
 
         _channelFactory = new ChannelFactory(_awsConnection);
-        _channel = _channelFactory.CreateAsyncChannel(subscription);
+        _channel = await _channelFactory.CreateAsyncChannelAsync(subscription);
     }
 
     [Test]

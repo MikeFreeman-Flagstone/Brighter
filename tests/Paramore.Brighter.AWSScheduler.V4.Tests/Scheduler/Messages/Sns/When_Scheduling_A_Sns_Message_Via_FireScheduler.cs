@@ -77,7 +77,7 @@ public class SnsSchedulingMessageViaFireSchedulerTest
         var stopAt = DateTimeOffset.UtcNow.AddMinutes(2);
         while (stopAt > DateTimeOffset.UtcNow)
         {
-            var messages = _consumer.Receive(TimeSpan.FromMinutes(1));
+            var messages = await _consumer.ReceiveAsync(TimeSpan.FromMinutes(1));
             await Assert.That(messages).HasSingleItem();
 
             if (messages[0].Header.MessageType != MessageType.MT_NONE)
@@ -89,7 +89,7 @@ public class SnsSchedulingMessageViaFireSchedulerTest
                 await Assert.That((object?)m).IsNotNull();
                 await Assert.That(m.Message).IsEquivalentTo(message);
                 await Assert.That((bool)m.Async).IsFalse();
-                _consumer.Acknowledge(messages[0]);
+                await _consumer.AcknowledgeAsync(messages[0]);
                 return;
             }
 
@@ -104,8 +104,8 @@ public class SnsSchedulingMessageViaFireSchedulerTest
     {
         await _channelFactory.DeleteQueueAsync();
         await _channelFactory.DeleteTopicAsync();
-        _messageProducer.Dispose();
-        _consumer.Dispose();
+        await _messageProducer.DisposeAsync();
+        await _consumer.DisposeAsync();
     }
 }
 

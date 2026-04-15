@@ -60,7 +60,7 @@ public class When_redis_consumer_requeues_with_zero_delay_should_use_direct_list
     {
         // Act - requeue with zero delay; the direct Redis list path will be attempted
         // which may fail without Redis, but the scheduler must NOT be called
-        _consumer.Requeue(_message, TimeSpan.Zero);
+        await _consumer.RequeueAsync(_message, TimeSpan.Zero);
 
         // Assert - scheduler should NOT have been called
         await Assert.That(_scheduler.ScheduleCalled).IsFalse();
@@ -70,7 +70,7 @@ public class When_redis_consumer_requeues_with_zero_delay_should_use_direct_list
     public async Task When_requeuing_with_null_delay_should_not_use_scheduler()
     {
         // Act - requeue with null delay (defaults to zero)
-        _consumer.Requeue(_message);
+        await _consumer.RequeueAsync(_message);
 
         // Assert - scheduler should NOT have been called
         await Assert.That(_scheduler.ScheduleCalled).IsFalse();

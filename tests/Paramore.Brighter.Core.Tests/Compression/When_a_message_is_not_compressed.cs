@@ -16,7 +16,7 @@ public class UncompressedPayloadTests
         var body = new MessageBody(smallContent, contentType);
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow, contentType: contentType), body);
         //act
-        var msg = transformer.Unwrap(message);
+        var msg = await transformer.UnwrapAsync(message);
         //assert
         await Assert.That(msg.Body.Value).IsEqualTo(smallContent);
     }
@@ -32,7 +32,7 @@ public class UncompressedPayloadTests
         var body = new MessageBody(smallContent, contentType);
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow, contentType: contentType), body);
         //act
-        var msg = transformer.Unwrap(message);
+        var msg = await transformer.UnwrapAsync(message);
         //assert
         await Assert.That(msg.Body.Value).IsEqualTo(smallContent);
     }
@@ -48,7 +48,7 @@ public class UncompressedPayloadTests
         var body = new MessageBody(smallContent, contentType);
         var message = new Message(new MessageHeader(Guid.NewGuid().ToString(), new("test_topic"), MessageType.MT_EVENT, timeStamp: DateTime.UtcNow, contentType: contentType), body);
         //act
-        var msg = transformer.Unwrap(message);
+        var msg = await transformer.UnwrapAsync(message);
         //assert
         await Assert.That(msg.Body.Value).IsEqualTo(smallContent);
     }

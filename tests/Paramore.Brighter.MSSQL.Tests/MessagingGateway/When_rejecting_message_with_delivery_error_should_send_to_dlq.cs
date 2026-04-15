@@ -67,12 +67,12 @@ public class MsSqlMessageConsumerDeliveryErrorDlqTests : IDisposable
     public async Task When_rejecting_message_with_delivery_error_should_send_to_dlq()
     {
         // Arrange - send a message and consume it from the source topic
-        _producer.Send(_message);
+        await _producer.SendAsync(_message);
         var receivedMessage = ConsumeMessage(_consumer);
         var originalTopic = receivedMessage.Header.Topic.Value;
 
         // Act - reject with DeliveryError
-        var result = _consumer.Reject(receivedMessage,
+        var result = await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
         // Assert - reject returns true

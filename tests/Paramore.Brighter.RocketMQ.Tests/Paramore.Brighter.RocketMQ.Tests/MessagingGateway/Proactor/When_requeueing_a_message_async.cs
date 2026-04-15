@@ -48,7 +48,7 @@ public class MessageProducerRequeueTestsAsync
         _sender = new RocketMqMessageProducer(connection,
             await GatewayFactory.CreateProducer(connection, publication),
             publication);
-        _channel = channelFactory.CreateAsyncChannel(subscription);
+        _channel = await channelFactory.CreateAsyncChannelAsync(subscription);
     }
 
     [Test]

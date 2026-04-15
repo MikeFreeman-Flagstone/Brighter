@@ -66,19 +66,19 @@ public class When_mssql_consumer_requeues_with_zero_delay_should_use_direct_queu
     public async Task When_requeuing_with_zero_delay_should_send_directly_to_queue()
     {
         // Arrange - send and receive a message so it's in the queue
-        _producer.Send(_message);
-        var received = _consumer.Receive(TimeSpan.FromMilliseconds(2000));
+        await _producer.SendAsync(_message);
+        var received = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
         await Assert.That(received).IsNotEmpty();
         await Assert.That(received[0].Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
 
         // Act - requeue with zero delay (should use direct queue send)
-        var result = _consumer.Requeue(received[0], TimeSpan.Zero);
+        var result = await _consumer.RequeueAsync(received[0], TimeSpan.Zero);
 
         // Assert - returns true
         await Assert.That(result).IsTrue();
 
         // Assert - message is immediately available in queue (direct send, not scheduled)
-        var requeued = _consumer.Receive(TimeSpan.FromMilliseconds(2000));
+        var requeued = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
         await Assert.That(requeued).IsNotEmpty();
         await Assert.That(requeued[0].Body.Value).IsEqualTo(_message.Body.Value);
     }
@@ -87,19 +87,19 @@ public class When_mssql_consumer_requeues_with_zero_delay_should_use_direct_queu
     public async Task When_requeuing_with_null_delay_should_send_directly_to_queue()
     {
         // Arrange - send and receive a message
-        _producer.Send(_message);
-        var received = _consumer.Receive(TimeSpan.FromMilliseconds(2000));
+        await _producer.SendAsync(_message);
+        var received = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
         await Assert.That(received).IsNotEmpty();
         await Assert.That(received[0].Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
 
         // Act - requeue with null delay (should default to zero and use direct queue)
-        var result = _consumer.Requeue(received[0]);
+        var result = await _consumer.RequeueAsync(received[0]);
 
         // Assert - returns true
         await Assert.That(result).IsTrue();
 
         // Assert - message is immediately available
-        var requeued = _consumer.Receive(TimeSpan.FromMilliseconds(2000));
+        var requeued = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
         await Assert.That(requeued).IsNotEmpty();
         await Assert.That(requeued[0].Body.Value).IsEqualTo(_message.Body.Value);
     }

@@ -76,7 +76,7 @@ public class AsyncInMemoryConsumerMissingSchedulerTests
     public async Task Should_succeed_when_requeue_has_no_delay()
     {
         // Act - requeue without delay should still work (no scheduler needed)
-        var result = _consumer.Requeue(_message);
+        var result = await _consumer.RequeueAsync(_message);
 
         // Assert
         await Assert.That(result).IsTrue();
@@ -86,7 +86,7 @@ public class AsyncInMemoryConsumerMissingSchedulerTests
     public async Task Should_succeed_when_requeue_has_zero_delay()
     {
         // Act - requeue with zero delay should still work (no scheduler needed)
-        var result = _consumer.Requeue(_message, TimeSpan.Zero);
+        var result = await _consumer.RequeueAsync(_message, TimeSpan.Zero);
 
         // Assert
         await Assert.That(result).IsTrue();

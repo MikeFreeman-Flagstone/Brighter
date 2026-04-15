@@ -17,7 +17,7 @@ public class InMemoryMessageProducerTests
         var producer = new InMemoryMessageProducer(bus, instrumentationOptions:InstrumentationOptions.All);
 
         // act
-        producer.Send(message);
+        await producer.SendAsync(message);
 
         // assert
         var messages = bus.Stream(new RoutingKey(topic));

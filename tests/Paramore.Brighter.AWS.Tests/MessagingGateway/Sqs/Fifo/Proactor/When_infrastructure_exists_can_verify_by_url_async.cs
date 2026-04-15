@@ -53,7 +53,7 @@ public class AwsValidateInfrastructureByUrlTestsAsync : IAsyncDisposable
         var awsConnection = GatewayFactory.CreateFactory();
 
         _channelFactory = new ChannelFactory(awsConnection);
-        var channel = _channelFactory.CreateAsyncChannel(subscription);
+        var channel = await _channelFactory.CreateAsyncChannelAsync(subscription);
 
         var queueUrl = await FindQueueUrl(awsConnection, routingKey.ToValidSQSQueueName(true));
 
@@ -101,7 +101,7 @@ public class AwsValidateInfrastructureByUrlTestsAsync : IAsyncDisposable
         await _channelFactory.DeleteTopicAsync();
         await _channelFactory.DeleteQueueAsync();
         ((IAmAMessageConsumerSync)_consumer).Dispose();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

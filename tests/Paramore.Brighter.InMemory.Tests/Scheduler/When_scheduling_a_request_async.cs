@@ -210,7 +210,7 @@ public class InMemorySchedulerRequestAsyncTests
         await Assert.That(_receivedMessages).ContainsKey(nameof(MyEventHandlerAsync));
 
         var expected = Message.Empty;
-        var actual =  _outbox.Get(req.Id, new RequestContext());
+        var actual =  await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -240,7 +240,7 @@ public class InMemorySchedulerRequestAsyncTests
 
         _timeProvider.Advance(TimeSpan.FromSeconds(2));
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
     }
@@ -260,7 +260,7 @@ public class InMemorySchedulerRequestAsyncTests
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
     }
 
     #endregion

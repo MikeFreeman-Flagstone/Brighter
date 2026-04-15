@@ -47,7 +47,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Post
             _controlBusSender.Post(_myCommand);
             _timeProvider.Advance(TimeSpan.FromSeconds(30));
             //_should_store_the_message_in_the_sent_command_message_repository
-            var message = _outbox.DispatchedMessages(TimeSpan.FromSeconds(10), new RequestContext(), 1).SingleOrDefault();
+            var message = (await _outbox.DispatchedMessagesAsync(TimeSpan.FromSeconds(10), new RequestContext(), 1)).SingleOrDefault();
             await Assert.That(message).IsNotNull();
             //_should_convert_the_command_into_a_message
             await Assert.That(message).IsEqualTo(_message);

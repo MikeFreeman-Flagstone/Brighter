@@ -60,7 +60,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
         await Assert.That(result[0].Header.Topic).IsEqualTo("topic");
@@ -86,7 +86,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
             
         await _nameSpaceManagerWrapper.SubscriptionExistsAsync("topic", "subscription");
         //A.CallTo(() => _nameSpaceManagerWrapper.f => f.CreateSubscription("topic", "subscription", _subConfig)).MustHaveHappened();
@@ -109,7 +109,7 @@ public class AzureServiceBusConsumerTests
             
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
         await Assert.That(result[0].Header.Topic).IsEqualTo("topic");
@@ -132,7 +132,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
         await Assert.That(result[0].Header.Topic).IsEqualTo("topic");
@@ -155,7 +155,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Header.MessageType).IsEqualTo(MessageType.MT_EVENT);
     }
@@ -176,7 +176,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
         await Assert.That(result[0].Header.Topic).IsEqualTo("topic");
@@ -200,7 +200,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
         await Assert.That(result[0].Header.Topic).IsEqualTo("topic");
@@ -216,7 +216,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
         await Assert.That(result).IsEmpty();
     }
 
@@ -237,7 +237,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
             
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
     }
@@ -247,8 +247,8 @@ public class AzureServiceBusConsumerTests
     {
         _nameSpaceManagerWrapper.ResetState();
         _nameSpaceManagerWrapper.Topics.Add("topic", new ());
-        _azureServiceBusConsumer.Receive(TimeSpan.Zero);
-        _azureServiceBusConsumer.Dispose();
+        await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.Zero);
+        await _azureServiceBusConsumer.DisposeAsync();
 
         await Assert.That(_messageReceiver.IsClosedOrClosing).IsTrue();
     }
@@ -264,7 +264,7 @@ public class AzureServiceBusConsumerTests
         var message = new Message(messageHeader, new MessageBody("body"));
         message.Header.Bag.Add("LockToken", messageLockTokenOne);
 
-        _azureServiceBusConsumer.Requeue(message, TimeSpan.Zero);
+        await _azureServiceBusConsumer.RequeueAsync(message, TimeSpan.Zero);
 
         await Assert.That(_fakeMessageProducer.SentMessages).HasSingleItem();
     }
@@ -281,7 +281,7 @@ public class AzureServiceBusConsumerTests
         var message = new Message(messageHeader, new MessageBody("body"));
         message.Header.Bag.Add("LockToken", messageLockTokenOne);
 
-        _azureServiceBusConsumer.Requeue(message, TimeSpan.FromMilliseconds(100));
+        await _azureServiceBusConsumer.RequeueAsync(message, TimeSpan.FromMilliseconds(100));
 
         await Assert.That(_fakeMessageProducer.SentMessages).HasSingleItem();
     }
@@ -340,8 +340,8 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
-        _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
+        await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
             
         //Subscription is only created once
         await Assert.That(_nameSpaceManagerWrapper.Topics["topic"].Count(s => s.Equals("subscription"))).IsEqualTo(1);
@@ -368,8 +368,8 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
-        _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
+        await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
             
         await Assert.That(result[0].Body.Value).IsEqualTo("somebody");
 
@@ -395,7 +395,7 @@ public class AzureServiceBusConsumerTests
 
         _messageReceiver.MessageQueue = brokeredMessageList;
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Body.Value).IsEqualTo(string.Empty);
     }
@@ -404,9 +404,9 @@ public class AzureServiceBusConsumerTests
     public async Task When_receiving_messages_and_the_receiver_is_closing_a_MT_QUIT_message_is_sent()
     {
         _nameSpaceManagerWrapper.Topics.Add("topic", new ());
-        _messageReceiver.Close();
+        await _messageReceiver.CloseAsync();
 
-        Message[] result = _azureServiceBusConsumer.Receive(TimeSpan.FromMilliseconds(400));
+        Message[] result = await _azureServiceBusConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(400));
 
         await Assert.That(result[0].Header.MessageType).IsEqualTo(MessageType.MT_QUIT);
 

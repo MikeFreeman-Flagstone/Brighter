@@ -74,17 +74,17 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Deposit
             await Assert.That(_bus.Stream(_commandTopic).Any()).IsFalse();
             await Assert.That(_bus.Stream(_eventTopic).Any()).IsFalse();
             //message should correspond to the command
-            var depositedPost = _outbox.Get(_message.Id, context);
+            var depositedPost = await _outbox.GetAsync(_message.Id, context);
             await Assert.That(depositedPost.Id).IsEqualTo(_message.Id);
             await Assert.That(depositedPost.Body.Value).IsEqualTo(_message.Body.Value);
             await Assert.That(depositedPost.Header.Topic).IsEqualTo(_message.Header.Topic);
             await Assert.That(depositedPost.Header.MessageType).IsEqualTo(_message.Header.MessageType);
-            var depositedPost2 = _outbox.Get(_messageTwo.Id, context);
+            var depositedPost2 = await _outbox.GetAsync(_messageTwo.Id, context);
             await Assert.That(depositedPost2.Id).IsEqualTo(_messageTwo.Id);
             await Assert.That(depositedPost2.Body.Value).IsEqualTo(_messageTwo.Body.Value);
             await Assert.That(depositedPost2.Header.Topic).IsEqualTo(_messageTwo.Header.Topic);
             await Assert.That(depositedPost2.Header.MessageType).IsEqualTo(_messageTwo.Header.MessageType);
-            var depositedPost3 = _outbox.OutstandingMessages(TimeSpan.Zero, context).SingleOrDefault(msg => msg.Id == _messageThree.Id);
+            var depositedPost3 = (await _outbox.OutstandingMessagesAsync(TimeSpan.Zero, context)).SingleOrDefault(msg => msg.Id == _messageThree.Id);
             //message should correspond to the command
             await Assert.That(depositedPost3).IsNotNull();
             await Assert.That(depositedPost3.Id).IsEqualTo(_messageThree.Id);
@@ -92,7 +92,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Deposit
             await Assert.That(depositedPost3.Header.Topic).IsEqualTo(_messageThree.Header.Topic);
             await Assert.That(depositedPost3.Header.MessageType).IsEqualTo(_messageThree.Header.MessageType);
             //message should be marked as outstanding if not sent
-            var outstandingMessages = _outbox.OutstandingMessages(TimeSpan.Zero, context);
+            var outstandingMessages = await _outbox.OutstandingMessagesAsync(TimeSpan.Zero, context);
             await Assert.That(outstandingMessages.Count()).IsEqualTo(3);
         }
     }

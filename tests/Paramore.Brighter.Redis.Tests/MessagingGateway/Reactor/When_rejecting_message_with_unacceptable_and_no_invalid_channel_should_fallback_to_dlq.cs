@@ -64,17 +64,17 @@ public class RedisMessageConsumerUnacceptableFallbackToDlqTests : IDisposable
     public async Task When_rejecting_message_with_unacceptable_and_no_invalid_channel_should_fallback_to_dlq()
     {
         //Arrange - subscribe then send
-        _consumer.Receive(TimeSpan.FromMilliseconds(1000));
-        _dlqConsumer.Receive(TimeSpan.FromMilliseconds(1000));
-        _messageProducer.Send(_message);
-        var receivedMessage = _consumer.Receive(TimeSpan.FromMilliseconds(1000)).Single();
+        await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        await _dlqConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        await _messageProducer.SendAsync(_message);
+        var receivedMessage = (await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000))).Single();
 
         //Act - reject with Unacceptable, but no invalid channel configured
-        _consumer.Reject(receivedMessage,
+        await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.Unacceptable, "Bad message format"));
 
         //Assert - message should fall back to DLQ
-        var dlqMessage = _dlqConsumer.Receive(TimeSpan.FromMilliseconds(3000)).Single();
+        var dlqMessage = (await _dlqConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(3000))).Single();
 
         await Assert.That(dlqMessage.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
         await Assert.That(dlqMessage.Body.Value).IsEqualTo(_message.Body.Value);

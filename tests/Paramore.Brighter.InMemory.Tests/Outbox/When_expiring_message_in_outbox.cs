@@ -28,7 +28,7 @@ namespace Paramore.Brighter.InMemory.Tests.Outbox
             
             
             //Act
-            outbox.Add(messageToAdd, new RequestContext());
+            await outbox.AddAsync(messageToAdd, new RequestContext());
             
             timeProvider.Advance(TimeSpan.FromMilliseconds(500)); //give the entry to time to expire
             

@@ -128,7 +128,7 @@ public class SnsReDrivePolicySDlqTests : IAsyncDisposable
     [Test, Skip("This test is skipped because running tests of the DLQ is unreliable in the CI environment")]
     public async Task When_throwing_defer_action_respect_redrive_async()
     {
-        _sender.Send(_message);
+        await _sender.SendAsync(_message);
 
         var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
         await Task.Delay(5000);

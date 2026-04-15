@@ -63,18 +63,18 @@ public class RedisMessageConsumerDeliveryErrorDlqTests : IDisposable
     public async Task When_rejecting_message_with_delivery_error_should_send_to_dlq()
     {
         //Arrange - subscribe then send
-        _consumer.Receive(TimeSpan.FromMilliseconds(1000));
-        _dlqConsumer.Receive(TimeSpan.FromMilliseconds(1000)); 
-        _messageProducer.Send(_message);
-        var receivedMessage = _consumer.Receive(TimeSpan.FromMilliseconds(1000)).Single();
+        await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        await _dlqConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000)); 
+        await _messageProducer.SendAsync(_message);
+        var receivedMessage = (await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000))).Single();
 
         //Act
         var originalTopic = receivedMessage.Header.Topic.Value;
-        _consumer.Reject(receivedMessage,
+        await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
         //Assert - message should appear on DLQ
-        var dlqMessage = _dlqConsumer.Receive(TimeSpan.FromMilliseconds(3000)).Single();
+        var dlqMessage = (await _dlqConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(3000))).Single();
 
         await Assert.That(dlqMessage.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
         await Assert.That(dlqMessage.Body.Value).IsEqualTo(_message.Body.Value);

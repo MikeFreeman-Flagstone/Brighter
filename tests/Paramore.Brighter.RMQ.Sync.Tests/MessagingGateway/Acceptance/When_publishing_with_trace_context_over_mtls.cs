@@ -115,7 +115,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         try
         {
             // Act
-            messageProducer.Send(message);
+            await messageProducer.SendAsync(message);
             _parentActivity?.Stop();
             _tracerProvider.ForceFlush();
 
@@ -128,7 +128,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         }
         finally
         {
-            messageProducer.Dispose();
+            await messageProducer.DisposeAsync();
         }
     }
 
@@ -174,7 +174,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         try
         {
             // Act
-            messageProducer.Send(message);
+            await messageProducer.SendAsync(message);
             _parentActivity?.Stop();
             _tracerProvider.ForceFlush();
 
@@ -196,7 +196,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         }
         finally
         {
-            messageProducer.Dispose();
+            await messageProducer.DisposeAsync();
         }
     }
 
@@ -242,7 +242,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         try
         {
             // Act
-            messageProducer.Send(message);
+            await messageProducer.SendAsync(message);
             _parentActivity?.Stop();
             _tracerProvider.ForceFlush();
 
@@ -262,7 +262,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         }
         finally
         {
-            messageProducer.Dispose();
+            await messageProducer.DisposeAsync();
         }
     }
 
@@ -309,7 +309,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         try
         {
             // Act - Publish (serialization occurs here)
-            messageProducer.Send(message);
+            await messageProducer.SendAsync(message);
             _parentActivity?.Stop();
             _tracerProvider.ForceFlush();
 
@@ -332,7 +332,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         }
         finally
         {
-            messageProducer.Dispose();
+            await messageProducer.DisposeAsync();
         }
     }
 
@@ -378,7 +378,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         try
         {
             // Act
-            messageProducer.Send(message);
+            await messageProducer.SendAsync(message);
             _parentActivity?.Stop();
             _tracerProvider.ForceFlush();
 
@@ -398,7 +398,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
         }
         finally
         {
-            messageProducer.Dispose();
+            await messageProducer.DisposeAsync();
         }
     }
 }

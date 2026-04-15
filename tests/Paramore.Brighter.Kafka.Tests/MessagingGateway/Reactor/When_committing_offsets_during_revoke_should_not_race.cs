@@ -85,7 +85,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
             var msg = await ReadMessage(consumerA);
             if (msg.Header.MessageType != MessageType.MT_NONE)
             {
-                consumerA.Acknowledge(msg);
+                await consumerA.AcknowledgeAsync(msg);
             }
         }
 
@@ -105,7 +105,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
                     if (msg.Header.MessageType != MessageType.MT_NONE)
                     {
                         //each acknowledge fires a background commit (batch size = 1)
-                        consumerA.Acknowledge(msg);
+                        await consumerA.AcknowledgeAsync(msg);
                     }
                 }
             }
@@ -125,7 +125,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
         //consumer B polls to join the group and trigger rebalance
         try
         {
-            _ = consumerB.Receive(TimeSpan.FromMilliseconds(5000));
+            _ = await consumerB.ReceiveAsync(TimeSpan.FromMilliseconds(5000));
         }
         catch (ChannelFailureException)
         {
@@ -138,7 +138,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
         await Assert.That(caughtException).IsNull();
 
         //consumer A should still be functional after the rebalance
-        _ = consumerA.Receive(TimeSpan.FromMilliseconds(2000));
+        _ = await consumerA.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
 
         Console.WriteLine("Test completed - no race condition errors");
     }
@@ -175,7 +175,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
             try
             {
                 maxTries++;
-                messages = consumer.Receive(TimeSpan.FromMilliseconds(1000));
+                messages = await consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
 
                 if (messages[0].Header.MessageType != MessageType.MT_NONE)
                 {

@@ -55,7 +55,7 @@ public class MessageProducerDlqTests
     public async Task When_requeueing_redrives_to_the_queue()
     {
         _channel.Purge();
-        _sender.Send(_message);
+        await _sender.SendAsync(_message);
         Message receivedMessage;
         for (var i = 0; i < 32; i++)
         {

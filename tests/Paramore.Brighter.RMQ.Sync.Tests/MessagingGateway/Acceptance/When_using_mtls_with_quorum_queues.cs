@@ -101,7 +101,7 @@ public class RmqMutualTlsQuorumObservabilityTests : IDisposable
             new MessageBody("Testing trace context over mTLS + Quorum")
         );
 
-        producer.Send(message);
+        await producer.SendAsync(message);
 
         // Stop activity and flush to exporter
         activity?.Stop();
@@ -162,7 +162,7 @@ public class RmqMutualTlsQuorumObservabilityTests : IDisposable
                 new MessageBody("Testing baggage over mTLS + Quorum")
             );
 
-            producer.Send(message);
+            await producer.SendAsync(message);
             var receivedMessages = consumer.Receive(TimeSpan.FromSeconds(5));
 
             // Assert - Baggage must survive (Rule #12)

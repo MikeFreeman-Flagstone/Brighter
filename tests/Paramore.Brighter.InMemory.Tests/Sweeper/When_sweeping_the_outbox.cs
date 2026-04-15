@@ -233,7 +233,7 @@ namespace Paramore.Brighter.InMemory.Tests.Sweeper
 
             //Assert
             await Assert.That(internalBus.Stream(routingKey)).HasSingleItem();
-            await Assert.That(outbox.OutstandingMessages(TimeSpan.Zero, new RequestContext()).Count()).IsEqualTo(3);
+            await Assert.That((await outbox.OutstandingMessagesAsync(TimeSpan.Zero, new RequestContext())).Count()).IsEqualTo(3);
         }
 
         [Test]

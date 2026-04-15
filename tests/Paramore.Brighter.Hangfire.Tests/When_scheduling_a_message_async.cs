@@ -122,7 +122,7 @@ public class HangfireSchedulerMessageAsyncTests : IDisposable
 
         await Task.Delay(TimeSpan.FromSeconds(2));
 
-        await Assert.That(_outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _outbox.GetAsync(message.Id, new RequestContext())).IsEquivalentTo(message);
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
     }
@@ -147,7 +147,7 @@ public class HangfireSchedulerMessageAsyncTests : IDisposable
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsEquivalentTo(message);
     }
 
     [Test]
@@ -173,7 +173,7 @@ public class HangfireSchedulerMessageAsyncTests : IDisposable
         await Task.Delay(TimeSpan.FromSeconds(4));
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsEquivalentTo(message);
     }
 
     [Test]
@@ -199,7 +199,7 @@ public class HangfireSchedulerMessageAsyncTests : IDisposable
         await Task.Delay(TimeSpan.FromSeconds(4));
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
     }
 
     [Test]

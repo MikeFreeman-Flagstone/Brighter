@@ -99,7 +99,7 @@ public class RmqMutualTlsAcceptanceTests : IDisposable
 
         // Act - Create consumer first to ensure queue exists and is bound
         var consumer = new RmqMessageConsumer(connection, queueName, routingKey, false);
-        consumer.Purge(); // Ensure queue is created and bound before publishing
+        await consumer.PurgeAsync(); // Ensure queue is created and bound before publishing
 
         // Act - Publish
         var producer = new RmqMessageProducer(connection);

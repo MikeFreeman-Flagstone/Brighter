@@ -117,7 +117,7 @@ public class SqsMessageConsumerUnacceptableInvalidChannelTests : IAsyncDisposabl
     public async Task When_rejecting_message_with_unacceptable_reason_should_send_to_invalid_channel()
     {
         //Arrange
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
         var message = _channel.Receive(TimeSpan.FromMilliseconds(5000));
 
         //Act

@@ -58,12 +58,12 @@ public class RedisMessageConsumerNoChannelsRejectTests : IDisposable
     public async Task When_rejecting_message_with_no_channels_configured_should_remove_from_inflight()
     {
         //Arrange - subscribe then send
-        _consumer.Receive(TimeSpan.FromMilliseconds(1000));
-        _messageProducer.Send(_message);
-        var receivedMessage = _consumer.Receive(TimeSpan.FromMilliseconds(1000)).Single();
+        await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        await _messageProducer.SendAsync(_message);
+        var receivedMessage = (await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000))).Single();
 
         //Act - reject with DeliveryError, but no channels configured
-        var result = _consumer.Reject(receivedMessage,
+        var result = await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
         //Assert - reject returns true and consumer can receive again without "unacked message" error
@@ -71,7 +71,7 @@ public class RedisMessageConsumerNoChannelsRejectTests : IDisposable
 
         // This would throw ChannelFailureException("Unacked message still in flight...")
         // if reject didn't remove from inflight
-        var nextMessages = _consumer.Receive(TimeSpan.FromMilliseconds(1000));
+        var nextMessages = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
         await Assert.That(nextMessages).IsEmpty();
     }
 

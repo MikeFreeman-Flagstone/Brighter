@@ -104,8 +104,8 @@ public class SnsSchedulingMessageViaFireSchedulerAsyncTest
     {
         await _channelFactory.DeleteQueueAsync();
         await _channelFactory.DeleteTopicAsync();
-        _messageProducer.Dispose();
-        _consumer.Dispose();
+        await _messageProducer.DisposeAsync();
+        await _consumer.DisposeAsync();
     }
 }
 

@@ -80,7 +80,7 @@ public class SqsMessageProducerSendTests : IAsyncDisposable
     {
         //arrange
         _message.Header.Subject = "test subject";
-        _messageProducer.Send(_message);
+        await _messageProducer.SendAsync(_message);
 
         await Task.Delay(1000);
 
@@ -118,7 +118,7 @@ public class SqsMessageProducerSendTests : IAsyncDisposable
         //Clean up resources that we have created
         await _channelFactory.DeleteTopicAsync();
         await _channelFactory.DeleteQueueAsync();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

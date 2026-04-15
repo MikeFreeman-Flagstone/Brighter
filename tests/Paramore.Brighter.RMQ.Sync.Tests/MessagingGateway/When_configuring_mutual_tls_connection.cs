@@ -150,7 +150,7 @@ public class RmqMutualTlsConnectionConfigurationTests : IDisposable
     {
         // Arrange - create a temp file with invalid certificate data
         var invalidCertPath = Path.Combine(Path.GetTempPath(), $"invalid-cert-{Guid.NewGuid()}.pfx");
-        File.WriteAllText(invalidCertPath, "not a valid certificate");
+        await File.WriteAllTextAsync(invalidCertPath, "not a valid certificate");
 
         try
         {

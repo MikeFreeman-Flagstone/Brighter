@@ -68,25 +68,25 @@ public class RedisMessageConsumerUnacceptableInvalidChannelTests : IDisposable
     public async Task When_rejecting_message_with_unacceptable_reason_should_send_to_invalid_channel()
     {
         //Arrange - subscribe then send
-        _consumer.Receive(TimeSpan.FromMilliseconds(1000));
-        _dlqConsumer.Receive(TimeSpan.FromMilliseconds(1000));
-        _invalidConsumer.Receive(TimeSpan.FromMilliseconds(1000));
-        _messageProducer.Send(_message);
-        var receivedMessage = _consumer.Receive(TimeSpan.FromMilliseconds(1000)).Single();
+        await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        await _dlqConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        await _invalidConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        await _messageProducer.SendAsync(_message);
+        var receivedMessage = (await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000))).Single();
 
         //Act
-        _consumer.Reject(receivedMessage,
+        await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.Unacceptable, "Bad message format"));
 
         //Assert - message should appear on invalid channel, not on DLQ
-        var invalidMessage = _invalidConsumer.Receive(TimeSpan.FromMilliseconds(3000)).Single();
+        var invalidMessage = (await _invalidConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(3000))).Single();
 
         await Assert.That(invalidMessage.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
         await Assert.That(invalidMessage.Body.Value).IsEqualTo(_message.Body.Value);
         await Assert.That(invalidMessage.Header.Bag["rejectionReason"].ToString()).IsEqualTo(RejectionReason.Unacceptable.ToString());
 
         // DLQ should be empty
-        var dlqMessages = _dlqConsumer.Receive(TimeSpan.FromMilliseconds(1000));
+        var dlqMessages = await _dlqConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
         await Assert.That(dlqMessages).IsEmpty();
     }
 

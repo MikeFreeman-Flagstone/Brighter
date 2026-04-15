@@ -62,11 +62,11 @@ public class MsSqlMessageConsumerNoChannelsConfiguredTests : IDisposable
         var message = new Message(
             new MessageHeader(Guid.NewGuid().ToString(), _topic, MessageType.MT_COMMAND),
             new MessageBody("test content"));
-        _producer.Send(message);
+        await _producer.SendAsync(message);
         var receivedMessage = ConsumeMessage(_consumer);
 
         // Act - reject with DeliveryError but no channels configured
-        var result = _consumer.Reject(receivedMessage,
+        var result = await _consumer.RejectAsync(receivedMessage,
             new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
         // Assert - reject returns true (message is silently dropped)
@@ -76,7 +76,7 @@ public class MsSqlMessageConsumerNoChannelsConfiguredTests : IDisposable
         var nextMessage = new Message(
             new MessageHeader(Guid.NewGuid().ToString(), _topic, MessageType.MT_COMMAND),
             new MessageBody("second message"));
-        _producer.Send(nextMessage);
+        await _producer.SendAsync(nextMessage);
         var received = ConsumeMessage(_consumer);
         await Assert.That(received.Id).IsEqualTo(nextMessage.Id);
     }

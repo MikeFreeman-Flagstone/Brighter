@@ -71,7 +71,7 @@ public class MessageProducerDlqTestsAsync : IDisposable
     [Test]
     public async Task When_requeueing_redrives_to_the_queue()
     {
-        _sender.Send(_message);
+        await _sender.SendAsync(_message);
         for (var i = 0; i <= MaxDeliveryAttempts; i++)
         {
             var receivedMessage = _channel.Receive(TimeSpan.FromMilliseconds(5000));

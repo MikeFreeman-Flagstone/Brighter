@@ -116,7 +116,7 @@ public class HangfireSchedulerMessageTests : IDisposable
 
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
-        await Assert.That(_outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _outbox.GetAsync(message.Id, new RequestContext())).IsEquivalentTo(message);
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
     }
@@ -141,7 +141,7 @@ public class HangfireSchedulerMessageTests : IDisposable
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsEquivalentTo(message);
     }
 
     [Test]
@@ -168,7 +168,7 @@ public class HangfireSchedulerMessageTests : IDisposable
         Thread.Sleep(TimeSpan.FromSeconds(6));
 
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsEquivalentTo(message);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsEquivalentTo(message);
     }
 
     [Test]
@@ -194,7 +194,7 @@ public class HangfireSchedulerMessageTests : IDisposable
         Thread.Sleep(TimeSpan.FromSeconds(4));
         await Assert.That(_internalBus.Stream(_routingKey)).IsNotEmpty();
 
-        await Assert.That(_outbox.Get(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
+        await Assert.That(await _outbox.GetAsync(req.Id, new RequestContext())).IsNotEqualTo(Message.Empty);
     }
 
     [Test]
@@ -216,7 +216,7 @@ public class HangfireSchedulerMessageTests : IDisposable
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);
@@ -252,7 +252,7 @@ public class HangfireSchedulerMessageTests : IDisposable
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
         var expected = Message.Empty;
-        var actual = _outbox.Get(req.Id, new RequestContext());
+        var actual = await _outbox.GetAsync(req.Id, new RequestContext());
         
         await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
         await Assert.That(actual.Id).IsEqualTo(expected.Id);

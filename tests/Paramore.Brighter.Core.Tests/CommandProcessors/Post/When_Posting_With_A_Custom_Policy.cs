@@ -50,7 +50,7 @@ public class PostCommandWithCustomPolicyTests
         var requestContext = new RequestContext();
         _commandProcessor.Post(_myCommand, requestContext);
         await Assert.That(_internalBus.Stream(new RoutingKey(_routingKey)).Any()).IsTrue();
-        var message = _outbox.Get(_myCommand.Id, requestContext);
+        var message = await _outbox.GetAsync(_myCommand.Id, requestContext);
         await Assert.That(message).IsNotNull();
         await Assert.That(message).IsEqualTo(_message);
         await Assert.That(requestContext.ResiliencePipeline).IsEqualTo(_resiliencePipeline);

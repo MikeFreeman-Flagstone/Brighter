@@ -43,7 +43,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
             var @event = new MyEvent();
             _commandProcessor.Publish(@event);
             //assert we are in, and auto-context added us under our name
-            var boxed = _inbox.Exists<MyEvent>(@event.Id, typeof(MyGlobalInboxEventHandler).FullName, null, 100);
+            var boxed = await _inbox.ExistsAsync<MyEvent>(@event.Id, typeof(MyGlobalInboxEventHandler).FullName, null, 100);
             await Assert.That(boxed).IsTrue();
         }
     }

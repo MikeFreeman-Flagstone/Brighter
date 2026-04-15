@@ -114,7 +114,7 @@ public class SqsMessageProducerSendAsyncTests : IAsyncDisposable
         //Clean up resources that we have created
         await _channelFactory.DeleteTopicAsync();
         await _channelFactory.DeleteQueueAsync();
-        _messageProducer.Dispose();
+        await _messageProducer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

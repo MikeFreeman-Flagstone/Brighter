@@ -91,7 +91,7 @@ public class RocketMqDeliveryErrorDlqTests : IDisposable
         // Arrange - send a message and consume it from the source topic
         _consumer.Purge();
         _dlqConsumer.Purge();
-        _producer.Send(_message);
+        await _producer.SendAsync(_message);
         var receivedMessage = ConsumeMessage(_consumer);
         var originalTopic = receivedMessage.Header.Topic.Value;
 

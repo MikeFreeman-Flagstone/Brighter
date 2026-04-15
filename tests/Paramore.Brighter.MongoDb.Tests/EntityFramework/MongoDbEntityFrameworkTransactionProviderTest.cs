@@ -128,7 +128,7 @@ public class MongoDbEntityFrameworkTransactionProviderTest
         var provider = new MongoDbEntityFrameworkTransactionProvider<DbContext>(context);
 
         // Act
-        provider.Rollback();
+        await provider.RollbackAsync();
 
         // Assert
         A.CallTo(() => mockTransaction.Rollback()).MustHaveHappenedOnceExactly();
@@ -144,7 +144,7 @@ public class MongoDbEntityFrameworkTransactionProviderTest
         var provider = new MongoDbEntityFrameworkTransactionProvider<DbContext>(context);
 
         // Act & Assert - Should not throw
-        provider.Rollback();
+        await provider.RollbackAsync();
     }
 
     [Test]
@@ -215,7 +215,7 @@ public class MongoDbEntityFrameworkTransactionProviderTest
 
         // Act
         await Assert.That(provider.HasOpenTransaction).IsTrue();
-        provider.Rollback();
+        await provider.RollbackAsync();
         var hasTransactionAfterRollback = provider.HasOpenTransaction;
 
         // Assert
@@ -277,7 +277,7 @@ public class MongoDbEntityFrameworkTransactionProviderTest
         var provider = new MongoDbEntityFrameworkTransactionProvider<DbContext>(context);
 
         // Act & Assert
-        provider.Rollback(); // First rollback
-        provider.Rollback(); // Second rollback with null transaction - should not throw
+        await provider.RollbackAsync(); // First rollback
+        await provider.RollbackAsync(); // Second rollback with null transaction - should not throw
     }
 }

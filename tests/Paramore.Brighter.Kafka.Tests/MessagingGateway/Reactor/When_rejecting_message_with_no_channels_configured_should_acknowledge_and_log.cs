@@ -77,14 +77,14 @@ public class KafkaMessageConsumerNoChannelsTests : IDisposable
             new MessageHeader(messageId1, routingKey, MessageType.MT_COMMAND) { PartitionKey = _partitionKey },
             new MessageBody($"test message 1 - should be rejected")
         );
-        _producer.Send(sentMessage1);
+        await _producer.SendAsync(sentMessage1);
 
         var messageId2 = Guid.NewGuid().ToString();
         var sentMessage2 = new Message(
             new MessageHeader(messageId2, routingKey, MessageType.MT_COMMAND) { PartitionKey = _partitionKey },
             new MessageBody($"test message 2 - should be received after rejection")
         );
-        _producer.Send(sentMessage2);
+        await _producer.SendAsync(sentMessage2);
         _producer.Flush();
 
         //Act - consume and reject the first message, then consume the second

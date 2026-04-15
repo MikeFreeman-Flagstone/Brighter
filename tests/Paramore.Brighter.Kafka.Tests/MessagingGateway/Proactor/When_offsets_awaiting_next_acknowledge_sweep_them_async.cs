@@ -149,7 +149,7 @@ public class KafkaMessageConsumerSweepOffsetsAsync : IAsyncDisposable
     public async Task Cleanup()
     {
         _producerRegistry?.Dispose();
-        _consumer.Dispose();
+        await _consumer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

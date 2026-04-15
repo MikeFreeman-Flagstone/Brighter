@@ -58,7 +58,7 @@ public class When_rmq_async_channel_factory_has_scheduler_should_pass_to_consume
         ((IAmAChannelFactoryWithScheduler)channelFactory).Scheduler = scheduler;
 
         // Act
-        var channel = channelFactory.CreateAsyncChannel(_subscription);
+        var channel = await channelFactory.CreateAsyncChannelAsync(_subscription);
 
         // Assert
         await Assert.That(channel).IsNotNull();

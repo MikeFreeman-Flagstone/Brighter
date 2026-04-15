@@ -126,7 +126,7 @@ public class RMQMessageConsumerRetryDLQTests : IDisposable
         await Task.Delay(20000);
 
         //put something on an SNS topic, which will be delivered to our SQS queue
-        _sender.Send(_message);
+        await _sender.SendAsync(_message);
 
         //Let the message be handled and deferred until it reaches the DLQ
         await Task.Delay(20000);
@@ -141,12 +141,12 @@ public class RMQMessageConsumerRetryDLQTests : IDisposable
         await Task.Delay(5000);
 
         //inspect the dlq
-        var dlqMessage = _deadLetterConsumer.Receive(new TimeSpan(10000)).First();
+        var dlqMessage = (await _deadLetterConsumer.ReceiveAsync(new TimeSpan(10000))).First();
 
         //assert this is our message
         await Assert.That(dlqMessage.Body.Value).IsEqualTo(_message.Body.Value);
 
-        _deadLetterConsumer.Acknowledge(dlqMessage);
+        await _deadLetterConsumer.AcknowledgeAsync(dlqMessage);
 
     }
 

@@ -26,12 +26,12 @@ public class ClaimCheckLargePayloadTests
     public async Task When_a_message_wraps_a_large_payload()
     {
         //act
-        var luggageCheckedMessage = _transformer.Wrap(_message, new Publication { Topic = new RoutingKey(_topic) });
+        var luggageCheckedMessage = await _transformer.WrapAsync(_message, new Publication { Topic = new RoutingKey(_topic) });
         //assert
         bool hasLuggage = !string.IsNullOrEmpty(luggageCheckedMessage.Header.DataRef);
         await Assert.That(hasLuggage).IsTrue();
         var claimCheck = luggageCheckedMessage.Header.DataRef;
-        var luggage = new StreamReader(_store.Retrieve(claimCheck)).ReadToEnd();
+        var luggage = await new StreamReader(await _store.RetrieveAsync(claimCheck)).ReadToEndAsync();
         await Assert.That(luggage).IsEqualTo(_body);
     }
 }

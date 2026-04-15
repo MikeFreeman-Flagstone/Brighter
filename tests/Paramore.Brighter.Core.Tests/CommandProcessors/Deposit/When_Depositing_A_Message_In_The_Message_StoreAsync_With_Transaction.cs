@@ -51,7 +51,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Deposit
             //message should not be in the outbox
             await Assert.That(_spyOutbox.Messages).DoesNotContain(m => m.Message.Id == postedMessageId);
             //message should be in the current transaction
-            var transaction = _transactionProvider.GetTransaction();
+            var transaction = await _transactionProvider.GetTransactionAsync();
             var message = transaction.Get(postedMessageId);
             await Assert.That(message).IsNotNull();
             //message should not be posted

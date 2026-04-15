@@ -148,11 +148,11 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
             {
                 maxTries++;
                 await Task.Delay(500); //Let topic propagate in the broker
-                messages = _consumer.Receive(TimeSpan.FromMilliseconds(1000));
+                messages = await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
 
                 if (messages[0].Header.MessageType != MessageType.MT_NONE)
                 {
-                    _consumer.Acknowledge(messages[0]);
+                    await _consumer.AcknowledgeAsync(messages[0]);
                     return messages[0];
                 }
                 
@@ -174,7 +174,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
     public async Task Cleanup()
     {
         _producerRegistry?.Dispose();
-        _consumer.Dispose();
+        await _consumer.DisposeAsync();
     }
 
     public async ValueTask DisposeAsync()

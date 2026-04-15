@@ -91,7 +91,7 @@ public class RocketMqUnacceptableFallbackToDlqTests : IDisposable
         // Arrange - send a message and consume it from the source topic
         _consumer.Purge();
         _dlqConsumer.Purge();
-        _producer.Send(_message);
+        await _producer.SendAsync(_message);
         var receivedMessage = ConsumeMessage(_consumer);
 
         // Act - reject with Unacceptable reason (no invalid channel configured, should fall back to DLQ)

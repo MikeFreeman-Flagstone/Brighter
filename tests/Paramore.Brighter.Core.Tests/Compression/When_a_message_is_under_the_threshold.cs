@@ -22,7 +22,7 @@ public class SmallPayloadNotCompressedTests
     [Test]
     public async Task When_a_message_is_under_the_threshold()
     {
-        var uncompressedMessage = _transformer.Wrap(_message, new Publication { Topic = _topic });
+        var uncompressedMessage = await _transformer.WrapAsync(_message, new Publication { Topic = _topic });
         //look for gzip in the bytes
         await Assert.That(uncompressedMessage.Body.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Application.Json) { CharSet = CharacterEncoding.UTF8.FromCharacterEncoding() });
         await Assert.That(uncompressedMessage.Body.Value).IsEqualTo(_message.Body.Value);

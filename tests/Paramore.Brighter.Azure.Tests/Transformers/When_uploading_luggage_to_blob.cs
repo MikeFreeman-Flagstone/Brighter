@@ -29,15 +29,15 @@ public class AzureBlobUploadTests : IAsyncDisposable
             Credential = new AzureCliCredential()
         });
         
-        luggageStore.EnsureStoreExists();
+        await luggageStore.EnsureStoreExistsAsync();
         
         //act
         //Upload the test stream to Azure
         const string testContent = "Well, always know that you shine Brighter";
         var stream = new MemoryStream();
         var streamWriter = new StreamWriter(stream);
-        streamWriter.Write(testContent);
-        streamWriter.Flush();
+        await streamWriter.WriteAsync(testContent);
+        await streamWriter.FlushAsync();
         stream.Position = 0;
 
         var claim = luggageStore.Store(stream);
@@ -48,7 +48,7 @@ public class AzureBlobUploadTests : IAsyncDisposable
         
         //check for the contents indicated by the claim id on S3
         var result = luggageStore.Retrieve(claim);
-        var resultAsString = new StreamReader(result).ReadToEnd();
+        var resultAsString = await new StreamReader(result).ReadToEndAsync();
         await Assert.That(resultAsString).IsEqualTo(testContent);
 
         luggageStore.Delete(claim);

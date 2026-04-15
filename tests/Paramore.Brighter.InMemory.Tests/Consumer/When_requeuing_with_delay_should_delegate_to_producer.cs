@@ -67,7 +67,7 @@ public class InMemoryConsumerRequeueWithDelayProducerTests
     public async Task Should_use_scheduler_when_requeuing_with_delay()
     {
         // Act
-        _consumer.Requeue(_message, _delay);
+        await _consumer.RequeueAsync(_message, _delay);
 
         // Assert
         await Assert.That(_scheduler.ScheduleCalled).IsTrue();
@@ -77,7 +77,7 @@ public class InMemoryConsumerRequeueWithDelayProducerTests
     public async Task Should_not_have_message_immediately_available_on_bus()
     {
         // Act
-        _consumer.Requeue(_message, _delay);
+        await _consumer.RequeueAsync(_message, _delay);
 
         // Assert - message should not be immediately available (scheduler holds it)
         var messagesOnBus = _bus.Stream(_routingKey);
@@ -88,7 +88,7 @@ public class InMemoryConsumerRequeueWithDelayProducerTests
     public async Task Should_remove_message_from_locked_messages()
     {
         // Act
-        var result = _consumer.Requeue(_message, _delay);
+        var result = await _consumer.RequeueAsync(_message, _delay);
 
         // Assert
         await Assert.That(result).IsTrue();

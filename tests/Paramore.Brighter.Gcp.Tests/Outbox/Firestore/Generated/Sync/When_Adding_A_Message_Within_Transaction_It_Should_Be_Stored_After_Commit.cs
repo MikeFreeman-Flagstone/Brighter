@@ -54,7 +54,7 @@ public class WhenAddingAMessageWithinTransactionItShouldBeStoredAfterCommit : ID
         var outbox = _outboxProvider.CreateOutbox();
 
         var transaction = _outboxProvider.CreateTransactionProvider();
-        _ = transaction.GetTransaction();
+        _ = await transaction.GetTransactionAsync();
 
         var context = new RequestContext();
         var message = _messageFactory.Create();
@@ -63,7 +63,7 @@ public class WhenAddingAMessageWithinTransactionItShouldBeStoredAfterCommit : ID
 
         // Act
         outbox.Add(message, context, transactionProvider: transaction);
-        transaction.Commit();
+        await transaction.CommitAsync();
         
         var storedMessage = outbox.Get(message.Id, context);
         
