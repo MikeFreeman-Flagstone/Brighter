@@ -25,14 +25,14 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             Subscription subscription = new Subscription<MyEvent>(new SubscriptionName("test"), noOfPerformers: 1, timeOut: TimeSpan.FromMilliseconds(1000), channelFactory: new InMemoryChannelFactory(_bus, TimeProvider.System), channelName: new ChannelName("fakeChannel"), messagePumpType: MessagePumpType.Proactor, routingKey: _routingKey);
             _newSubscription = new Subscription<MyEvent>(new SubscriptionName("newTest"), noOfPerformers: 1, timeOut: TimeSpan.FromMilliseconds(1000), channelFactory: new InMemoryChannelFactory(_bus, TimeProvider.System), channelName: new ChannelName("fakeChannelTwo"), messagePumpType: MessagePumpType.Proactor, routingKey: _routingKeyTwo);
             _dispatcher = new Dispatcher(commandProcessor, new List<Subscription> { subscription }, messageMapperRegistryAsync: messageMapperRegistry);
-            var @event = new MyEvent();
-            var message = new MyEventMessageMapperAsync().MapToMessageAsync(@event, new Publication { Topic = _routingKey }).GetAwaiter().GetResult();
-            _bus.Enqueue(message);
         }
 
         [Before(Test)]
         public async Task Setup()
         {
+            var @event = new MyEvent();
+            var message = await new MyEventMessageMapperAsync().MapToMessageAsync(@event, new Publication { Topic = _routingKey });
+            _bus.Enqueue(message);
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_AWAITING);
             _dispatcher.Receive();
         }
@@ -52,10 +52,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         }
 
         [After(Test)]
-        public void Dispose()
+        public async Task Dispose()
         {
             if (_dispatcher?.State == DispatcherState.DS_RUNNING)
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
         }
     }
 }

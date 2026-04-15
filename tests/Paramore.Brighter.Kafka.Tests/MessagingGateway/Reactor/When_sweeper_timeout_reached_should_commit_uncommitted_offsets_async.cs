@@ -31,7 +31,7 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
 [Category("Kafka")]
-public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDisposable, IDisposable
+public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
@@ -93,7 +93,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
     {
         //Arrange
         //allow time for topic to propagate
-        Task.Delay(1000).GetAwaiter().GetResult();
+        await Task.Delay(1000);
         
         var routingKey = new RoutingKey(_topic);
         var producerAsync = _producerRegistry.LookupSyncBy(routingKey);
@@ -114,12 +114,12 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
         ((KafkaMessageProducer)producerAsync).Flush();
 
         //allow messages to propagate on the broker
-        Task.Delay(3000).GetAwaiter().GetResult();
+        await Task.Delay(3000);
 
         var consumedMessages = new List<Message>();
         for (int j = 0; j < 5; j++)
         {
-            consumedMessages.Add(ReadMessage());
+            consumedMessages.Add(await ReadMessage());
         }
 
         //Assert - messages consumed and acknowledged but not yet committed
@@ -130,7 +130,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
         _fakeTimeProvider.Advance(TimeSpan.FromSeconds(31));
 
         //Allow the timer callback to execute
-        Task.Delay(2000).GetAwaiter().GetResult();
+        await Task.Delay(2000);
 
         //Assert - Sweeper should have committed the offsets
         await Assert.That(_consumer.StoredOffsets()).IsEqualTo(0);
@@ -138,7 +138,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
         _consumer.Close();
     }
 
-    private Message ReadMessage()
+    private async Task<Message> ReadMessage()
     {
         Message[] messages = [new Message()];
         int maxTries = 0;
@@ -147,7 +147,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
             try
             {
                 maxTries++;
-                Task.Delay(500).GetAwaiter().GetResult(); //Let topic propagate in the broker
+                await Task.Delay(500); //Let topic propagate in the broker
                 messages = _consumer.Receive(TimeSpan.FromMilliseconds(1000));
 
                 if (messages[0].Header.MessageType != MessageType.MT_NONE)
@@ -157,20 +157,21 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsets : IAsyncDis
                 }
                 
                 //wait before retry
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 
         return messages[0];
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _producerRegistry?.Dispose();
         _consumer.Dispose();

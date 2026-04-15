@@ -10,14 +10,15 @@ namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Proactor;
 [Category("RocketMQ")]
 public class MessageProducerSendAsyncTests  : IAsyncDisposable 
 {
-    private readonly Message _message;
-    private readonly IAmAChannelAsync _channel;
-    private readonly IAmAMessageProducerAsync _messageProducer;
-    private readonly MyCommand _myCommand;
-    private readonly Id _correlationId;
-    private readonly RoutingKey _replyTo;
+    private Message _message;
+    private IAmAChannelAsync _channel;
+    private IAmAMessageProducerAsync _messageProducer;
+    private MyCommand _myCommand;
+    private Id _correlationId;
+    private RoutingKey _replyTo;
 
-    public MessageProducerSendAsyncTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         _myCommand = new MyCommand { Value = "Test" };
         _correlationId = Id.Random();
@@ -44,8 +45,8 @@ public class MessageProducerSendAsyncTests  : IAsyncDisposable
         var channelFactory = new RocketMqChannelFactory(new RocketMessageConsumerFactory(connection));
         _channel = channelFactory.CreateAsyncChannel(mqSubscription);
         _messageProducer = new RocketMqMessageProducer(
-            connection, 
-            GatewayFactory.CreateProducer(connection, publication).GetAwaiter().GetResult(),
+            connection,
+            await GatewayFactory.CreateProducer(connection, publication),
             publication);
     }
 

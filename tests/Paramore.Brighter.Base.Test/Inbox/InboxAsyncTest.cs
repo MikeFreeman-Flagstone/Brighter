@@ -17,7 +17,6 @@ public abstract class InboxAsyncTest
     }
 
     [After(HookType.Test)]
-
     public async Task Cleanup()
     {
         await AfterEachTestAsync();

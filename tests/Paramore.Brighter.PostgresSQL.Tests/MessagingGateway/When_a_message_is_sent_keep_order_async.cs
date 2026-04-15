@@ -8,14 +8,15 @@ using Paramore.Brighter.PostgresSQL.Tests.TestDoubles;
 namespace Paramore.Brighter.PostgresSQL.Tests.MessagingGateway;
 
 [Category("PostgresSql")]
-public class OrderTestAsync : IAsyncDisposable, IDisposable
+public class OrderTestAsync : IAsyncDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topicName = Guid.NewGuid().ToString();
-    private readonly IAmAProducerRegistry _producerRegistry;
-    private readonly IAmAMessageConsumerAsync _consumer;
+    private IAmAProducerRegistry _producerRegistry;
+    private IAmAMessageConsumerAsync _consumer;
 
-    public OrderTestAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         var testHelper = new PostgresSqlTestHelper();
         testHelper.SetupDatabase();
@@ -27,11 +28,11 @@ public class OrderTestAsync : IAsyncDisposable, IDisposable
             new ChannelName(_topicName), routingKey,
             messagePumpType: MessagePumpType.Proactor);
 
-        _producerRegistry = new PostgresProducerRegistryFactory(
+        _producerRegistry = await new PostgresProducerRegistryFactory(
             new PostgresMessagingGatewayConnection(testHelper.Configuration),
             [new PostgresPublication { Topic = routingKey }]
-        ).CreateAsync().GetAwaiter().GetResult();
-            
+        ).CreateAsync();
+
         _consumer = new PostgresConsumerFactory(new PostgresMessagingGatewayConnection(testHelper.Configuration)).CreateAsync(sub);
     }
 
@@ -103,7 +104,8 @@ public class OrderTestAsync : IAsyncDisposable, IDisposable
         return messages;
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _producerRegistry.Dispose();
         ((IAmAMessageConsumerSync)_consumer).Dispose();

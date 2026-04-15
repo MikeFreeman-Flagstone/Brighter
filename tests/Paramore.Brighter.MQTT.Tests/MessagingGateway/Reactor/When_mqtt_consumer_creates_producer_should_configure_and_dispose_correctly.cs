@@ -38,20 +38,18 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 [Category("MQTT")]
 public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
 {
-    private readonly MqttTestServer? _mqttTestServer;
+    private MqttTestServer? _mqttTestServer;
     private readonly MqttMessageProducer _producer;
     private readonly MqttMessageConsumer _consumer;
     private readonly SpySchedulerSync _scheduler;
+    private readonly int _serverPort;
 
     public MqttConsumerProducerConfigAndDisposeTests()
     {
 
         int serverPort = MqttTestServer.GetRandomServerPort();
+        _serverPort = serverPort;
         string topicPrefix = "BrighterIntegrationTests/SchedulerDisposeTests";
-
-        _mqttTestServer = MqttTestServer.CreateTestMqttServer(
-            new MqttFactory(), true, null,
-            IPAddress.Any, serverPort, null, "MqttConsumerProducerConfigAndDisposeTests");
 
         var producerConfig = new MqttMessagingGatewayProducerConfiguration
         {
@@ -74,6 +72,14 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
 
         // Create consumer WITH scheduler - this is the constructor parameter being tested
         _consumer = new MqttMessageConsumer(consumerConfig, _scheduler);
+    }
+
+    [Before(HookType.Test)]
+    public async Task Setup()
+    {
+        _mqttTestServer = await MqttTestServer.CreateTestMqttServer(
+            new MqttFactory(), true, null,
+            IPAddress.Any, _serverPort, null, "MqttConsumerProducerConfigAndDisposeTests");
     }
 
     [Test]

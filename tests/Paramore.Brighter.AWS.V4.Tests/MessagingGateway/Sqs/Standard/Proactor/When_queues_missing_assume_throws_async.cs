@@ -9,12 +9,13 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Standard.Proactor;
 
 [Category("AWS")]
-public class AWSAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
+public class AWSAssumeQueuesTestsAsync : IAsyncDisposable
 {
-    private readonly ChannelFactory _channelFactory;
-    private readonly IAmAMessageConsumerAsync _consumer;
+    private ChannelFactory _channelFactory;
+    private IAmAMessageConsumerAsync _consumer;
 
-    public AWSAssumeQueuesTestsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         var channelName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
         var queueName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
@@ -36,7 +37,7 @@ public class AWSAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
                 MakeChannels = OnMissingChannel.Create
             });
 
-        producer.ConfirmTopicExistsAsync(queueName).Wait();
+        await producer.ConfirmTopicExistsAsync(queueName);
 
         _channelFactory = new ChannelFactory(awsConnection);
         var channel = _channelFactory.CreateAsyncChannel(subscription);
@@ -52,9 +53,10 @@ public class AWSAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
         await Assert.That(() => _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000))).ThrowsExactly<QueueDoesNotExistException>();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait(); 
+        await _channelFactory.DeleteTopicAsync(); 
     }
 
     public async ValueTask DisposeAsync()

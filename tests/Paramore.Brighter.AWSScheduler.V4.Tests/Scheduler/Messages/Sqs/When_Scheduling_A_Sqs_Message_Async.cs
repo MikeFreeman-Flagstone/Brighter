@@ -11,36 +11,42 @@ public class SqsSchedulingAsyncMessageTest : IAsyncDisposable
 {
     private readonly ContentType _contentType = new(MediaTypeNames.Text.Plain);
     private const int BufferSize = 3;
-    private readonly SqsMessageProducer _messageProducer;
-    private readonly SqsMessageConsumer _consumer;
+    private SqsMessageProducer _messageProducer;
+    private SqsMessageConsumer _consumer;
     private readonly string _queueName;
     private readonly ChannelFactory _channelFactory;
-    private readonly IAmAMessageSchedulerFactory _factory;
+    private IAmAMessageSchedulerFactory _factory;
+    private readonly AWSMessagingGatewayConnection _awsConnection;
 
     public SqsSchedulingAsyncMessageTest()
     {
-        var awsConnection = GatewayFactory.CreateFactory();
+        _awsConnection = GatewayFactory.CreateFactory();
 
-        _channelFactory = new ChannelFactory(awsConnection);
-        var subscriptionName = $"Buffered-Scheduler-Async-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
+        _channelFactory = new ChannelFactory(_awsConnection);
         _queueName = $"Buffered-Scheduler-Async-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
+        var subscriptionName = $"Buffered-Scheduler-Async-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
 
         //we need the channel to create the queues and notifications
         var routingKey = new RoutingKey(_queueName);
 
-        var channel = _channelFactory.CreateAsyncChannelAsync(new SqsSubscription<MyCommand>(
+        var channel = await _channelFactory.CreateAsyncChannelAsync(new SqsSubscription<MyCommand>(
             subscriptionName: new SubscriptionName(subscriptionName),
             channelName: new ChannelName(_queueName),
             channelType: ChannelType.PointToPoint, routingKey: routingKey, bufferSize: BufferSize, makeChannels: OnMissingChannel.Create,
-            queueAttributes: new SqsAttributes(tags: new Dictionary<string, string> { { "Environment", "Test" } }))).GetAwaiter().GetResult();
+            queueAttributes: new SqsAttributes(tags: new Dictionary<string, string> { { "Environment", "Test" } })));
 
         //we want to access via a consumer, to receive multiple messages - we don't want to expose on channel
         //just for the tests, so create a new consumer from the properties
-        _consumer = new SqsMessageConsumer(awsConnection, channel.Name.ToValidSQSQueueName(), BufferSize);
-        _messageProducer = new SqsMessageProducer(awsConnection,
+        _consumer = new SqsMessageConsumer(_awsConnection, channel.Name.ToValidSQSQueueName(), BufferSize);
+        _messageProducer = new SqsMessageProducer(_awsConnection,
             new SqsPublication { MakeChannels = OnMissingChannel.Create, QueueAttributes = new SqsAttributes(tags: new Dictionary<string, string> { { "Environment", "Test" } }) });
 
-        _factory = new AwsSchedulerFactory(awsConnection, $"brighter-scheduler-{Guid.NewGuid():N}")
+        _factory = new AwsSchedulerFactory(_awsConnection, $"brighter-scheduler-{Guid.NewGuid():N}")
         {
             UseMessageTopicAsTarget = true
         };
@@ -89,5 +95,3 @@ public class SqsSchedulingAsyncMessageTest : IAsyncDisposable
         await _consumer.DisposeAsync();
     }
 }
-
-

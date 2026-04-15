@@ -90,7 +90,7 @@ public class KafkaMessageConsumerNoChannelsTests : IDisposable
         //Act - consume and reject the first message, then consume the second
         using (var consumer = CreateConsumerWithNoChannels(groupId))
         {
-            var receivedMessage1 = ConsumeMessage(consumer);
+            var receivedMessage1 = await ConsumeMessage(consumer);
             await Assert.That(receivedMessage1.Id).IsEqualTo(messageId1);
 
             Console.WriteLine($"About to reject message {messageId1} with no channels configured");
@@ -104,7 +104,7 @@ public class KafkaMessageConsumerNoChannelsTests : IDisposable
             await Assert.That(rejected).IsTrue();
 
             //verify we can consume the next message (proving first was acknowledged)
-            var receivedMessage2 = ConsumeMessage(consumer);
+            var receivedMessage2 = await ConsumeMessage(consumer);
             await Assert.That(receivedMessage2.Id).IsEqualTo(messageId2);
 
             Console.WriteLine($"Successfully consumed message {messageId2} after rejection");
@@ -138,7 +138,7 @@ public class KafkaMessageConsumerNoChannelsTests : IDisposable
             ));
     }
 
-    private Message ConsumeMessage(IAmAMessageConsumerSync consumer)
+    private async Task<Message> ConsumeMessage(IAmAMessageConsumerSync consumer)
     {
         int maxTries = 0;
         do
@@ -156,7 +156,7 @@ public class KafkaMessageConsumerNoChannelsTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

@@ -10,14 +10,15 @@ using Paramore.Brighter.Observability;
 namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
 {
     [Category("MSSQL")]
-    public class PostMessageTestAsync : IAsyncDisposable, IDisposable
+    public class PostMessageTestAsync : IAsyncDisposable
     {
         private readonly string _queueName = Guid.NewGuid().ToString();
         private readonly string _topicName = Guid.NewGuid().ToString();
-        private readonly IAmAProducerRegistry _producerRegistry;
-        private readonly IAmAMessageConsumerAsync _consumer;
+        private IAmAProducerRegistry _producerRegistry;
+        private IAmAMessageConsumerAsync _consumer;
 
-        public PostMessageTestAsync()
+        [Before(Test)]
+        public async Task Setup()
         {
             var testHelper = new MsSqlTestHelper();
             testHelper.SetupQueueDb();
@@ -29,10 +30,10 @@ namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
                 new ChannelName(_topicName), routingKey,
                 messagePumpType: MessagePumpType.Proactor);
 
-            _producerRegistry = new MsSqlProducerRegistryFactory(
+            _producerRegistry = await new MsSqlProducerRegistryFactory(
                 testHelper.QueueConfiguration,
                 [new() { Topic = routingKey }]
-            ).CreateAsync().Result;
+            ).CreateAsync();
             _consumer = new MsSqlMessageConsumerFactory(testHelper.QueueConfiguration).CreateAsync(sub);
         }
 
@@ -113,7 +114,8 @@ namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
             return messages;
         }
 
-        public void Dispose()
+        [After(Test)]
+        public async Task Cleanup()
         {
             _producerRegistry.Dispose();
             ((IAmAMessageConsumerSync)_consumer).Dispose();

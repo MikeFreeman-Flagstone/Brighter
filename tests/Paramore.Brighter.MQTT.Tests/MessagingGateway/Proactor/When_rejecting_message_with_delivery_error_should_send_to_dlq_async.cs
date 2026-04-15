@@ -38,17 +38,20 @@ public class MqttMessageConsumerRejectDeliveryErrorDlqAsyncTests : IDisposable
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/DlqAsyncSource";
     private const string DLQ_TOPIC_PREFIX = "BrighterTests/DlqAsyncTarget";
 
-    private readonly MqttTestServer? _mqttTestServer;
+    private MqttTestServer? _mqttTestServer;
     private readonly MqttMessageProducer _sourceProducer;
     private readonly MqttMessageConsumer _sourceConsumer;
     private readonly MqttMessageConsumer _dlqConsumer;
+    private readonly MqttFactory _mqttFactory;
+    private readonly int _serverPort;
 
     public MqttMessageConsumerRejectDeliveryErrorDlqAsyncTests()
     {
         var mqttFactory = new MqttFactory();
         int serverPort = MqttTestServer.GetRandomServerPort();
 
-        _mqttTestServer = MqttTestServer.CreateTestMqttServer(mqttFactory, true, serverPort: serverPort);
+        _mqttFactory = mqttFactory;
+        _serverPort = serverPort;
 
         //Arrange — source producer
         var producerConfig = new MqttMessagingGatewayProducerConfiguration
@@ -83,6 +86,12 @@ public class MqttMessageConsumerRejectDeliveryErrorDlqAsyncTests : IDisposable
             ClientID = "BrighterTests-DlqAsyncTarget-Consumer"
         };
         _dlqConsumer = new MqttMessageConsumer(dlqConsumerConfig);
+    }
+
+    [Before(HookType.Test)]
+    public async Task Setup()
+    {
+        _mqttTestServer = await MqttTestServer.CreateTestMqttServer(_mqttFactory, true, serverPort: _serverPort);
     }
 
     [Test]

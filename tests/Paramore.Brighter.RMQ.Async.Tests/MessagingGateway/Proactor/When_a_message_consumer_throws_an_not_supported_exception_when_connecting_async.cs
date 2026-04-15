@@ -31,18 +31,19 @@ namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
 [Category("RMQ")]
 
-public class AsyncRmqMessageConsumerChannelFailureTests : IAsyncDisposable, IDisposable
+public class AsyncRmqMessageConsumerChannelFailureTests : IAsyncDisposable
 {
-    private readonly IAmAMessageProducerAsync _sender;
-    private readonly IAmAMessageConsumerAsync _badReceiver;
+    private IAmAMessageProducerAsync _sender;
+    private IAmAMessageConsumerAsync _badReceiver;
+    private Message _sentMessage;
 
     public AsyncRmqMessageConsumerChannelFailureTests()
     {
-        var messageHeader = new MessageHeader(Guid.NewGuid().ToString(), 
+        var messageHeader = new MessageHeader(Guid.NewGuid().ToString(),
             new RoutingKey(Guid.NewGuid().ToString()), MessageType.MT_COMMAND);
 
         messageHeader.UpdateHandledCount();
-        Message sentMessage = new(messageHeader, new MessageBody("test content"));
+        _sentMessage = new Message(messageHeader, new MessageBody("test content"));
 
         var rmqConnection = new RmqMessagingGatewayConnection
         {
@@ -52,10 +53,14 @@ public class AsyncRmqMessageConsumerChannelFailureTests : IAsyncDisposable, IDis
 
         _sender = new RmqMessageProducer(rmqConnection);
         var queueName = new ChannelName(Guid.NewGuid().ToString());
-            
-        _badReceiver = new NotSupportedRmqMessageConsumer(rmqConnection,queueName, sentMessage.Header.Topic, false, 1, false);
 
-        _sender.SendAsync(sentMessage).GetAwaiter().GetResult();
+        _badReceiver = new NotSupportedRmqMessageConsumer(rmqConnection,queueName, _sentMessage.Header.Topic, false, 1, false);
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
+        await _sender.SendAsync(_sentMessage);
     }
 
     [Test]
@@ -78,7 +83,8 @@ public class AsyncRmqMessageConsumerChannelFailureTests : IAsyncDisposable, IDis
         await Assert.That(exceptionHappened).IsTrue();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         ((IAmAMessageProducerSync)_sender).Dispose();
         ((IAmAMessageConsumerSync)_badReceiver).Dispose();

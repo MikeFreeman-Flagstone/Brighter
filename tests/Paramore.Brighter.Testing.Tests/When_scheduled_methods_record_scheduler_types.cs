@@ -181,23 +181,28 @@ public class SpyCommandProcessorScheduledPostTests
 public class SpyCommandProcessorScheduledAsyncTests
 {
     private readonly SpyCommandProcessor _spy;
-    private readonly string _sendAsyncAtId;
-    private readonly string _publishAsyncDelayId;
-    private readonly string _postAsyncAtId;
+    private string _sendAsyncAtId;
+    private string _publishAsyncDelayId;
+    private string _postAsyncAtId;
 
     public SpyCommandProcessorScheduledAsyncTests()
     {
         //Arrange
         _spy = new SpyCommandProcessor();
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
         var command = new TestCommand();
         var @event = new TestEvent();
         var at = DateTimeOffset.UtcNow.AddMinutes(5);
         var delay = TimeSpan.FromMinutes(10);
 
         //Act
-        _sendAsyncAtId = _spy.SendAsync(at, command).GetAwaiter().GetResult();
-        _publishAsyncDelayId = _spy.PublishAsync(delay, @event).GetAwaiter().GetResult();
-        _postAsyncAtId = _spy.PostAsync(at, command).GetAwaiter().GetResult();
+        _sendAsyncAtId = await _spy.SendAsync(at, command);
+        _publishAsyncDelayId = await _spy.PublishAsync(delay, @event);
+        _postAsyncAtId = await _spy.PostAsync(at, command);
     }
 
     [Test]

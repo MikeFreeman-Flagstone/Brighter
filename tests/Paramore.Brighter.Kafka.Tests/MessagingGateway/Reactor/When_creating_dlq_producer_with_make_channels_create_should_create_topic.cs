@@ -88,7 +88,7 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
         Message? receivedMessage;
         using (var consumer = CreateConsumer(groupId, dlqRoutingKey, OnMissingChannel.Create))
         {
-            receivedMessage = ConsumeMessage(consumer);
+            receivedMessage = await ConsumeMessage(consumer);
             await Assert.That(receivedMessage.Id).IsEqualTo(messageId);
 
             Console.WriteLine($"About to reject message {messageId} - DLQ topic should be created automatically");
@@ -112,7 +112,7 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
         using (var dlqConsumer = CreateDLQConsumer(groupId))
         {
             Console.WriteLine("Attempting to consume from DLQ - this proves topic was auto-created");
-            var dlqMessage = ConsumeMessage(dlqConsumer);
+            var dlqMessage = await ConsumeMessage(dlqConsumer);
 
             await Assert.That(dlqMessage).IsNotNull();
             await Assert.That(dlqMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
@@ -171,7 +171,7 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
             ));
     }
 
-    private Message ConsumeMessage(IAmAMessageConsumerSync consumer)
+    private async Task<Message> ConsumeMessage(IAmAMessageConsumerSync consumer)
     {
         int maxTries = 0;
         do
@@ -189,7 +189,7 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

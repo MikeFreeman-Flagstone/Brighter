@@ -47,14 +47,13 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
             _dispatcher.Receive();
         }
 
-#pragma warning disable xUnit1031
         [Test]
         public async Task When_A_Message_Dispatcher_Starts_Different_Types_Of_Performers()
         {
-            Task.Delay(1000).Wait();
+            await Task.Delay(1000);
             _numberOfConsumers = _dispatcher.Consumers.Count();
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
-            _dispatcher.End().Wait();
+            await _dispatcher.End();
             await Assert.That(_bus.Stream(_eventRoutingKey)).IsEmpty();
             await Assert.That(_bus.Stream(_commandRoutingKey)).IsEmpty();
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_STOPPED);
@@ -63,11 +62,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         }
 
         [After(Test)]
-#pragma warning restore xUnit1031
-        public void Dispose()
+        public async Task Dispose()
         {
             if (_dispatcher?.State == DispatcherState.DS_RUNNING)
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
         }
     }
 }

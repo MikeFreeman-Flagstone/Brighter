@@ -12,7 +12,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Proactor;
 
 [Category("AWS")]
-public class SqsMessageProducerSendAsyncTests : IAsyncDisposable, IDisposable
+public class SqsMessageProducerSendAsyncTests : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAChannelAsync _channel;
@@ -108,11 +108,12 @@ public class SqsMessageProducerSendAsyncTests : IAsyncDisposable, IDisposable
         await Assert.That(message.Header.Bag[HeaderNames.DeduplicationId]).IsEqualTo(_deduplicationId);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         _messageProducer.Dispose();
     }
 

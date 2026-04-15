@@ -12,7 +12,7 @@ using Amazon.SimpleNotificationService.Model;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Reactor;
 
 [Category("AWS")]
-public class SqsMessageProducerSendTests : IDisposable, IAsyncDisposable
+public class SqsMessageProducerSendTests : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAChannelSync _channel;
@@ -97,11 +97,12 @@ public class SqsMessageProducerSendTests : IDisposable, IAsyncDisposable
         await Assert.That(message.Body.Value).IsEqualTo(_message.Body.Value);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         _messageProducer.Dispose();
     }
 

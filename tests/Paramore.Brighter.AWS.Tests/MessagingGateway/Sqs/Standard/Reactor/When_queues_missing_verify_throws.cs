@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Standard.Reactor;
 
 [Category("AWS")] 
-public class AWSValidateQueuesTests  : IDisposable, IAsyncDisposable
+public class AWSValidateQueuesTests : IAsyncDisposable
 {
     private readonly AWSMessagingGatewayConnection _awsConnection;
     private readonly SqsSubscription<MyCommand> _subscription;
@@ -39,9 +39,10 @@ public class AWSValidateQueuesTests  : IDisposable, IAsyncDisposable
         await Assert.That(() => _channelFactory.CreateSyncChannel(_subscription)).ThrowsExactly<QueueDoesNotExistException>();
     }
  
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait(); 
+        await _channelFactory.DeleteTopicAsync(); 
     }
         
     public async ValueTask DisposeAsync()

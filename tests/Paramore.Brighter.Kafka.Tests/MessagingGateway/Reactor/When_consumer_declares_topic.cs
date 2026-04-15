@@ -78,14 +78,14 @@ public class KafkaConsumerDeclareTests : IDisposable
         //ensure the messages are sent
         ((KafkaMessageProducer)producer).Flush();
 
-        Message receivedMessage = ConsumeMessage();
+        Message receivedMessage = await ConsumeMessage();
 
         await Assert.That(receivedMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
         await Assert.That(receivedMessage.Header.PartitionKey).IsEqualTo(_partitionKey);
         await Assert.That(receivedMessage.Body.Value).IsEqualTo(message.Body.Value);
     }
 
-    private Message ConsumeMessage()
+    private async Task<Message> ConsumeMessage()
     {
         Message[] messages = new Message[0];
         int maxTries = 0;
@@ -105,7 +105,7 @@ public class KafkaConsumerDeclareTests : IDisposable
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
 
         } while (maxTries <= 10);

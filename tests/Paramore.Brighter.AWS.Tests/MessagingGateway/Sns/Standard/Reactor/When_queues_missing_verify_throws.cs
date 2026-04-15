@@ -10,18 +10,19 @@ using Amazon.SimpleNotificationService.Model;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Reactor;
 
 [Category("AWS")] 
-public class AwsValidateQueuesTests  : IDisposable, IAsyncDisposable
+public class AwsValidateQueuesTests : IAsyncDisposable
 {
-    private readonly AWSMessagingGatewayConnection _awsConnection;
-    private readonly SqsSubscription<MyCommand> _subscription;
+    private AWSMessagingGatewayConnection _awsConnection;
+    private SqsSubscription<MyCommand> _subscription;
     private ChannelFactory? _channelFactory;
 
-    public AwsValidateQueuesTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         var channelName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
         string topicName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
         var routingKey = new RoutingKey(topicName);
-            
+
         _subscription = new SqsSubscription<MyCommand>(
             subscriptionName: new SubscriptionName(channelName),
             channelName: new ChannelName(channelName),
@@ -31,17 +32,17 @@ public class AwsValidateQueuesTests  : IDisposable, IAsyncDisposable
             makeChannels: OnMissingChannel.Validate,
             queueAttributes: new SqsAttributes(tags: new Dictionary<string, string> { { "Environment", "Test" } }),
             topicAttributes: new SnsAttributes(tags: [new Tag { Key = "Environment", Value = "Test" }]));
-            
+
         _awsConnection = GatewayFactory.CreateFactory();
-            
+
         //We need to create the topic at least, to check the queues
-        var producer = new SnsMessageProducer(_awsConnection, 
+        var producer = new SnsMessageProducer(_awsConnection,
             new SnsPublication
             {
-                MakeChannels = OnMissingChannel.Create 
+                MakeChannels = OnMissingChannel.Create
             });
-        producer.ConfirmTopicExistsAsync(topicName).Wait(); 
-            
+        await producer.ConfirmTopicExistsAsync(topicName);
+
     }
 
     [Test]
@@ -53,10 +54,11 @@ public class AwsValidateQueuesTests  : IDisposable, IAsyncDisposable
         await Assert.That(() => _channelFactory.CreateSyncChannel(_subscription)).ThrowsExactly<QueueDoesNotExistException>();
     }
  
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         if (_channelFactory != null)
-            _channelFactory.DeleteTopicAsync().Wait(); 
+            await _channelFactory.DeleteTopicAsync(); 
     }
         
     public async ValueTask DisposeAsync()

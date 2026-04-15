@@ -25,22 +25,21 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             messageMapperRegistry.RegisterAsync<MyEvent, MyEventMessageMapperAsync>();
             var subscription = new Subscription<MyEvent>(new SubscriptionName("test"), noOfPerformers: 1, timeOut: TimeSpan.FromMilliseconds(1000), channelFactory: new InMemoryChannelFactory(_bus, _timeProvider), channelName: new ChannelName(ChannelName), routingKey: _routingKey, messagePumpType: MessagePumpType.Proactor);
             _dispatcher = new Dispatcher(_commandProcessor, new List<Subscription> { subscription }, null, messageMapperRegistry, requestContextFactory: new InMemoryRequestContextFactory());
-            var @event = new MyEvent
-            {
-                Data = 4
-            };
-            var message = new MyEventMessageMapperAsync().MapToMessageAsync(@event, new() { Topic = _routingKey }).Result;
-            _bus.Enqueue(message);
         }
 
         [Before(Test)]
         public async Task Setup()
         {
+            var @event = new MyEvent
+            {
+                Data = 4
+            };
+            var message = await new MyEventMessageMapperAsync().MapToMessageAsync(@event, new() { Topic = _routingKey });
+            _bus.Enqueue(message);
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_AWAITING);
             _dispatcher.Receive();
         }
 
-#pragma warning disable xUnit1031
         [Test]
         public async Task When_a_message_dispatcher_is_asked_to_connect_a_channel_and_handler_async()
         {
@@ -54,10 +53,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         }
 
         [After(Test)]
-        public void Dispose()
+        public async Task Dispose()
         {
             if (_dispatcher?.State == DispatcherState.DS_RUNNING)
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
         }
     }
 }

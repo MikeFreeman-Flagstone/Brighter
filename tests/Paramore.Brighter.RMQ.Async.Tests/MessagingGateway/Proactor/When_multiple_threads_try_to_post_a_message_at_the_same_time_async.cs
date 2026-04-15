@@ -6,7 +6,7 @@ using Paramore.Brighter.MessagingGateway.RMQ.Async;
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
 [Category("RMQ")]
-public class RmqMessageProducerSupportsMultipleThreadsTestsAsync : IDisposable, IAsyncDisposable
+public class RmqMessageProducerSupportsMultipleThreadsTestsAsync : IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _messageProducer;
     private readonly Message _message;
@@ -48,7 +48,8 @@ public class RmqMessageProducerSupportsMultipleThreadsTestsAsync : IDisposable, 
         await Assert.That(exceptionHappened).IsFalse();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         ((IAmAMessageProducerSync)_messageProducer).Dispose();
     }

@@ -35,15 +35,16 @@ namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 /// so that requeued messages are actually redelivered.
 /// </summary>
 [Category("Kafka")]
-public class KafkaConsumerRequeueAsyncTests : IAsyncDisposable, IDisposable
+public class KafkaConsumerRequeueAsyncTests : IAsyncDisposable
 {
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly string _channelName = Guid.NewGuid().ToString();
-    private readonly IAmAProducerRegistry _producerRegistry;
-    private readonly IAmAMessageConsumerAsync _consumer;
-    private readonly Message _message;
+    private IAmAProducerRegistry _producerRegistry;
+    private IAmAMessageConsumerAsync _consumer;
+    private Message _message;
 
-    public KafkaConsumerRequeueAsyncTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         string groupId = Guid.NewGuid().ToString();
 
@@ -51,7 +52,7 @@ public class KafkaConsumerRequeueAsyncTests : IAsyncDisposable, IDisposable
             new MessageHeader(Guid.NewGuid().ToString(), new RoutingKey(_topic), MessageType.MT_COMMAND),
             new MessageBody("test content for async requeue"));
 
-        _producerRegistry = new KafkaProducerRegistryFactory(
+        _producerRegistry = await new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
                 Name = "Kafka Producer Requeue Async Test",
@@ -67,7 +68,7 @@ public class KafkaConsumerRequeueAsyncTests : IAsyncDisposable, IDisposable
                     RequestTimeoutMs = 2000,
                     MakeChannels = OnMissingChannel.Create
                 }
-            ]).CreateAsync().Result;
+            ]).CreateAsync();
 
         _consumer = new KafkaMessageConsumerFactory(
             new KafkaMessagingGatewayConfiguration
@@ -140,7 +141,8 @@ public class KafkaConsumerRequeueAsyncTests : IAsyncDisposable, IDisposable
         return messages[0];
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _producerRegistry?.Dispose();
         ((IAmAMessageConsumerSync)_consumer)?.Dispose();

@@ -30,8 +30,13 @@ public class MessageDispatchRejectMessageExceptionTestsAsync
         var subscription = new InMemorySubscription<MyRejectedEvent>(new SubscriptionName("test"), noOfPerformers: 1, timeOut: TimeSpan.FromMilliseconds(1000), channelFactory: new InMemoryChannelFactory(_bus, _timeProvider), channelName: new ChannelName("myChannel"), messagePumpType: MessagePumpType.Proactor, routingKey: _routingKey);
         subscription.DeadLetterRoutingKey = _deadLetterRoutingKey;
         _dispatcher = new Dispatcher(commandProcessor, new List<Subscription> { subscription }, null, messageMapperRegistryAsync, requestContextFactory: new InMemoryRequestContextFactory());
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
         var @event = new MyRejectedEvent(Id.Random());
-        var message = new MyRejectedEventHandlerMessageMapperAsync().MapToMessageAsync(@event, new Publication { Topic = _routingKey }).Result;
+        var message = await new MyRejectedEventHandlerMessageMapperAsync().MapToMessageAsync(@event, new Publication { Topic = _routingKey });
         _bus.Enqueue(message);
         _dispatcher.Receive();
     }

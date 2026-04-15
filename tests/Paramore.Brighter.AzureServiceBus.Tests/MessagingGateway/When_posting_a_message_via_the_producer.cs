@@ -12,7 +12,7 @@ using Paramore.Brighter.MessagingGateway.AzureServiceBus.AzureServiceBusWrappers
 namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
 {
     [Category("ASB")]
-    public class ASBProducerTests : IDisposable
+    public class ASBProducerTests
     {
         private readonly IAmAChannelSync _topicChannel;
         private readonly IAmAChannelSync _queueChannel;
@@ -168,10 +168,11 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
             new MessageBody(JsonSerializer.Serialize(_command, JsonSerialisationOptions.Options))
         );
 
-        public void Dispose()
+        [After(Test)]
+        public async Task Cleanup()
         {
-            _administrationClient.DeleteTopicAsync(_topicName).GetAwaiter().GetResult();
-            _administrationClient.DeleteQueueAsync(_queueName).GetAwaiter().GetResult();
+            await _administrationClient.DeleteTopicAsync(_topicName);
+            await _administrationClient.DeleteQueueAsync(_queueName);
         }
 
         private DateTime RoundToSeconds(DateTime dateTime)

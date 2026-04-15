@@ -98,8 +98,13 @@ namespace Paramore.Brighter.TickerQ.Tests.TestDoubles.Fixtures
             Processor = ServiceProvider.GetRequiredService<IAmACommandProcessor>();
             SchedulerFactory = ServiceProvider.GetRequiredService<TickerQSchedulerFactory>();
             TickerQModuleInitializer.EnsureOneTimeSetupTickerQ();
+        }
+
+        [Before(HookType.Test)]
+        public async Task StartScheduler()
+        {
             var scheduler = ServiceProvider.GetRequiredService<ITickerQHostScheduler>();
-            scheduler.StartAsync().GetAwaiter().GetResult();
+            await scheduler.StartAsync();
         }
         protected abstract IAmAHandlerFactory GetHandlerFactory();
         protected abstract IAmASubscriberRegistry GetSubscriberServiceRegistry();

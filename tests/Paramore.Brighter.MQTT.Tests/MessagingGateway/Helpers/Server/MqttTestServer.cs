@@ -35,7 +35,7 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server
 
         public string HostName => MqttServerOptions.DefaultEndpointOptions.BoundInterNetworkAddress.ToString();
 
-        public static MqttTestServer? CreateTestMqttServer(MqttFactory mqttFactory, bool startService = true, ILogger? logger = null, IPAddress? serverIPAddress = null, int? serverPort = null, MqttServerOptions? mqttServerOptions = null, [CallerMemberName] string? testMethodName = null)
+        public static async Task<MqttTestServer?> CreateTestMqttServer(MqttFactory mqttFactory, bool startService = true, ILogger? logger = null, IPAddress? serverIPAddress = null, int? serverPort = null, MqttServerOptions? mqttServerOptions = null, [CallerMemberName] string? testMethodName = null)
         {
             ArgumentNullException.ThrowIfNull(mqttFactory);
 
@@ -74,7 +74,7 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server
             {
                 if (startService)
                 {
-                    testMqttServer.MqttServer.StartAsync().GetAwaiter().GetResult();
+                    await testMqttServer.MqttServer.StartAsync();
                 }
             }
             catch (Exception ex)

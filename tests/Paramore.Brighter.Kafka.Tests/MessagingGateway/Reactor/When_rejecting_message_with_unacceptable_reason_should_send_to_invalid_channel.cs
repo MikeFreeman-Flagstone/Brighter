@@ -87,7 +87,7 @@ public class KafkaMessageConsumerInvalidMessageTests : IDisposable
         Message? receivedMessage;
         using (var consumer = CreateConsumer(groupId, invalidMessageRoutingKey))
         {
-            receivedMessage = ConsumeMessage(consumer);
+            receivedMessage = await ConsumeMessage(consumer);
             await Assert.That(receivedMessage.Id).IsEqualTo(messageId);
 
             Console.WriteLine($"About to reject message {messageId} with Unacceptable reason");
@@ -110,7 +110,7 @@ public class KafkaMessageConsumerInvalidMessageTests : IDisposable
         using (var invalidMessageConsumer = CreateInvalidMessageConsumer(groupId))
         {
             Console.WriteLine("Attempting to consume from invalid message channel");
-            var invalidMessage = ConsumeMessage(invalidMessageConsumer);
+            var invalidMessage = await ConsumeMessage(invalidMessageConsumer);
 
             await Assert.That(invalidMessage).IsNotNull();
             await Assert.That(invalidMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
@@ -169,7 +169,7 @@ public class KafkaMessageConsumerInvalidMessageTests : IDisposable
             ));
     }
 
-    private Message ConsumeMessage(IAmAMessageConsumerSync consumer)
+    private async Task<Message> ConsumeMessage(IAmAMessageConsumerSync consumer)
     {
         int maxTries = 0;
         do
@@ -187,7 +187,7 @@ public class KafkaMessageConsumerInvalidMessageTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

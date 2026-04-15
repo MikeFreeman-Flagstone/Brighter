@@ -13,15 +13,16 @@ namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Fifo.Proactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class AwsValidateInfrastructureByUrlTestsAsync : IAsyncDisposable, IDisposable
+public class AwsValidateInfrastructureByUrlTestsAsync : IAsyncDisposable
 {
-    private readonly Message _message;
-    private readonly IAmAMessageConsumerAsync _consumer;
-    private readonly SqsMessageProducer _messageProducer;
-    private readonly ChannelFactory _channelFactory;
-    private readonly MyCommand _myCommand;
+    private Message _message;
+    private IAmAMessageConsumerAsync _consumer;
+    private SqsMessageProducer _messageProducer;
+    private ChannelFactory _channelFactory;
+    private MyCommand _myCommand;
 
-    public AwsValidateInfrastructureByUrlTestsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         _myCommand = new MyCommand { Value = "Test" };
         const string replyTo = "http:\\queueUrl";
@@ -54,7 +55,7 @@ public class AwsValidateInfrastructureByUrlTestsAsync : IAsyncDisposable, IDispo
         _channelFactory = new ChannelFactory(awsConnection);
         var channel = _channelFactory.CreateAsyncChannel(subscription);
 
-        var queueUrl = FindQueueUrl(awsConnection, routingKey.ToValidSQSQueueName(true)).Result;
+        var queueUrl = await FindQueueUrl(awsConnection, routingKey.ToValidSQSQueueName(true));
 
         subscription.MakeChannels = OnMissingChannel.Validate;
 
@@ -93,11 +94,12 @@ public class AwsValidateInfrastructureByUrlTestsAsync : IAsyncDisposable, IDispo
         return topicResponse.QueueUrl;
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         ((IAmAMessageConsumerSync)_consumer).Dispose();
         _messageProducer.Dispose();
     }

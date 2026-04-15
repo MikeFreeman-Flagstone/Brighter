@@ -64,22 +64,22 @@ public class KafkaMessageConsumerPreservesOrder : IDisposable
             consumer = CreateConsumer();
             
             //Now read messages in order
-            var firstMessage = ConsumeMessages(consumer);
+            var firstMessage = await ConsumeMessages(consumer);
             var message = firstMessage.First();
             await Assert.That(message.Id).IsEqualTo(msgId);
             consumer.Acknowledge(message);
 
-            var secondMessage = ConsumeMessages(consumer);
+            var secondMessage = await ConsumeMessages(consumer);
             message = secondMessage.First();
             await Assert.That(message.Id).IsEqualTo(msgId2);
             consumer.Acknowledge(message);
 
-            var thirdMessages = ConsumeMessages(consumer);
+            var thirdMessages = await ConsumeMessages(consumer);
             message = thirdMessages.First();
             await Assert.That(message.Id).IsEqualTo(msgId3);
             consumer.Acknowledge(message);
 
-            var fourthMessage = ConsumeMessages(consumer);
+            var fourthMessage = await ConsumeMessages(consumer);
             message = fourthMessage.First();
             await Assert.That(message.Id).IsEqualTo(msgId4);
             consumer.Acknowledge(message);
@@ -108,7 +108,7 @@ public class KafkaMessageConsumerPreservesOrder : IDisposable
         return messageId;
     }
 
-    private IEnumerable<Message> ConsumeMessages(IAmAMessageConsumerSync consumer)
+    private async Task<IEnumerable<Message>> ConsumeMessages(IAmAMessageConsumerSync consumer)
     {
         var messages = Array.Empty<Message>();
         int maxTries = 0;
@@ -126,7 +126,7 @@ public class KafkaMessageConsumerPreservesOrder : IDisposable
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

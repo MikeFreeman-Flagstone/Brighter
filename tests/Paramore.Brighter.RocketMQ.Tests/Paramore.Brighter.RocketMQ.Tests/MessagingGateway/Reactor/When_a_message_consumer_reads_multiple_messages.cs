@@ -6,17 +6,18 @@ namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 [Category("RocketMQ")]
 public class BufferedConsumerTests : IDisposable
 {
-    private readonly IAmAMessageProducerSync _messageProducer;
-    private readonly IAmAMessageConsumerSync _messageConsumer;
+    private IAmAMessageProducerSync _messageProducer;
+    private IAmAMessageConsumerSync _messageConsumer;
     private readonly RoutingKey _routingKey = new(Guid.NewGuid().ToString());
     private const int BatchSize = 3;
 
-    public BufferedConsumerTests()
+    [Before(Test)]
+    public async Task Setup()
     {
-        var connection = GatewayFactory.CreateConnection(); 
+        var connection = GatewayFactory.CreateConnection();
         var publication = new RocketMqPublication { Topic = "bt_mc_rmm" };
-        var consumer = GatewayFactory.CreateSimpleConsumer(connection, publication).GetAwaiter().GetResult();
-        var producer = GatewayFactory.CreateProducer(connection,  publication).GetAwaiter().GetResult();
+        var consumer = await GatewayFactory.CreateSimpleConsumer(connection, publication);
+        var producer = await GatewayFactory.CreateProducer(connection,  publication);
 
         _messageConsumer  = new RocketMessageConsumer(consumer, BatchSize, TimeSpan.FromSeconds(30));
         _messageProducer = new RocketMqMessageProducer(connection, producer, publication);

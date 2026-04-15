@@ -35,7 +35,7 @@ namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Standard.Reactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class SqsMessageConsumerNoChannelsRejectTests : IDisposable, IAsyncDisposable
+public class SqsMessageConsumerNoChannelsRejectTests : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAChannelSync _channel;
@@ -93,10 +93,11 @@ public class SqsMessageConsumerNoChannelsRejectTests : IDisposable, IAsyncDispos
         await Assert.That(sourceMessage.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

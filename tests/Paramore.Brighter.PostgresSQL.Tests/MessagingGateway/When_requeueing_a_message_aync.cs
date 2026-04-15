@@ -12,7 +12,7 @@ namespace Paramore.Brighter.PostgresSQL.Tests.MessagingGateway;
 public class PostgreSqlMessageConsumerRequeueTestsAsync : IDisposable
 {
     private readonly Message _message;
-    private readonly IAmAProducerRegistry _producerRegistry;
+    private IAmAProducerRegistry _producerRegistry;
     private readonly IAmAChannelFactory _channelFactory;
     private readonly PostgresSubscription<MyCommand> _subscription;
     private readonly RoutingKey _topic;
@@ -36,15 +36,21 @@ public class PostgreSqlMessageConsumerRequeueTestsAsync : IDisposable
         testHelper.SetupDatabase();
 
         _subscription = new PostgresSubscription<MyCommand>(new SubscriptionName(channelName),
-            new ChannelName(_topic), 
+            new ChannelName(_topic),
             new RoutingKey(_topic),
             messagePumpType: MessagePumpType.Proactor);
-        
-        _producerRegistry = new PostgresProducerRegistryFactory(
+        _channelFactory = new PostgresChannelFactory(new PostgresMessagingGatewayConnection(testHelper.Configuration));
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
+        var testHelper = new PostgresSqlTestHelper();
+        testHelper.SetupDatabase();
+        _producerRegistry = await new PostgresProducerRegistryFactory(
             new PostgresMessagingGatewayConnection(testHelper.Configuration),
             [new PostgresPublication {Topic = new RoutingKey(_topic)}]
-        ).CreateAsync().Result;
-        _channelFactory = new PostgresChannelFactory(new PostgresMessagingGatewayConnection(testHelper.Configuration));
+        ).CreateAsync();
     }
 
     [Test]

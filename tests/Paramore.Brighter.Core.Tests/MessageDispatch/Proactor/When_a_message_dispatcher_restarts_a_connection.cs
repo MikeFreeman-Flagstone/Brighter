@@ -29,21 +29,20 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
                 RequestType = typeof(MyEvent)
             };
             _dispatcher = new Dispatcher(commandProcessor, new List<Subscription> { _subscription }, messageMapperRegistryAsync: messageMapperRegistry);
-            var @event = new MyEvent();
-            var message = new MyEventMessageMapperAsync().MapToMessageAsync(@event, _publication).GetAwaiter().GetResult();
-            _bus.Enqueue(message);
         }
 
         [Before(Test)]
         public async Task Setup()
         {
+            var @event = new MyEvent();
+            var message = await new MyEventMessageMapperAsync().MapToMessageAsync(@event, _publication);
+            _bus.Enqueue(message);
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_AWAITING);
             _dispatcher.Receive();
-            Task.Delay(1000).Wait();
+            await Task.Delay(1000);
             _dispatcher.Shut(_subscription);
         }
 
-#pragma warning disable xUnit1031
         [Test]
         public async Task When_A_Message_Dispatcher_Restarts_A_Connection()
         {
@@ -59,11 +58,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         }
 
         [After(Test)]
-#pragma warning restore xUnit1031
-        public void Dispose()
+        public async Task Dispose()
         {
             if (_dispatcher?.State == DispatcherState.DS_RUNNING)
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
         }
     }
 }

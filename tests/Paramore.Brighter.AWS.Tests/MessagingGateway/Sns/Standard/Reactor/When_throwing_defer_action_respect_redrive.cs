@@ -18,7 +18,7 @@ namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Reactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class SnsReDrivePolicySDlqTests : IDisposable, IAsyncDisposable
+public class SnsReDrivePolicySDlqTests : IAsyncDisposable
 {
     private readonly IAmAMessagePump _messagePump;
     private readonly Message _message;
@@ -116,17 +116,17 @@ public class SnsReDrivePolicySDlqTests : IDisposable, IAsyncDisposable
         };
     }
 
-    private int GetDLQCount(string queueName)
+    private async Task<int> GetDLQCount(string queueName)
     {
-        using var sqsClient = new AWSClientFactory(_awsConnection).CreateSqsClient(); 
-        var queueUrlResponse = sqsClient.GetQueueUrlAsync(queueName).GetAwaiter().GetResult();
-        var response = sqsClient.ReceiveMessageAsync(new ReceiveMessageRequest
+        using var sqsClient = new AWSClientFactory(_awsConnection).CreateSqsClient();
+        var queueUrlResponse = await sqsClient.GetQueueUrlAsync(queueName);
+        var response = await sqsClient.ReceiveMessageAsync(new ReceiveMessageRequest
         {
             QueueUrl = queueUrlResponse.QueueUrl,
             WaitTimeSeconds = 5,
             MessageSystemAttributeNames = ["ApproximateReceiveCount"],
             MessageAttributeNames = new List<string> { "All" }
-        }).GetAwaiter().GetResult();
+        });
 
         if (response.HttpStatusCode != HttpStatusCode.OK)
         {
@@ -158,13 +158,14 @@ public class SnsReDrivePolicySDlqTests : IDisposable, IAsyncDisposable
         await Task.Delay(5000);
 
         //inspect the dlq
-        await Assert.That(GetDLQCount(_dlqChannelName)).IsEqualTo(1);
+        await Assert.That(await GetDLQCount(_dlqChannelName)).IsEqualTo(1);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

@@ -35,7 +35,7 @@ namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Proactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class SqsMessageConsumerFifoDeliveryErrorDlqTestsAsync : IDisposable, IAsyncDisposable
+public class SqsMessageConsumerFifoDeliveryErrorDlqTestsAsync : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAChannelAsync _channel;
@@ -140,12 +140,13 @@ public class SqsMessageConsumerFifoDeliveryErrorDlqTestsAsync : IDisposable, IAs
         await Assert.That(sourceMessage.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
-        _dlqChannelFactory.DeleteTopicAsync().Wait();
-        _dlqChannelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
+        await _dlqChannelFactory.DeleteTopicAsync();
+        await _dlqChannelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

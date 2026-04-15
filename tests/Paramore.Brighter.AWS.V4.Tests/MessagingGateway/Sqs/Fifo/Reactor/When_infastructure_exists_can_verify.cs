@@ -13,7 +13,7 @@ namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Fifo.Reactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class AwsValidateInfrastructureTests : IDisposable, IAsyncDisposable
+public class AwsValidateInfrastructureTests : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAMessageConsumerSync _consumer;
@@ -91,11 +91,12 @@ public class AwsValidateInfrastructureTests : IDisposable, IAsyncDisposable
         _consumer.Acknowledge(message);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         _consumer.Dispose();
         _messageProducer.Dispose();
     }

@@ -10,7 +10,7 @@ namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Proactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable, IDisposable
+public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable
 {
     private readonly SqsMessageProducer _messageProducer;
     private readonly ChannelFactory _channelFactory;
@@ -96,10 +96,11 @@ public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable, IDisposable
         await Assert.That(messageReceived.Header.Bag[HeaderNames.DeduplicationId]).IsEqualTo(deduplicationId);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

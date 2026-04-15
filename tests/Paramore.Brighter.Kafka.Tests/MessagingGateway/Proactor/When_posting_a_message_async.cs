@@ -10,18 +10,19 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 
 [Category("Kafka")]
-public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable, IDisposable
+public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
-    private readonly IAmAProducerRegistry _producerRegistry;
-    private readonly IAmAMessageConsumerAsync _consumer;
+    private IAmAProducerRegistry _producerRegistry;
+    private IAmAMessageConsumerAsync _consumer;
     private readonly string _partitionKey = Guid.NewGuid().ToString();
 
-    public KafkaMessageProducerSendTestsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         string groupId = Guid.NewGuid().ToString();
-        _producerRegistry = new KafkaProducerRegistryFactory(
+        _producerRegistry = await new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
                 Name = "Kafka Producer Send Test", BootStrapServers = new[] { "localhost:9092" }
@@ -38,7 +39,7 @@ public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable, IDisposable
                     RequestTimeoutMs = 2000,
                     MakeChannels = OnMissingChannel.Create
                 }
-            ]).CreateAsync().Result;
+            ]).CreateAsync();
 
         _consumer = new KafkaMessageConsumerFactory(
                 new KafkaMessagingGatewayConfiguration
@@ -148,7 +149,8 @@ public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable, IDisposable
         return messages[0];
     }
     
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _producerRegistry?.Dispose();
         ((IAmAMessageConsumerSync)_consumer)?.Dispose();

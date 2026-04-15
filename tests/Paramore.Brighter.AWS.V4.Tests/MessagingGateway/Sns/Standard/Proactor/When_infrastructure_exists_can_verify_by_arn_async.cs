@@ -15,15 +15,16 @@ using Amazon.SimpleNotificationService.Model;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Proactor;
 
 [Category("AWS")]
-public class AwsValidateInfrastructureByArnTestsAsync : IAsyncDisposable, IDisposable
+public class AwsValidateInfrastructureByArnTestsAsync : IAsyncDisposable
 {
-    private readonly Message _message;
-    private readonly IAmAMessageConsumerAsync _consumer;
-    private readonly SnsMessageProducer _messageProducer;
-    private readonly ChannelFactory _channelFactory;
-    private readonly MyCommand _myCommand;
+    private Message _message;
+    private IAmAMessageConsumerAsync _consumer;
+    private SnsMessageProducer _messageProducer;
+    private ChannelFactory _channelFactory;
+    private MyCommand _myCommand;
 
-    public AwsValidateInfrastructureByArnTestsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         _myCommand = new MyCommand { Value = "Test" };
         string correlationId = Id.Random();
@@ -54,7 +55,7 @@ public class AwsValidateInfrastructureByArnTestsAsync : IAsyncDisposable, IDispo
         _channelFactory = new ChannelFactory(awsConnection);
         var channel = _channelFactory.CreateAsyncChannel(subscription);
 
-        var topicArn = FindTopicArn(awsConnection, routingKey.Value).Result;
+        var topicArn = await FindTopicArn(awsConnection, routingKey.Value);
         var routingKeyArn = new RoutingKey(topicArn);
         
         subscription.MakeChannels = OnMissingChannel.Validate;
@@ -96,11 +97,12 @@ public class AwsValidateInfrastructureByArnTestsAsync : IAsyncDisposable, IDispo
         return topicResponse.TopicArn;
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         ((IAmAMessageConsumerSync)_consumer).Dispose();
         _messageProducer.Dispose();
     }

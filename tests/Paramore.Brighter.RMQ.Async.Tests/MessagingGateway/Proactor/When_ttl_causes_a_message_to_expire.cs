@@ -30,23 +30,23 @@ using Paramore.Brighter.MessagingGateway.RMQ.Async;
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
 [Category("RMQ")]
-public class RmqMessageProducerTTLTests : IAsyncDisposable, IDisposable
+public class RmqMessageProducerTTLTests : IAsyncDisposable
 {
-    private readonly IAmAMessageProducerAsync _messageProducer;
-    private readonly IAmAMessageConsumerAsync _messageConsumer;
-    private readonly Message _messageOne;
-    private readonly Message _messageTwo;
+    private IAmAMessageProducerAsync _messageProducer;
+    private IAmAMessageConsumerAsync _messageConsumer;
+    private Message _messageOne;
+    private Message _messageTwo;
 
     public RmqMessageProducerTTLTests ()
     {
         _messageOne = new Message(
-            new MessageHeader(Guid.NewGuid().ToString(), 
-                new RoutingKey(Guid.NewGuid().ToString()), MessageType.MT_COMMAND), 
+            new MessageHeader(Guid.NewGuid().ToString(),
+                new RoutingKey(Guid.NewGuid().ToString()), MessageType.MT_COMMAND),
             new MessageBody("test content"));
-           
+
         _messageTwo = new Message(
-            new MessageHeader(Guid.NewGuid().ToString(), 
-                new RoutingKey(Guid.NewGuid().ToString()), MessageType.MT_COMMAND), 
+            new MessageHeader(Guid.NewGuid().ToString(),
+                new RoutingKey(Guid.NewGuid().ToString()), MessageType.MT_COMMAND),
             new MessageBody("test content"));
 
         var rmqConnection = new RmqMessagingGatewayConnection
@@ -54,22 +54,25 @@ public class RmqMessageProducerTTLTests : IAsyncDisposable, IDisposable
             AmpqUri = new AmqpUriSpecification(new Uri("amqp://guest:guest@localhost:5672/%2f")),
             Exchange = new Exchange("paramore.brighter.exchange"),
         };
-            
+
         _messageProducer = new RmqMessageProducer(rmqConnection);
 
         _messageConsumer = new RmqMessageConsumer(
-            connection: rmqConnection, 
-            queueName: new ChannelName(Guid.NewGuid().ToString()), 
-            routingKey: _messageOne.Header.Topic, 
-            isDurable: false, 
+            connection: rmqConnection,
+            queueName: new ChannelName(Guid.NewGuid().ToString()),
+            routingKey: _messageOne.Header.Topic,
+            isDurable: false,
             highAvailability: false,
             ttl: TimeSpan.FromMilliseconds(10000),
             makeChannels:OnMissingChannel.Create
         );
+    }
 
+    [Before(Test)]
+    public async Task Setup()
+    {
         //create the infrastructure
-        _messageConsumer.ReceiveAsync(TimeSpan.Zero).GetAwaiter().GetResult(); 
-             
+        await _messageConsumer.ReceiveAsync(TimeSpan.Zero);
     }
 
     [Test]
@@ -91,7 +94,8 @@ public class RmqMessageProducerTTLTests : IAsyncDisposable, IDisposable
         await Assert.That(dlqMessage.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         ((IAmAMessageProducerSync)_messageProducer).Dispose();
         ((IAmAMessageConsumerSync)_messageConsumer).Dispose();

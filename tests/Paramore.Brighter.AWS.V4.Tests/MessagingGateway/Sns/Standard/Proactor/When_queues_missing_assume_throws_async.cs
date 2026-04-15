@@ -10,12 +10,13 @@ using Amazon.SimpleNotificationService.Model;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Proactor;
 
 [Category("AWS")]
-public class AwsAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
+public class AwsAssumeQueuesTestsAsync : IAsyncDisposable
 {
-    private readonly ChannelFactory _channelFactory;
-    private readonly IAmAMessageConsumerAsync _consumer;
+    private ChannelFactory _channelFactory;
+    private IAmAMessageConsumerAsync _consumer;
 
-    public AwsAssumeQueuesTestsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         var channelName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
         string topicName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
@@ -41,7 +42,7 @@ public class AwsAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
                 MakeChannels = OnMissingChannel.Create
             });
 
-        producer.ConfirmTopicExistsAsync(topicName).Wait();
+        await producer.ConfirmTopicExistsAsync(topicName);
         
         _channelFactory = new ChannelFactory(awsConnection);
         var channel = _channelFactory.CreateAsyncChannel(subscription);
@@ -58,9 +59,10 @@ public class AwsAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
             await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000)));
     }
         
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait(); 
+        await _channelFactory.DeleteTopicAsync(); 
     }
 
     public async ValueTask DisposeAsync()

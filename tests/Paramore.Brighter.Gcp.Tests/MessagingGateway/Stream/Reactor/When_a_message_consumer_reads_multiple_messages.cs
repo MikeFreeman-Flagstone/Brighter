@@ -8,7 +8,7 @@ using Paramore.Brighter.MessagingGateway.GcpPubSub;
 namespace Paramore.Brighter.Gcp.Tests.MessagingGateway.Stream.Reactor;
 
 [Category("GCP")]
-public class PubSubBufferedConsumerTestsAsync : IDisposable
+public class PubSubBufferedConsumerTestsAsync
 {
     private readonly ContentType _contentType = new("text/plain");
     private readonly GcpMessageProducer _messageProducer;
@@ -91,10 +91,11 @@ public class PubSubBufferedConsumerTestsAsync : IDisposable
         } 
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _channelFactory.DeleteSubscription(_pubSubSubscription);
         _channelFactory.DeleteTopic(_pubSubSubscription);
-        _messageProducer.DisposeAsync().GetAwaiter().GetResult();
+        await _messageProducer.DisposeAsync();
     }
 }

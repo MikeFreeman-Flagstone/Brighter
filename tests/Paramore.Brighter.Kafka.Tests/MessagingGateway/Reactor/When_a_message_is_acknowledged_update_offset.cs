@@ -93,7 +93,7 @@ public class KafkaMessageConsumerUpdateOffset : IDisposable
         {
             for (int i = 0; i < batchLimit; i++)
             {
-                consumedMessages.Add(ConsumeMessage(consumer));
+                consumedMessages.Add(await ConsumeMessage(consumer));
             }
 
             //yield to allow commits to flush
@@ -102,7 +102,7 @@ public class KafkaMessageConsumerUpdateOffset : IDisposable
 
         return consumedMessages.ToArray();
 
-        Message ConsumeMessage(IAmAMessageConsumerSync consumer)
+        async Task<Message> ConsumeMessage(IAmAMessageConsumerSync consumer)
         {
             Message[] messages = [new Message()];
             int maxTries = 0;
@@ -124,7 +124,7 @@ public class KafkaMessageConsumerUpdateOffset : IDisposable
                 {
                     //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
                     Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                    Task.Delay(1000).GetAwaiter().GetResult();
+                    await Task.Delay(1000);
                 }
             } while (maxTries <= 10);
 

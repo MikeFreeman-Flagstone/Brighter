@@ -39,18 +39,21 @@ public class MqttMessageConsumerRejectUnacceptableInvalidChannelTests : IDisposa
     private const string DLQ_TOPIC_PREFIX = "BrighterTests/InvalidDlq";
     private const string INVALID_TOPIC_PREFIX = "BrighterTests/InvalidTarget";
 
-    private readonly MqttTestServer? _mqttTestServer;
+    private MqttTestServer? _mqttTestServer;
     private readonly MqttMessageProducer _sourceProducer;
     private readonly MqttMessageConsumer _sourceConsumer;
     private readonly MqttMessageConsumer _invalidConsumer;
     private readonly MqttMessageConsumer _dlqConsumer;
+    private readonly MqttFactory _mqttFactory;
+    private readonly int _serverPort;
 
     public MqttMessageConsumerRejectUnacceptableInvalidChannelTests()
     {
         var mqttFactory = new MqttFactory();
         int serverPort = MqttTestServer.GetRandomServerPort();
 
-        _mqttTestServer = MqttTestServer.CreateTestMqttServer(mqttFactory, true, serverPort: serverPort);
+        _mqttFactory = mqttFactory;
+        _serverPort = serverPort;
 
         //Arrange — source producer
         var producerConfig = new MqttMessagingGatewayProducerConfiguration
@@ -96,6 +99,12 @@ public class MqttMessageConsumerRejectUnacceptableInvalidChannelTests : IDisposa
             ClientID = "BrighterTests-InvalidDlq-Consumer"
         };
         _dlqConsumer = new MqttMessageConsumer(dlqConsumerConfig);
+    }
+
+    [Before(HookType.Test)]
+    public async Task Setup()
+    {
+        _mqttTestServer = await MqttTestServer.CreateTestMqttServer(_mqttFactory, true, serverPort: _serverPort);
     }
 
     [Test]

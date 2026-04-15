@@ -4,7 +4,7 @@ using Paramore.Brighter.MessagingGateway.Redis;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway
 {
-    public class RedisFixture : IAsyncDisposable, IDisposable
+    public class RedisFixture : IAsyncDisposable
     {
         public readonly RoutingKey Topic;
         public readonly RedisMessageProducer MessageProducer;
@@ -34,7 +34,8 @@ namespace Paramore.Brighter.Redis.Tests.MessagingGateway
             return configuration;
         }
 
-        public void Dispose()
+        [After(Test)]
+        public async Task Cleanup()
         {
             MessageConsumer.Purge();
             MessageConsumer.Dispose();

@@ -31,7 +31,7 @@ using Paramore.Brighter.MessagingGateway.RMQ.Async;
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
 [Category("RMQ")]
-public class RmqMessageProducerDLQTestsAsync : IDisposable, IAsyncDisposable
+public class RmqMessageProducerDLQTestsAsync : IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _messageProducer;
     private readonly IAmAMessageConsumerAsync _messageConsumer;
@@ -103,7 +103,8 @@ public class RmqMessageProducerDLQTestsAsync : IDisposable, IAsyncDisposable
         await Assert.That(message.Body.Value).IsEqualTo(dlqMessage.Body.Value);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         ((IAmAMessageProducerSync)_messageProducer).Dispose();
     }

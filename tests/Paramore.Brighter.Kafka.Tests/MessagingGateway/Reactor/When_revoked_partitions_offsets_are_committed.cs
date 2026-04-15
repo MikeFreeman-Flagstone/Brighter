@@ -88,7 +88,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
         var firstBatchIds = new List<string>();
         for (int j = 0; j < 5; j++)
         {
-            var msg = ReadMessage(consumerA);
+            var msg = await ReadMessage(consumerA);
             if (msg.Header.MessageType != MessageType.MT_NONE)
             {
                 consumerA.Acknowledge(msg);
@@ -105,7 +105,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
         var secondBatchIds = new List<string>();
         for (int j = 0; j < 5; j++)
         {
-            var msg = ReadMessage(consumerA);
+            var msg = await ReadMessage(consumerA);
             if (msg.Header.MessageType != MessageType.MT_NONE)
             {
                 consumerA.Acknowledge(msg);
@@ -198,7 +198,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             ));
     }
 
-    private Message ReadMessage(KafkaMessageConsumer consumer)
+    private async Task<Message> ReadMessage(KafkaMessageConsumer consumer)
     {
         Message[] messages = [new Message()];
         int maxTries = 0;
@@ -217,7 +217,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             catch (ChannelFailureException cfx)
             {
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

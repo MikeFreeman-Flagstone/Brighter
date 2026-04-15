@@ -122,7 +122,7 @@ public class KafkaMessageProducerSendTests : IDisposable
 
         await Assert.That(messagePublished).IsTrue();
 
-        var receivedMessage = GetMessage();
+        var receivedMessage = await GetMessage();
 
         var receivedCommand = JsonSerializer.Deserialize<MyCommand>(receivedMessage.Body.Value, JsonSerialisationOptions.Options);
 
@@ -154,7 +154,7 @@ public class KafkaMessageProducerSendTests : IDisposable
         await Assert.That(message.Header.Bag["Test Header"]).IsEqualTo("Test Value");
     }
 
-    private Message GetMessage()
+    private async Task<Message> GetMessage()
     {
         Message[] messages = [];
         int maxTries = 0;
@@ -175,7 +175,7 @@ public class KafkaMessageProducerSendTests : IDisposable
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

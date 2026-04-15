@@ -94,7 +94,7 @@ public class KafkaConsumerRequeueSchedulerTests : IDisposable
         producer.Send(_message);
         ((KafkaMessageProducer)producer).Flush();
 
-        var received = GetMessage();
+        var received = await GetMessage();
         await Assert.That(received.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
 
         // Act - requeue with non-zero delay (should use scheduler via producer)
@@ -105,7 +105,7 @@ public class KafkaConsumerRequeueSchedulerTests : IDisposable
         await Assert.That(_scheduler.ScheduledDelay).IsEqualTo(TimeSpan.FromSeconds(5));
     }
 
-    private Message GetMessage()
+    private async Task<Message> GetMessage()
     {
         Message[] messages = [];
         int maxTries = 0;
@@ -125,7 +125,7 @@ public class KafkaConsumerRequeueSchedulerTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

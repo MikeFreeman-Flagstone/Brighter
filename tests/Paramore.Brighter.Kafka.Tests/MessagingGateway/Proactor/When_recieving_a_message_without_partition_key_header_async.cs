@@ -131,7 +131,8 @@ public class KafkaMessageProducerMissingHeaderTestsAsync : IAsyncDisposable
         return messages[0];
     }
     
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _producer?.Dispose();
         ((IAmAMessageConsumerSync)_consumer)?.Dispose();

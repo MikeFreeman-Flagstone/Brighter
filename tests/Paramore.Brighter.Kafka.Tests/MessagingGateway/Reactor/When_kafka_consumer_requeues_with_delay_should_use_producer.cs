@@ -94,7 +94,7 @@ public class KafkaConsumerRequeueTests : IDisposable
         producer.Send(_message);
         ((KafkaMessageProducer)producer).Flush();
 
-        var received = GetMessage();
+        var received = await GetMessage();
         await Assert.That(received.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
         Console.WriteLine($"Received body length: {received.Body.Bytes.Length}, value: '{received.Body.Value}'");
         Console.WriteLine($"Received topic: {received.Header.Topic}");
@@ -106,13 +106,13 @@ public class KafkaConsumerRequeueTests : IDisposable
         await Assert.That(result).IsTrue();
 
         // Assert - message should be available again on the topic (published via producer)
-        var requeued = GetMessage();
+        var requeued = await GetMessage();
         Console.WriteLine($"Requeued body length: {requeued.Body.Bytes.Length}, value: '{requeued.Body.Value}'");
         Console.WriteLine($"Requeued topic: {requeued.Header.Topic}, type: {requeued.Header.MessageType}");
         await Assert.That(requeued.Body.Value).IsEqualTo(_message.Body.Value);
     }
 
-    private Message GetMessage()
+    private async Task<Message> GetMessage()
     {
         Message[] messages = [];
         int maxTries = 0;
@@ -132,7 +132,7 @@ public class KafkaConsumerRequeueTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

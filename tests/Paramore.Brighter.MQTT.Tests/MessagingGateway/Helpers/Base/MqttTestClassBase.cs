@@ -28,7 +28,10 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
         protected static readonly MqttFactory s_mqttFactory = new();
 
         protected readonly Message _noopMessage = new();
-        protected readonly MqttTestServer? MqttTestServer;
+        protected MqttTestServer? MqttTestServer;
+
+        private readonly IPAddress _serverIPAddress;
+        private readonly int _serverPort;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MqttTestClassBase{T}"/> class with the specified client ID, topic prefix, and test output helper.
@@ -56,15 +59,13 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
                 configure.Services.TryAdd(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(TestOutputLogger<>)));
             });
 
-            IPAddress serverIPAddress = IPAddress.Any;
-            int serverPort = MqttTestServer.GetRandomServerPort();
-
-            MqttTestServer = MqttTestServer.CreateTestMqttServer(s_mqttFactory, true, ApplicationLogging.CreateLogger<T>(), serverIPAddress, serverPort, null, TestDisplayName);
+            _serverIPAddress = IPAddress.Any;
+            _serverPort = Helpers.Server.MqttTestServer.GetRandomServerPort();
 
             var mqttProducerConfig = new MqttMessagingGatewayProducerConfiguration
             {
                 Hostname = IPAddress.Loopback.ToString(),
-                Port = serverPort,
+                Port = _serverPort,
                 TopicPrefix = uniqueTopicPrefix
             };
 
@@ -74,12 +75,18 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
             MqttMessagingGatewayConsumerConfiguration mqttConsumerConfig = new()
             {
                 Hostname = IPAddress.Loopback.ToString(),
-                Port = serverPort,
+                Port = _serverPort,
                 TopicPrefix = uniqueTopicPrefix,
                 ClientID = uniqueClientId
             };
 
             MessageConsumerAsync = new MqttMessageConsumer(mqttConsumerConfig);
+        }
+
+        [Before(HookType.Test)]
+        public virtual async Task SetupMqttServer()
+        {
+            MqttTestServer = await Helpers.Server.MqttTestServer.CreateTestMqttServer(s_mqttFactory, true, ApplicationLogging.CreateLogger<T>(), _serverIPAddress, _serverPort, null, TestDisplayName);
         }
 
         /// <summary>

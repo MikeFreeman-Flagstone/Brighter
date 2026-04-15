@@ -36,13 +36,14 @@ namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 [Category("RocketMQ")]
 public class RocketMqUnacceptableInvalidChannelTests : IDisposable
 {
-    private readonly RocketMqMessageProducer _producer;
-    private readonly IAmAMessageConsumerSync _consumer;
-    private readonly IAmAMessageConsumerSync _invalidConsumer;
-    private readonly IAmAMessageConsumerSync _dlqConsumer;
-    private readonly Message _message;
+    private RocketMqMessageProducer _producer;
+    private IAmAMessageConsumerSync _consumer;
+    private IAmAMessageConsumerSync _invalidConsumer;
+    private IAmAMessageConsumerSync _dlqConsumer;
+    private Message _message;
 
-    public RocketMqUnacceptableInvalidChannelTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         var sourceTopic = new RoutingKey("rmq_dlq_source");
         var dlqTopic = new RoutingKey("rmq_dlq_target");
@@ -54,7 +55,7 @@ public class RocketMqUnacceptableInvalidChannelTests : IDisposable
         var publication = new RocketMqPublication { Topic = sourceTopic };
         _producer = new RocketMqMessageProducer(
             connection,
-            GatewayFactory.CreateProducer(connection, publication).GetAwaiter().GetResult(),
+            await GatewayFactory.CreateProducer(connection, publication),
             publication);
 
         // Source topic consumer with both DLQ and invalid message routing keys

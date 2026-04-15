@@ -11,20 +11,21 @@ namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 [Property("Fragile", "CI")]
 public class MessageProducerDlqTests
 {
-    private readonly RocketMqMessageProducer _sender;
-    private readonly IAmAChannelSync _channel;
-    private readonly Message _message;
+    private RocketMqMessageProducer _sender;
+    private IAmAChannelSync _channel;
+    private Message _message;
 
-    public MessageProducerDlqTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         MyCommand myCommand = new() { Value = "Test" };
         string correlationId = Guid.NewGuid().ToString();
         const string replyTo = "http:\\queueUrl";
-        var contentType = new ContentType(MediaTypeNames.Text.Plain);  
+        var contentType = new ContentType(MediaTypeNames.Text.Plain);
         var queueName = Guid.NewGuid().ToString();
         var routingKey = new RoutingKey("rmq_dead_letter");
         var channelName = new ChannelName(queueName);
-        
+
         var subscription = new RocketMqSubscription<MyCommand>(
             subscriptionName: new SubscriptionName(queueName),
             channelName: channelName,
@@ -42,8 +43,8 @@ public class MessageProducerDlqTests
 
         var connection = GatewayFactory.CreateConnection();
         var publication = new RocketMqPublication { Topic = routingKey };
-        _sender = new RocketMqMessageProducer(connection,  
-            GatewayFactory.CreateProducer(connection, publication).GetAwaiter().GetResult(),
+        _sender = new RocketMqMessageProducer(connection,
+            await GatewayFactory.CreateProducer(connection, publication),
             publication);
 
         RocketMqChannelFactory channelFactory = new(new RocketMessageConsumerFactory(connection));

@@ -14,7 +14,7 @@ using Paramore.Brighter.MessagingGateway.AWSSQS;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Proactor;
 
 [Category("AWS")]
-public class SqsMessageProducerCreateTopicWithTagsAsyncTests : IAsyncDisposable, IDisposable
+public class SqsMessageProducerCreateTopicWithTagsAsyncTests : IAsyncDisposable
 {
     private readonly SnsMessageProducer _messageProducer;
     private readonly ChannelFactory _channelFactory;
@@ -80,10 +80,11 @@ public class SqsMessageProducerCreateTopicWithTagsAsyncTests : IAsyncDisposable,
         await Assert.That(tagsResponse.Tags).Contains(t => t.Key == "Environment" && t.Value == "Test");
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         _messageProducer.Dispose();
     }
 

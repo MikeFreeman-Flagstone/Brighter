@@ -17,23 +17,24 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         private readonly Subscription _subscription;
         private readonly RoutingKey _routingKey = new(Topic);
         private readonly FakeTimeProvider _timeProvider = new();
+        private readonly InternalBus _bus;
         public MessageDispatcherShutConnectionTests()
         {
-            InternalBus bus = new();
+            _bus = new InternalBus();
             IAmACommandProcessor commandProcessor = new SpyCommandProcessor();
             var messageMapperRegistry = new MessageMapperRegistry(null, new SimpleMessageMapperFactoryAsync((_) => new MyEventMessageMapperAsync()));
             messageMapperRegistry.RegisterAsync<MyEvent, MyEventMessageMapperAsync>();
-            _subscription = new Subscription<MyEvent>(new SubscriptionName("test"), noOfPerformers: 3, timeOut: TimeSpan.FromMilliseconds(1000), channelFactory: new InMemoryChannelFactory(bus, _timeProvider), channelName: new ChannelName(ChannelName), messagePumpType: MessagePumpType.Proactor, routingKey: _routingKey);
+            _subscription = new Subscription<MyEvent>(new SubscriptionName("test"), noOfPerformers: 3, timeOut: TimeSpan.FromMilliseconds(1000), channelFactory: new InMemoryChannelFactory(_bus, _timeProvider), channelName: new ChannelName(ChannelName), messagePumpType: MessagePumpType.Proactor, routingKey: _routingKey);
             _dispatcher = new Dispatcher(commandProcessor, new List<Subscription> { _subscription }, messageMapperRegistryAsync: messageMapperRegistry);
-            var @event = new MyEvent();
-            var message = new MyEventMessageMapperAsync().MapToMessageAsync(@event, new Publication { Topic = _subscription.RoutingKey }).GetAwaiter().GetResult();
-            for (var i = 0; i < 6; i++)
-                bus.Enqueue(message);
         }
 
         [Before(Test)]
         public async Task Setup()
         {
+            var @event = new MyEvent();
+            var message = await new MyEventMessageMapperAsync().MapToMessageAsync(@event, new Publication { Topic = _subscription.RoutingKey });
+            for (var i = 0; i < 6; i++)
+                _bus.Enqueue(message);
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_AWAITING);
             _dispatcher.Receive();
         }
@@ -50,10 +51,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         }
 
         [After(Test)]
-        public void Dispose()
+        public async Task Dispose()
         {
             if (_dispatcher?.State == DispatcherState.DS_RUNNING)
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
         }
     }
 }

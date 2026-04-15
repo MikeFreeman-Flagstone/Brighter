@@ -12,7 +12,6 @@ public abstract class DistributedLockingAsyncTest
     }
 
     [After(HookType.Test)]
-
     public async Task Cleanup()
     {
         await AfterEachTestAsync();

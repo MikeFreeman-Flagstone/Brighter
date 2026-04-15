@@ -20,7 +20,6 @@ public abstract class OutboxAsyncTest<TTransaction>
     }
 
     [After(HookType.Test)]
-
     public async Task Cleanup()
     {
         await AfterEachTestAsync();
@@ -36,11 +35,6 @@ public abstract class OutboxAsyncTest<TTransaction>
         return Task.CompletedTask;
     }
     
-    public void Dispose()
-    {
-        AfterEachTestAsync().GetAwaiter().GetResult();
-    }
-
     protected virtual async Task AfterEachTestAsync()
     {
         await DeleteStoreAsync();

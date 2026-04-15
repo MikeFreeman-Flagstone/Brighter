@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Standard.Proactor;
 
 [Category("AWS")]
-public class CustomisingAwsClientConfigTestsAsync : IDisposable, IAsyncDisposable
+public class CustomisingAwsClientConfigTestsAsync : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAChannelAsync _channel;
@@ -85,11 +85,12 @@ public class CustomisingAwsClientConfigTestsAsync : IDisposable, IAsyncDisposabl
         await Assert.That((InterceptingDelegatingHandler.RequestCount["sqs_async_pub"]) > (0)).IsTrue();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

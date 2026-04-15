@@ -43,10 +43,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         {
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_AWAITING);
             _dispatcher.Receive();
-            Task.Delay(250).Wait();
+            await Task.Delay(250);
             _dispatcher.Shut(_subscription.Name);
             _dispatcher.Shut(_newSubscription.Name);
-            Task.Delay(1000).Wait();
+            await Task.Delay(1000);
             await Assert.That(_dispatcher.Consumers).IsEmpty();
         }
 
@@ -66,10 +66,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         }
 
         [After(Test)]
-        public void Dispose()
+        public async Task Dispose()
         {
             if (_dispatcher?.State == DispatcherState.DS_RUNNING)
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
         }
     }
 }

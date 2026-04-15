@@ -13,7 +13,7 @@ using Paramore.Brighter.Scheduler.Events;
 namespace Paramore.Brighter.AWSScheduler.Tests.Scheduler.Requests.Sns;
 
 [Property("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
-public class SnsSchedulingMessageViaFireSchedulerRequestTest : IDisposable
+public class SnsSchedulingMessageViaFireSchedulerRequestTest
 {
     private readonly ContentType _contentType = new(MediaTypeNames.Text.Plain);
     private const int BufferSize = 3;
@@ -229,10 +229,11 @@ public class SnsSchedulingMessageViaFireSchedulerRequestTest : IDisposable
         await Assert.That((ex) is ResourceNotFoundException).IsTrue();
     }
     
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteQueueAsync().GetAwaiter().GetResult();
-        _channelFactory.DeleteTopicAsync().GetAwaiter().GetResult();
+        await _channelFactory.DeleteQueueAsync();
+        await _channelFactory.DeleteTopicAsync();
         _messageProducer.Dispose();
         _consumer.Dispose();
         _scheduler.Dispose();

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Proactor;
 
 [Category("AWS")]
-public class AwsAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
+public class AwsAssumeQueuesTestsAsync : IAsyncDisposable
 {
     private readonly ChannelFactory _channelFactory;
     private readonly IAmAMessageConsumerAsync _consumer;
@@ -46,9 +46,10 @@ public class AwsAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
             await _consumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000)));
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
     }
 
     public async ValueTask DisposeAsync()

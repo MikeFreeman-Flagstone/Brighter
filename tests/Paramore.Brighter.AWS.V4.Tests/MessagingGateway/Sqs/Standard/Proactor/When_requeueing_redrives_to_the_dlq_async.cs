@@ -15,7 +15,7 @@ namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Standard.Proactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class SqsMessageProducerDlqTestsAsync : IDisposable, IAsyncDisposable
+public class SqsMessageProducerDlqTestsAsync : IAsyncDisposable
 {
     private readonly SqsMessageProducer _sender;
     private readonly IAmAChannelAsync _channel;
@@ -103,10 +103,11 @@ public class SqsMessageProducerDlqTestsAsync : IDisposable, IAsyncDisposable
         return response.Messages.Count;
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Reactor;
 
 [Category("AWS")]
-public class AWSAssumeQueuesTests : IDisposable, IAsyncDisposable
+public class AWSAssumeQueuesTests : IAsyncDisposable
 {
     private readonly ChannelFactory _channelFactory;
     private readonly SqsMessageConsumer _consumer;
@@ -46,9 +46,10 @@ public class AWSAssumeQueuesTests : IDisposable, IAsyncDisposable
         await Assert.That(() => _consumer.Receive(TimeSpan.FromMilliseconds(1000))).ThrowsExactly<QueueDoesNotExistException>();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
     }
 
     public async ValueTask DisposeAsync()

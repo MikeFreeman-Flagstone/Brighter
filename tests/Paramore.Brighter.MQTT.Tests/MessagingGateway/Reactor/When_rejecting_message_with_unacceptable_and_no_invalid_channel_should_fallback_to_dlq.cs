@@ -38,17 +38,20 @@ public class MqttMessageConsumerRejectUnacceptableFallbackToDlqTests : IDisposab
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/FallbackSource";
     private const string DLQ_TOPIC_PREFIX = "BrighterTests/FallbackDlq";
 
-    private readonly MqttTestServer? _mqttTestServer;
+    private MqttTestServer? _mqttTestServer;
     private readonly MqttMessageProducer _sourceProducer;
     private readonly MqttMessageConsumer _sourceConsumer;
     private readonly MqttMessageConsumer _dlqConsumer;
+    private readonly MqttFactory _mqttFactory;
+    private readonly int _serverPort;
 
     public MqttMessageConsumerRejectUnacceptableFallbackToDlqTests()
     {
         var mqttFactory = new MqttFactory();
         int serverPort = MqttTestServer.GetRandomServerPort();
 
-        _mqttTestServer = MqttTestServer.CreateTestMqttServer(mqttFactory, true, serverPort: serverPort);
+        _mqttFactory = mqttFactory;
+        _serverPort = serverPort;
 
         //Arrange — source producer
         var producerConfig = new MqttMessagingGatewayProducerConfiguration
@@ -83,6 +86,12 @@ public class MqttMessageConsumerRejectUnacceptableFallbackToDlqTests : IDisposab
             ClientID = "BrighterTests-FallbackDlq-Consumer"
         };
         _dlqConsumer = new MqttMessageConsumer(dlqConsumerConfig);
+    }
+
+    [Before(HookType.Test)]
+    public async Task Setup()
+    {
+        _mqttTestServer = await MqttTestServer.CreateTestMqttServer(_mqttFactory, true, serverPort: _serverPort);
     }
 
     [Test]

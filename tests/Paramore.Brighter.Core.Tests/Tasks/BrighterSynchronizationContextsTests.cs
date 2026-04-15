@@ -82,11 +82,10 @@ public class BrighterSynchronizationContextsTests
     public async Task Run_AsyncTask_BlockingCode_Still_Ends()
     {
         bool resumed = false;
-        BrighterAsyncContext.Run(() =>
+        BrighterAsyncContext.Run(async () =>
         {
-            Task.Delay(50).GetAwaiter().GetResult();
+            await Task.Delay(50);
             resumed = true;
-            return Task.CompletedTask;
         });
         await Assert.That(resumed).IsTrue();
     }
@@ -111,7 +110,7 @@ public class BrighterSynchronizationContextsTests
         bool resumed = false;
         var result = BrighterAsyncContext.Run(async () =>
         {
-            Task.Delay(50).GetAwaiter().GetResult();
+            await Task.Delay(50);
             resumed = true;
             return 17;
         });

@@ -37,16 +37,19 @@ public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
 {
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/NoChannels";
 
-    private readonly MqttTestServer? _mqttTestServer;
+    private MqttTestServer? _mqttTestServer;
     private readonly MqttMessageProducer _sourceProducer;
     private readonly MqttMessageConsumer _sourceConsumer;
+    private readonly MqttFactory _mqttFactory;
+    private readonly int _serverPort;
 
     public MqttMessageConsumerRejectNoChannelsTests()
     {
         var mqttFactory = new MqttFactory();
         int serverPort = MqttTestServer.GetRandomServerPort();
 
-        _mqttTestServer = MqttTestServer.CreateTestMqttServer(mqttFactory, true, serverPort: serverPort);
+        _mqttFactory = mqttFactory;
+        _serverPort = serverPort;
 
         //Arrange — source producer
         var producerConfig = new MqttMessagingGatewayProducerConfiguration
@@ -68,6 +71,12 @@ public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
             ClientID = "BrighterTests-NoChannels-Consumer"
         };
         _sourceConsumer = new MqttMessageConsumer(consumerConfig);
+    }
+
+    [Before(HookType.Test)]
+    public async Task Setup()
+    {
+        _mqttTestServer = await MqttTestServer.CreateTestMqttServer(_mqttFactory, true, serverPort: _serverPort);
     }
 
     [Test]

@@ -39,18 +39,16 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
             _dispatcher.Receive();
         }
 
-#pragma warning disable xUnit1031
         [Test]
         public async Task WhenAMessageDispatcherStartsMultiplePerformers()
         {
             {
                 await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_RUNNING);
                 await Assert.That(_dispatcher.Consumers.Count()).IsEqualTo(3);
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
                 await Assert.That(_bus.Stream(new RoutingKey(Topic))).IsEmpty();
                 await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_STOPPED);
             }
         }
-#pragma warning restore xUnit1031
     }
 }

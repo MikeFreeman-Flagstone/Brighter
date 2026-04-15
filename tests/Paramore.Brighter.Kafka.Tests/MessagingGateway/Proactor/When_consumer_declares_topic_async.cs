@@ -6,7 +6,7 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 
 [Category("Kafka")]
-public class KafkaConsumerDeclareTestsAsync : IAsyncDisposable, IDisposable
+public class KafkaConsumerDeclareTestsAsync : IAsyncDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
@@ -100,7 +100,7 @@ public class KafkaConsumerDeclareTestsAsync : IAsyncDisposable, IDisposable
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
 
         } while (maxTries <= 10);
@@ -111,7 +111,8 @@ public class KafkaConsumerDeclareTestsAsync : IAsyncDisposable, IDisposable
         await Assert.That(messages[0].Body.Value).IsEqualTo(message.Body.Value);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _producerRegistry?.Dispose();
         ((IAmAMessageConsumerSync)_consumer).Dispose();

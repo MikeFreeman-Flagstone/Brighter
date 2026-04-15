@@ -13,7 +13,7 @@ using Amazon.SimpleNotificationService.Model;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Reactor;
 
 [Category("AWS")]
-public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable, IDisposable
+public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAMessageConsumerAsync _consumer;
@@ -83,11 +83,12 @@ public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable,
         await _consumer.AcknowledgeAsync(message);
     }
         
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         ((IAmAMessageConsumerSync)_consumer).Dispose();
         _messageProducer.Dispose();
     }

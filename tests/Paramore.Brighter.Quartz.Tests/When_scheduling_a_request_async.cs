@@ -14,17 +14,22 @@ using MyEventHandlerAsync = ParamoreBrighter.Quartz.Tests.TestDoubles.MyEventHan
 
 namespace ParamoreBrighter.Quartz.Tests;
 
-public class QuartzSchedulerRequestAsyncTests : IDisposable
+public class QuartzSchedulerRequestAsyncTests
 {
-    private readonly QuartzSchedulerFactory _scheduler;
-    private readonly IScheduler _quartzScheduler;
-    private readonly IAmACommandProcessor _processor;
+    private QuartzSchedulerFactory _scheduler;
+    private IScheduler _quartzScheduler;
+    private IAmACommandProcessor _processor;
     private readonly InMemoryOutbox _outbox;
     private readonly InternalBus _internalBus = new();
 
     private readonly Dictionary<string, string> _receivedMessages;
     private readonly RoutingKey _routingKey;
     private readonly TimeProvider _timeProvider;
+    private readonly ISchedulerFactory _schedulerFactory;
+    private readonly SubscriberRegistry _subscriberRegistry;
+    private readonly SimpleHandlerFactoryAsync _handlerFactory;
+    private readonly PolicyRegistry _policyRegistry;
+    private readonly OutboxProducerMediator<Message, CommittableTransaction> _outboxBus;
 
     public QuartzSchedulerRequestAsyncTests()
     {
@@ -32,8 +37,7 @@ public class QuartzSchedulerRequestAsyncTests : IDisposable
         _routingKey = new RoutingKey($"Test-{Guid.NewGuid():N}");
         _timeProvider = TimeProvider.System;
 
-
-        var handlerFactory = new SimpleHandlerFactoryAsync(
+        _handlerFactory = new SimpleHandlerFactoryAsync(
             type =>
             {
                 if (type == typeof(MyEventHandlerAsync))
@@ -44,11 +48,11 @@ public class QuartzSchedulerRequestAsyncTests : IDisposable
                 return new FireSchedulerRequestHandler(_processor!);
             });
 
-        var subscriberRegistry = new SubscriberRegistry();
-        subscriberRegistry.RegisterAsync<MyEvent, MyEventHandlerAsync>();
-        subscriberRegistry.RegisterAsync<FireSchedulerRequest, FireSchedulerRequestHandler>();
+        _subscriberRegistry = new SubscriberRegistry();
+        _subscriberRegistry.RegisterAsync<MyEvent, MyEventHandlerAsync>();
+        _subscriberRegistry.RegisterAsync<FireSchedulerRequest, FireSchedulerRequestHandler>();
 
-        var policyRegistry = new PolicyRegistry
+        _policyRegistry = new PolicyRegistry
         {
             [CommandProcessor.RETRYPOLICYASYNC] = Policy.Handle<Exception>().RetryAsync(),
             [CommandProcessor.CIRCUITBREAKERASYNC] =
@@ -69,9 +73,9 @@ public class QuartzSchedulerRequestAsyncTests : IDisposable
         var trace = new BrighterTracer(_timeProvider);
         _outbox = new InMemoryOutbox(_timeProvider) { Tracer = trace };
 
-        var outboxBus = new OutboxProducerMediator<Message, CommittableTransaction>(
+        _outboxBus = new OutboxProducerMediator<Message, CommittableTransaction>(
             producerRegistry,
-            new ResiliencePipelineRegistry<string>().AddBrighterDefault(), 
+            new ResiliencePipelineRegistry<string>().AddBrighterDefault(),
             messageMapperRegistry,
             new EmptyMessageTransformerFactory(),
             new EmptyMessageTransformerFactoryAsync(),
@@ -80,23 +84,27 @@ public class QuartzSchedulerRequestAsyncTests : IDisposable
             _outbox
         );
 
-        var schedulerFactory = SchedulerBuilder.Create(new NameValueCollection())
+        _schedulerFactory = SchedulerBuilder.Create(new NameValueCollection())
             .UseDefaultThreadPool(x => x.MaxConcurrency = 5)
             .UseJobFactory<BrighterResolver>()
             .Build();
+    }
 
-        _quartzScheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
-        _quartzScheduler.Start().GetAwaiter().GetResult();
+    [Before(Test)]
+    public async Task Setup()
+    {
+        _quartzScheduler = await _schedulerFactory.GetScheduler();
+        await _quartzScheduler.Start();
 
         _scheduler = new QuartzSchedulerFactory(_quartzScheduler);
 
         _processor = new CommandProcessor(
-            subscriberRegistry,
-            handlerFactory,
+            _subscriberRegistry,
+            _handlerFactory,
             new InMemoryRequestContextFactory(),
-            policyRegistry,
+            _policyRegistry,
             new ResiliencePipelineRegistry<string>(),
-            outboxBus,
+            _outboxBus,
             _scheduler
         );
 
@@ -429,8 +437,9 @@ public class QuartzSchedulerRequestAsyncTests : IDisposable
 
     #endregion
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _quartzScheduler.Shutdown(waitForJobsToComplete: true).GetAwaiter().GetResult();
+        await _quartzScheduler.Shutdown(waitForJobsToComplete: true);
     }
 }

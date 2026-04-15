@@ -35,16 +35,14 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
             performer.Stop(new RoutingKey(Topic));
         }
 
-#pragma warning disable xUnit1031
         [Test]
         public async Task When_Running_A_Message_Pump_On_A_Thread_Should_Be_Able_To_Stop()
         {
-            _performerTask.Wait();
+            await _performerTask;
             await Assert.That(_performerTask.IsCompleted).IsTrue();
             await Assert.That(_performerTask.IsFaulted).IsFalse();
             await Assert.That(_performerTask.IsCanceled).IsFalse();
             await Assert.That(_bus.Stream(_routingKey)).IsEmpty();
         }
-#pragma warning restore xUnit1031
     }
 }

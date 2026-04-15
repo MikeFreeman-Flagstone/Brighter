@@ -9,12 +9,13 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Fifo.Reactor;
 
 [Category("AWS")]
-public class AwsAssumeQueuesTests : IDisposable, IAsyncDisposable
+public class AwsAssumeQueuesTests : IAsyncDisposable
 {
-    private readonly ChannelFactory _channelFactory;
-    private readonly SqsMessageConsumer _consumer;
+    private ChannelFactory _channelFactory;
+    private SqsMessageConsumer _consumer;
 
-    public AwsAssumeQueuesTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         var channelName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
         string topicName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
@@ -29,7 +30,7 @@ public class AwsAssumeQueuesTests : IDisposable, IAsyncDisposable
             messagePumpType: MessagePumpType.Reactor,
             queueAttributes: new SqsAttributes(
                 type: SqsType.Fifo,
-                tags: new Dictionary<string, string> { { "Environment", "Test" } }), 
+                tags: new Dictionary<string, string> { { "Environment", "Test" } }),
             topicAttributes: topicAttributes,
             makeChannels: OnMissingChannel.Assume);
 
@@ -37,14 +38,14 @@ public class AwsAssumeQueuesTests : IDisposable, IAsyncDisposable
 
         //create the topic, we want the queue to be the issue
         //We need to create the topic at least, to check the queues
-        
+
         var producer = new SnsMessageProducer(awsConnection,
             new SnsPublication
             {
                 MakeChannels = OnMissingChannel.Create, TopicAttributes = topicAttributes
             });
 
-        producer.ConfirmTopicExistsAsync(topicName).Wait();
+        await producer.ConfirmTopicExistsAsync(topicName);
 
         _channelFactory = new ChannelFactory(awsConnection);
         var channel = _channelFactory.CreateSyncChannel(subscription);
@@ -60,9 +61,10 @@ public class AwsAssumeQueuesTests : IDisposable, IAsyncDisposable
         await Assert.That(() => _consumer.Receive(TimeSpan.FromMilliseconds(1000))).ThrowsExactly<QueueDoesNotExistException>();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
     }
 
     public async ValueTask DisposeAsync()

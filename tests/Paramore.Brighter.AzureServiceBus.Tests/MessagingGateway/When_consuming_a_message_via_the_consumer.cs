@@ -8,23 +8,26 @@ using Paramore.Brighter.AzureServiceBus.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus.AzureServiceBusWrappers;
+using Paramore.Brighter.MessagingGateway.AzureServiceBus.ClientProvider;
 using Paramore.Brighter.Observability;
 
 namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
 {
     [Category("ASB")]
-    public class ASBConsumerTests : IDisposable
+    public class ASBConsumerTests
     {
         private readonly Message _message;
-        private readonly IAmAChannelSync _channel;
-        private readonly IAmAProducerRegistry _producerRegistry;
+        private IAmAChannelSync _channel;
+        private IAmAProducerRegistry _producerRegistry;
         private readonly string _correlationId;
         private readonly ContentType _contentType;
         private readonly string _topicName;
         private readonly string _channelName;
-        private readonly ServiceBusClient _serviceBusClient;
+        private ServiceBusClient _serviceBusClient;
         private readonly IAdministrationClientWrapper _administrationClient;
         private readonly AzureServiceBusSubscriptionConfiguration _subscriptionConfiguration;
+        private readonly AzureServiceBusSubscription<ASBTestCommand> _subscription;
+        private readonly IServiceBusClientProvider _clientProvider;
 
         public ASBConsumerTests()
         {
@@ -33,12 +36,12 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
                 CommandValue = "Do the things.",
                 CommandNumber = 26
             };
-            
+
             _channelName = "test-channel";
             _topicName = $"Consumer-Tests-{Guid.NewGuid()}";
             var routingKey = new RoutingKey(_topicName);
-            
-            AzureServiceBusSubscription<ASBTestCommand> subscription = new(
+
+            _subscription = new AzureServiceBusSubscription<ASBTestCommand>(
                 subscriptionName: new SubscriptionName(_channelName),
                 channelName: new ChannelName(_channelName),
                 routingKey: routingKey
@@ -88,20 +91,23 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
                 SqlFilter = "1=1"
             };
 
-            var clientProvider = ASBCreds.ASBClientProvider;
-            _administrationClient = new AdministrationClientWrapper(clientProvider);
-            _administrationClient.CreateSubscriptionAsync(_topicName, _channelName, _subscriptionConfiguration)
-                .GetAwaiter()
-                .GetResult();
+            _clientProvider = ASBCreds.ASBClientProvider;
+            _administrationClient = new AdministrationClientWrapper(_clientProvider);
+        }
 
-            _serviceBusClient = clientProvider.GetServiceBusClient();
+        [Before(Test)]
+        public async Task Setup()
+        {
+            await _administrationClient.CreateSubscriptionAsync(_topicName, _channelName, _subscriptionConfiguration);
+
+            _serviceBusClient = _clientProvider.GetServiceBusClient();
 
             var channelFactory =
-                new AzureServiceBusChannelFactory(new AzureServiceBusConsumerFactory(clientProvider));
-            _channel = channelFactory.CreateSyncChannel(subscription);
+                new AzureServiceBusChannelFactory(new AzureServiceBusConsumerFactory(_clientProvider));
+            _channel = channelFactory.CreateSyncChannel(_subscription);
 
             _producerRegistry = new AzureServiceBusProducerRegistryFactory(
-                clientProvider,
+                _clientProvider,
                 [
                     new AzureServiceBusPublication { Topic = new RoutingKey(_topicName) }
                 ]
@@ -212,9 +218,10 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
             //ToDo: Need to Add Test for Filter
         }
 
-        public void Dispose()
+        [After(Test)]
+        public async Task Cleanup()
         {
-            _administrationClient.DeleteTopicAsync(_topicName).GetAwaiter().GetResult();
+            await _administrationClient.DeleteTopicAsync(_topicName);
             _channel?.Dispose();
             _producerRegistry?.Dispose();
         }

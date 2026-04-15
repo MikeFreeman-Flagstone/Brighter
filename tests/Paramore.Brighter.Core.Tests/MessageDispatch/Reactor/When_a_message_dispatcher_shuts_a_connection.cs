@@ -50,10 +50,10 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         }
 
         [After(Test)]
-        public void Dispose()
+        public async Task Dispose()
         {
             if (_dispatcher?.State == DispatcherState.DS_RUNNING)
-                _dispatcher.End().Wait();
+                await _dispatcher.End();
         }
     }
 }

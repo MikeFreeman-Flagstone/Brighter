@@ -55,8 +55,7 @@ public class ProactorShutdownInsideAsyncContextTests
         });
         // Assert — the performer must complete within a reasonable timeout.
         // A deadlock would cause this to hang indefinitely.
-        bool finishedInTime = completed.Wait(TimeSpan.FromSeconds(30));
-        await Assert.That(finishedInTime).IsTrue();
+        await completed.WaitAsync(TimeSpan.FromSeconds(30));
         await Assert.That(channel.DisposeAsyncCalled).IsTrue();
     }
 }

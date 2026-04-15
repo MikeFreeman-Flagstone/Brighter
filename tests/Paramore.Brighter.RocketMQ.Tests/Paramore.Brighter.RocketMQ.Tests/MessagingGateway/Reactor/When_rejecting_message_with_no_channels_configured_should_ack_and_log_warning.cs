@@ -36,11 +36,12 @@ namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 [Category("RocketMQ")]
 public class RocketMqNoChannelsConfiguredTests : IDisposable
 {
-    private readonly RocketMqMessageProducer _producer;
-    private readonly IAmAMessageConsumerSync _consumer;
-    private readonly Message _message;
+    private RocketMqMessageProducer _producer;
+    private IAmAMessageConsumerSync _consumer;
+    private Message _message;
 
-    public RocketMqNoChannelsConfiguredTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         var sourceTopic = new RoutingKey("rmq_dlq_source");
 
@@ -50,7 +51,7 @@ public class RocketMqNoChannelsConfiguredTests : IDisposable
         var publication = new RocketMqPublication { Topic = sourceTopic };
         _producer = new RocketMqMessageProducer(
             connection,
-            GatewayFactory.CreateProducer(connection, publication).GetAwaiter().GetResult(),
+            await GatewayFactory.CreateProducer(connection, publication),
             publication);
 
         // Source topic consumer with NO DLQ or invalid routing keys

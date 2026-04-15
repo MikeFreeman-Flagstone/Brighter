@@ -11,9 +11,9 @@ namespace Paramore.Brighter.Gcp.Tests.MessagingGateway.Stream.Proactor;
 public class PubSubBufferedConsumerTestsAsync : IDisposable
 {
     private readonly ContentType _contentType = new("text/plain");
-    private readonly GcpMessageProducer _messageProducer;
-    private readonly GcpPubSubSubscription _pubSubSubscription;
-    private readonly IAmAChannelAsync _channel;
+    private GcpMessageProducer _messageProducer;
+    private GcpPubSubSubscription _pubSubSubscription;
+    private IAmAChannelAsync _channel;
     private readonly string _topicName;
     private readonly GcpPubSubChannelFactory _channelFactory;
     private const int BufferSize = 3;
@@ -22,13 +22,18 @@ public class PubSubBufferedConsumerTestsAsync : IDisposable
     public PubSubBufferedConsumerTestsAsync()
     {
         _channelFactory = GatewayFactory.CreateChannelFactory();
-        var channelName = $"Buffered-Consumer-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
         _topicName = $"Buffered-Consumer-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
+        var channelName = $"Buffered-Consumer-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
 
         //we need the channel to create the queues and notifications
         var routingKey = new RoutingKey(_topicName);
 
-        _channel = _channelFactory.CreateAsyncChannelAsync(_pubSubSubscription = new GcpPubSubSubscription<MyCommand>(
+        _channel = await _channelFactory.CreateAsyncChannelAsync(_pubSubSubscription = new GcpPubSubSubscription<MyCommand>(
             subscriptionName: new SubscriptionName(channelName),
             channelName: new ChannelName(channelName),
             routingKey: routingKey,
@@ -36,7 +41,7 @@ public class PubSubBufferedConsumerTestsAsync : IDisposable
             messagePumpType: MessagePumpType.Proactor,
             makeChannels: OnMissingChannel.Create,
             subscriptionMode: SubscriptionMode.Stream
-        )).GetAwaiter().GetResult();
+        ));
 
         _messageProducer = GatewayFactory.CreateProducer(new GcpPublication<MyCommand>
         {

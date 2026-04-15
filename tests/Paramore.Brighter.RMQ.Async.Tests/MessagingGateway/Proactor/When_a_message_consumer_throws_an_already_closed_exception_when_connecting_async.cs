@@ -7,7 +7,7 @@ using RabbitMQ.Client.Exceptions;
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
 [Category("RMQ")]
-public class AsyncRmqMessageConsumerConnectionClosedTests : IDisposable, IAsyncDisposable
+public class AsyncRmqMessageConsumerConnectionClosedTests : IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _sender;
     private readonly IAmAMessageConsumerAsync _receiver;
@@ -55,7 +55,8 @@ public class AsyncRmqMessageConsumerConnectionClosedTests : IDisposable, IAsyncD
         await Assert.That(exceptionHappened).IsTrue();
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         ((IAmAMessageProducerSync)_sender).Dispose();
         ((IAmAMessageConsumerSync)_receiver).Dispose();

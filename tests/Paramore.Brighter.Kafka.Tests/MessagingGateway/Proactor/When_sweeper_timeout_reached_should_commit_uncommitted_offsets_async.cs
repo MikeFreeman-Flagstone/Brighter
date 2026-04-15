@@ -31,20 +31,21 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 
 [Category("Kafka")]
-public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsyncDisposable, IDisposable
+public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsyncDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
-    private readonly IAmAProducerRegistry _producerRegistry;
-    private readonly KafkaMessageConsumer _consumer;
+    private IAmAProducerRegistry _producerRegistry;
+    private KafkaMessageConsumer _consumer;
     private readonly string _partitionKey = Guid.NewGuid().ToString();
-    private readonly FakeTimeProvider _fakeTimeProvider;
+    private FakeTimeProvider _fakeTimeProvider;
 
-    public WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         var groupId = Uuid.New().ToString("N");
-        
-        _producerRegistry = new KafkaProducerRegistryFactory(
+
+        _producerRegistry = await new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
                 Name = "Kafka Producer Send Test",
@@ -62,7 +63,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
                 RequestTimeoutMs = 2000,
                 MakeChannels = OnMissingChannel.Create
             }
-            ]).CreateAsync().Result;
+            ]).CreateAsync();
 
         // Create a fake time provider to control time in the test
         _fakeTimeProvider = new FakeTimeProvider();
@@ -75,8 +76,8 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
             commitBatchSize: 20,  //Large commit batch size to ensure sweeper is triggered
             sweepUncommittedOffsetsInterval: TimeSpan.FromSeconds(30),
             messagePumpType: MessagePumpType.Proactor,
-            numOfPartitions: 1, 
-            replicationFactor: 1, 
+            numOfPartitions: 1,
+            replicationFactor: 1,
             makeChannels: OnMissingChannel.Create) { TimeProvider = _fakeTimeProvider };
 
         _consumer = (KafkaMessageConsumer) new KafkaMessageConsumerFactory(
@@ -171,7 +172,8 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
         return messages[0];
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         _producerRegistry?.Dispose();
         _consumer.Dispose();

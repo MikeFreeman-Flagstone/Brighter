@@ -15,15 +15,16 @@ using Amazon.SimpleNotificationService.Model;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Proactor;
 
 [Category("AWS")]
-public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
+public class AwsValidateInfrastructureByArnTests : IAsyncDisposable
 {
-    private readonly Message _message;
-    private readonly IAmAMessageConsumerAsync _consumer;
-    private readonly SnsMessageProducer _messageProducer;
-    private readonly ChannelFactory _channelFactory;
-    private readonly MyCommand _myCommand;
+    private Message _message;
+    private IAmAMessageConsumerAsync _consumer;
+    private SnsMessageProducer _messageProducer;
+    private ChannelFactory _channelFactory;
+    private MyCommand _myCommand;
 
-    public AwsValidateInfrastructureByArnTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         _myCommand = new MyCommand { Value = "Test" };
         string correlationId = Guid.NewGuid().ToString();
@@ -57,7 +58,7 @@ public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
         _channelFactory = new ChannelFactory(awsConnection);
         var channel = _channelFactory.CreateAsyncChannel(subscription);
 
-        var topicArn = FindTopicArn(awsConnection, routingKey.Value);
+        var topicArn = await FindTopicArn(awsConnection, routingKey.Value);
         var routingKeyArn = new RoutingKey(topicArn);
 
         //Now change the subscription to validate, just check what we made
@@ -97,11 +98,12 @@ public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
         await _consumer.AcknowledgeAsync(message);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         ((IAmAMessageConsumerSync)_consumer).Dispose();
         _messageProducer.Dispose();
     }
@@ -114,10 +116,10 @@ public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
         await _messageProducer.DisposeAsync();
     }
 
-    private static string FindTopicArn(AWSMessagingGatewayConnection connection, string topicName)
+    private static async Task<string> FindTopicArn(AWSMessagingGatewayConnection connection, string topicName)
     {
         using var snsClient = new AWSClientFactory(connection).CreateSnsClient();
-        var topicResponse = snsClient.FindTopicAsync(topicName).GetAwaiter().GetResult();
+        var topicResponse = await snsClient.FindTopicAsync(topicName);
         return topicResponse.TopicArn;
     }
 }

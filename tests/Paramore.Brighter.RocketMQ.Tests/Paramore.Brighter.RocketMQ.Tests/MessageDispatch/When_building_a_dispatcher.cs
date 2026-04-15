@@ -82,7 +82,7 @@ public class DispatchBuilderTests
 
         await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_RUNNING);
 
-        _dispatcher.End().GetAwaiter().GetResult();
+        await _dispatcher.End();
             
         await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_STOPPED);
     }

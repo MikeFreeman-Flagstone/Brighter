@@ -19,21 +19,28 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         private readonly int _requeueCount = 5;
         private readonly RoutingKey _routingKey = new("MyCommand");
         private readonly FakeTimeProvider _timeProvider = new();
+        private readonly InternalBus _bus;
+        private readonly MessageMapperRegistry _messageMapperRegistry;
         public MessagePumpCommandProcessingExceptionTestsAsync()
         {
             SpyExceptionCommandProcessor commandProcessor = new();
-            InternalBus bus = new();
-            _channel = new ChannelAsync(new("myChannel"), _routingKey, new InMemoryMessageConsumer(_routingKey, bus, _timeProvider, ackTimeout: TimeSpan.FromMilliseconds(1000)));
-            var messageMapperRegistry = new MessageMapperRegistry(null, new SimpleMessageMapperFactoryAsync(_ => new MyCommandMessageMapperAsync()));
-            messageMapperRegistry.RegisterAsync<MyCommand, MyCommandMessageMapperAsync>();
-            _messagePump = new ServiceActivator.Proactor(commandProcessor, (message) => typeof(MyCommand), messageMapperRegistry, new EmptyMessageTransformerFactoryAsync(), new InMemoryRequestContextFactory(), _channel)
+            _bus = new InternalBus();
+            _channel = new ChannelAsync(new("myChannel"), _routingKey, new InMemoryMessageConsumer(_routingKey, _bus, _timeProvider, ackTimeout: TimeSpan.FromMilliseconds(1000)));
+            _messageMapperRegistry = new MessageMapperRegistry(null, new SimpleMessageMapperFactoryAsync(_ => new MyCommandMessageMapperAsync()));
+            _messageMapperRegistry.RegisterAsync<MyCommand, MyCommandMessageMapperAsync>();
+            _messagePump = new ServiceActivator.Proactor(commandProcessor, (message) => typeof(MyCommand), _messageMapperRegistry, new EmptyMessageTransformerFactoryAsync(), new InMemoryRequestContextFactory(), _channel)
             {
                 Channel = _channel,
                 TimeOut = TimeSpan.FromMilliseconds(5000),
                 RequeueCount = _requeueCount
             };
-            var msg = new TransformPipelineBuilderAsync(messageMapperRegistry, null, InstrumentationOptions.All).BuildWrapPipeline<MyCommand>().WrapAsync(new MyCommand(), new RequestContext(), new Publication { Topic = _routingKey }).Result;
-            bus.Enqueue(msg);
+        }
+
+        [Before(Test)]
+        public async Task Setup()
+        {
+            var msg = await new TransformPipelineBuilderAsync(_messageMapperRegistry, null, InstrumentationOptions.All).BuildWrapPipeline<MyCommand>().WrapAsync(new MyCommand(), new RequestContext(), new Publication { Topic = _routingKey });
+            _bus.Enqueue(msg);
         }
 
         [Test]

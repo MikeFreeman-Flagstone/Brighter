@@ -9,7 +9,7 @@ using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Fifo.Proactor;
 
 [Category("AWS")]
-public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable, IDisposable
+public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable
 {
     private readonly SnsMessageProducer _messageProducer;
     private readonly ChannelFactory _channelFactory;
@@ -89,10 +89,11 @@ public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable, IDisposable
         await Assert.That(messageReceived.Header.Bag[HeaderNames.DeduplicationId]).IsEqualTo(deduplicationId);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

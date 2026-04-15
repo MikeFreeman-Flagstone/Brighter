@@ -56,7 +56,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
                 RequeueCount = 5,
                 RequeueDelay = TimeSpan.FromMilliseconds(100) // Subscription default — should NOT be used when DeferMessageAction has a delay
             };
-            var msg = new TransformPipelineBuilderAsync(messageMapperRegistry, null, InstrumentationOptions.All).BuildWrapPipeline<MyCommand>().WrapAsync(new MyCommand(), new RequestContext(), new Publication { Topic = _routingKey }).Result;
+            var msg = await new TransformPipelineBuilderAsync(messageMapperRegistry, null, InstrumentationOptions.All).BuildWrapPipeline<MyCommand>().WrapAsync(new MyCommand(), new RequestContext(), new Publication { Topic = _routingKey });
             bus.Enqueue(msg);
             //Act
             var task = Task.Factory.StartNew(() => messagePump.Run(), TaskCreationOptions.LongRunning);

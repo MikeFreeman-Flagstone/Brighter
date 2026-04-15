@@ -8,22 +8,26 @@ using Paramore.Brighter.AzureServiceBus.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus.AzureServiceBusWrappers;
+using Paramore.Brighter.MessagingGateway.AzureServiceBus.ClientProvider;
 
 namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
 {
     [Category("ASB")]
     [Property("Fragile", "CI")]
-    public class LargeAsbMessageProducerTests : IDisposable
+    public class LargeAsbMessageProducerTests
     {
-        private readonly IAmAChannelSync _topicChannel;
-        private readonly IAmAChannelSync _queueChannel;
-        private readonly IAmAProducerRegistry _producerRegistry;
+        private IAmAChannelSync _topicChannel;
+        private IAmAChannelSync _queueChannel;
+        private IAmAProducerRegistry _producerRegistry;
         private ASBTestCommand _command;
         private readonly string _correlationId;
         private readonly ContentType _contentType;
         private readonly string _topicName;
         private readonly string _queueName;
         private readonly IAdministrationClientWrapper _administrationClient;
+        private readonly IServiceBusClientProvider _clientProvider;
+        private readonly AzureServiceBusSubscription<ASBTestCommand> _subscription;
+        private readonly AzureServiceBusSubscription<ASBTestCommand> _queueSubscription;
 
         public LargeAsbMessageProducerTests()
         {
@@ -38,7 +42,7 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
             _topicName = $"Producer-Send-Tests-{Guid.NewGuid()}";
             var routingKey = new RoutingKey(_topicName);
 
-            AzureServiceBusSubscription<ASBTestCommand> subscription = new(
+            _subscription = new AzureServiceBusSubscription<ASBTestCommand>(
                 subscriptionName: new SubscriptionName(channelName),
                 channelName: new ChannelName(channelName),
                 routingKey: routingKey
@@ -48,7 +52,7 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
             _queueName = $"Producer-queue-Send-Tests-{Guid.NewGuid()}";
             var queueRoutingKey = new RoutingKey(_queueName);
 
-            AzureServiceBusSubscription<ASBTestCommand> queueSubscription = new(
+            _queueSubscription = new AzureServiceBusSubscription<ASBTestCommand>(
                 subscriptionName: new SubscriptionName(queueChannelName),
                 channelName: new ChannelName(queueChannelName),
                 routingKey: queueRoutingKey,
@@ -60,21 +64,24 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
 
             _contentType = new ContentType(MediaTypeNames.Application.Json);
 
-            var clientProvider = ASBCreds.ASBClientProvider;
-            _administrationClient = new AdministrationClientWrapper(clientProvider);
-            _administrationClient.CreateQueueAsync(_queueName, TimeSpan.FromMinutes(5), 3000).GetAwaiter().GetResult();
-            _administrationClient.CreateTopicAsync(_topicName, TimeSpan.FromMinutes(5), 3000).GetAwaiter().GetResult();
-            _administrationClient.CreateSubscriptionAsync(_topicName, channelName, new AzureServiceBusSubscriptionConfiguration())
-                .GetAwaiter()
-                .GetResult();
+            _clientProvider = ASBCreds.ASBClientProvider;
+            _administrationClient = new AdministrationClientWrapper(_clientProvider);
+        }
+
+        [Before(Test)]
+        public async Task Setup()
+        {
+            await _administrationClient.CreateQueueAsync(_queueName, TimeSpan.FromMinutes(5), 3000);
+            await _administrationClient.CreateTopicAsync(_topicName, TimeSpan.FromMinutes(5), 3000);
+            await _administrationClient.CreateSubscriptionAsync(_topicName, _subscription.ChannelName.Value, new AzureServiceBusSubscriptionConfiguration());
 
             var channelFactory =
-                new AzureServiceBusChannelFactory(new AzureServiceBusConsumerFactory(clientProvider));
-            _topicChannel = channelFactory.CreateSyncChannel(subscription);
-            _queueChannel = channelFactory.CreateSyncChannel(queueSubscription);
+                new AzureServiceBusChannelFactory(new AzureServiceBusConsumerFactory(_clientProvider));
+            _topicChannel = channelFactory.CreateSyncChannel(_subscription);
+            _queueChannel = channelFactory.CreateSyncChannel(_queueSubscription);
 
             _producerRegistry = new AzureServiceBusProducerRegistryFactory(
-                clientProvider,
+                _clientProvider,
                 [
                     new AzureServiceBusPublication { Topic = new RoutingKey(_topicName) },
                         new AzureServiceBusPublication { Topic = new RoutingKey(_queueName), UseServiceBusQueue = true}
@@ -133,10 +140,11 @@ namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway
         );
 
 
-        public void Dispose()
+        [After(Test)]
+        public async Task Cleanup()
         {
-            _administrationClient.DeleteTopicAsync(_topicName).GetAwaiter().GetResult();
-            _administrationClient.DeleteQueueAsync(_queueName).GetAwaiter().GetResult();
+            await _administrationClient.DeleteTopicAsync(_topicName);
+            await _administrationClient.DeleteQueueAsync(_queueName);
         }
 
         private DateTime RoundToSeconds(DateTime dateTime)

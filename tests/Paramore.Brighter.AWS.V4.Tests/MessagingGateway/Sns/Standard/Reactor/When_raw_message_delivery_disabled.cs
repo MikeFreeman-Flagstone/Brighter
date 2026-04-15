@@ -10,7 +10,7 @@ using Amazon.SimpleNotificationService.Model;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Reactor;
 
 [Category("AWS")] 
-public class SqsRawMessageDeliveryTests : IDisposable, IAsyncDisposable
+public class SqsRawMessageDeliveryTests : IAsyncDisposable
 {
     private readonly SnsMessageProducer _messageProducer;
     private readonly ChannelFactory _channelFactory;
@@ -83,10 +83,11 @@ public class SqsRawMessageDeliveryTests : IDisposable, IAsyncDisposable
         await Assert.That(messageReceived.Body.Value).IsEqualTo(messageToSent.Body.Value);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait(); 
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync(); 
+        await _channelFactory.DeleteQueueAsync();
     }
         
     public async ValueTask DisposeAsync()

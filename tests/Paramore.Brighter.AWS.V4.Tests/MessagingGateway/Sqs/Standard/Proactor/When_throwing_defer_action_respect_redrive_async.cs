@@ -17,7 +17,7 @@ namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Standard.Proactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
+public class SnsReDrivePolicySDlqTestsAsync : IAsyncDisposable
 {
     private readonly IAmAMessagePump _messagePump;
     private readonly Message _message;
@@ -143,10 +143,11 @@ public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
         await Assert.That(dlqCount).IsEqualTo(1);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

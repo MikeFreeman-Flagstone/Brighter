@@ -14,20 +14,26 @@ public class SqsSchedulingRequestAsyncTest : IAsyncDisposable
 {
     private readonly ContentType _contentType = new(MediaTypeNames.Text.Plain);
     private const int BufferSize = 3;
-    private readonly SqsMessageProducer _messageProducer;
-    private readonly SqsMessageConsumer _consumer;
+    private SqsMessageProducer _messageProducer;
+    private SqsMessageConsumer _consumer;
     private readonly string _queueName;
     private readonly ChannelFactory _channelFactory;
-    private readonly AwsSchedulerFactory _factory;
-    private readonly IAmazonScheduler _scheduler;
+    private AwsSchedulerFactory _factory;
+    private IAmazonScheduler _scheduler;
+    private readonly AWSMessagingGatewayConnection _awsConnection;
 
     public SqsSchedulingRequestAsyncTest()
     {
-        var awsConnection = GatewayFactory.CreateFactory();
+        _awsConnection = GatewayFactory.CreateFactory();
 
-        _channelFactory = new ChannelFactory(awsConnection);
-        var subscriptionName = $"Buffered-Scheduler-Async-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
+        _channelFactory = new ChannelFactory(_awsConnection);
         _queueName = $"Buffered-Scheduler-Async-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
+        var subscriptionName = $"Buffered-Scheduler-Async-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
 
         //we need the channel to create the queues and notifications
         var routingKey = new RoutingKey(_queueName);
@@ -38,24 +44,24 @@ public class SqsSchedulingRequestAsyncTest : IAsyncDisposable
             delaySeconds: TimeSpan.Zero,
             tags: new Dictionary<string, string> { { "Environment", "Test" } }
         );
-        
-        var channel = _channelFactory.CreateAsyncChannelAsync(new SqsSubscription<MyCommand>(
+
+        var channel = await _channelFactory.CreateAsyncChannelAsync(new SqsSubscription<MyCommand>(
             subscriptionName: new SubscriptionName(subscriptionName),
             channelName: new ChannelName(_queueName),
             channelType: ChannelType.PointToPoint,
-            routingKey: routingKey, bufferSize: BufferSize, queueAttributes: sqsAttributes, makeChannels: OnMissingChannel.Create)).GetAwaiter().GetResult();
+            routingKey: routingKey, bufferSize: BufferSize, queueAttributes: sqsAttributes, makeChannels: OnMissingChannel.Create));
 
         //we want to access via a consumer, to receive multiple messages - we don't want to expose on channel
         //just for the tests, so create a new consumer from the properties
-        _consumer = new SqsMessageConsumer(awsConnection, channel.Name.ToValidSQSQueueName(), BufferSize);
-        
+        _consumer = new SqsMessageConsumer(_awsConnection, channel.Name.ToValidSQSQueueName(), BufferSize);
+
         //in principle, for point-to-point, we don't need both sides to create the queue;  whoever does not own the API can just validate
         _messageProducer = new SqsMessageProducer(
-            awsConnection,
+            _awsConnection,
             new SqsPublication{ QueueAttributes = sqsAttributes,  MakeChannels = OnMissingChannel.Create });
-        
-        _scheduler = new AWSClientFactory(awsConnection).CreateSchedulerClient();
-        _factory = new AwsSchedulerFactory(awsConnection, $"brighter-scheduler-{Guid.NewGuid():N}")
+
+        _scheduler = new AWSClientFactory(_awsConnection).CreateSchedulerClient();
+        _factory = new AwsSchedulerFactory(_awsConnection, $"brighter-scheduler-{Guid.NewGuid():N}")
         {
             UseMessageTopicAsTarget = false, MakeRole = OnMissingRole.Create, SchedulerTopicOrQueue = routingKey
         };
@@ -109,5 +115,3 @@ public class SqsSchedulingRequestAsyncTest : IAsyncDisposable
         await _consumer.DisposeAsync();
     }
 }
-
-

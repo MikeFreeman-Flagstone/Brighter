@@ -12,7 +12,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Fifo.Reactor;
 
 [Category("AWS")]
-public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable, IDisposable
+public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAMessageConsumerSync _consumer;
@@ -86,11 +86,12 @@ public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable,
         _consumer.Acknowledge(message);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         (_consumer).Dispose();
         _messageProducer.Dispose();
     }

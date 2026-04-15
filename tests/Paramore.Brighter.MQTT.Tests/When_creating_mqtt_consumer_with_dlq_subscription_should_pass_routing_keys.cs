@@ -35,9 +35,11 @@ namespace Paramore.Brighter.MQTT.Tests;
 [Category("MQTT")]
 public class MqttMessageConsumerFactoryDlqTests : IDisposable
 {
-    private readonly MqttTestServer? _mqttTestServer;
+    private MqttTestServer? _mqttTestServer;
     private readonly MqttMessageConsumerFactory _factory;
     private IAmAMessageConsumerSync? _consumer;
+    private readonly MqttFactory _mqttFactory;
+    private readonly int _serverPort;
 
     public MqttMessageConsumerFactoryDlqTests()
     {
@@ -46,7 +48,8 @@ public class MqttMessageConsumerFactoryDlqTests : IDisposable
         int serverPort = MqttTestServer.GetRandomServerPort();
         var uniqueSuffix = Guid.NewGuid().ToString("N");
 
-        _mqttTestServer = MqttTestServer.CreateTestMqttServer(mqttFactory, true, serverPort: serverPort);
+        _mqttFactory = mqttFactory;
+        _serverPort = serverPort;
 
         var configuration = new MqttMessagingGatewayConsumerConfiguration
         {
@@ -57,6 +60,12 @@ public class MqttMessageConsumerFactoryDlqTests : IDisposable
         };
 
         _factory = new MqttMessageConsumerFactory(configuration);
+    }
+
+    [Before(HookType.Test)]
+    public async Task Setup()
+    {
+        _mqttTestServer = await MqttTestServer.CreateTestMqttServer(_mqttFactory, true, serverPort: _serverPort);
     }
 
     [Test]

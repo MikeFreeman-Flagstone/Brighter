@@ -12,7 +12,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Standard.Reactor;
 
 [Category("AWS")]
-public class SqsMessageProducerRequeueTests : IDisposable, IAsyncDisposable
+public class SqsMessageProducerRequeueTests : IAsyncDisposable
 {
     private readonly IAmAMessageProducerSync _sender;
     private Message _requeuedMessage;
@@ -77,10 +77,11 @@ public class SqsMessageProducerRequeueTests : IDisposable, IAsyncDisposable
         await Assert.That(_requeuedMessage.Body.Value).IsEqualTo(_receivedMessage.Body.Value);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

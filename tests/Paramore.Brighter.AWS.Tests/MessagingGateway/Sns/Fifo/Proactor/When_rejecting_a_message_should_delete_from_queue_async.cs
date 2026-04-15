@@ -11,7 +11,7 @@ using System.Collections.Generic;
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Fifo.Proactor;
 
 [Category("AWS")]
-public class SqsMessageConsumerRejectTestsAsync : IDisposable, IAsyncDisposable
+public class SqsMessageConsumerRejectTestsAsync : IAsyncDisposable
 {
     private readonly Message _message;
     private readonly IAmAChannelAsync _channel;
@@ -77,10 +77,11 @@ public class SqsMessageConsumerRejectTestsAsync : IDisposable, IAsyncDisposable
         await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()

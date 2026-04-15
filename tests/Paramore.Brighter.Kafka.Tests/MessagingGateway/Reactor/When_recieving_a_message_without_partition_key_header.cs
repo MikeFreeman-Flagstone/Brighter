@@ -93,14 +93,14 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
        //let this propogate to the Broker
        await Task.Delay(3000);
 
-        var receivedMessage = GetMessage();
+        var receivedMessage = await GetMessage();
 
         //Where we lack a partition key header, assume non-Brighter header and set to message key
         await Assert.That(receivedMessage.Header.PartitionKey).IsEqualTo(command.Id);
         await Assert.That(receivedMessage.Body.Bytes).IsEqualTo(value);
     }
 
-    private Message GetMessage()
+    private async Task<Message> GetMessage()
     {
         Message[] messages = new Message[0];
         int maxTries = 0;
@@ -118,13 +118,13 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
                 }
 
                 //wait before retry - allow consumer group join to complete
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(1000).GetAwaiter().GetResult();
+                await Task.Delay(1000);
             }
         } while (maxTries <= 10);
 

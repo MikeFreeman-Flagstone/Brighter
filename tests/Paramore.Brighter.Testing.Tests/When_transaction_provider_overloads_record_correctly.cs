@@ -105,8 +105,8 @@ public class SpyCommandProcessorTransactionProviderSyncTests
 public class SpyCommandProcessorTransactionProviderAsyncTests
 {
     private readonly SpyCommandProcessor _spy;
-    private readonly Id _singleId;
-    private readonly Id[] _batchIds;
+    private Id _singleId;
+    private Id[] _batchIds;
     private readonly TestCommand _singleCommand;
     private readonly TestCommand _batchCommand1;
     private readonly TestCommand _batchCommand2;
@@ -118,14 +118,17 @@ public class SpyCommandProcessorTransactionProviderAsyncTests
         _singleCommand = new TestCommand();
         _batchCommand1 = new TestCommand();
         _batchCommand2 = new TestCommand();
+    }
+
+    [Before(Test)]
+    public async Task Setup()
+    {
         var transactionProvider = new StubTransactionProvider();
 
         //Act
-        _singleId = _spy.DepositPostAsync<TestCommand, object>(_singleCommand, transactionProvider)
-            .GetAwaiter().GetResult();
-        _batchIds = _spy.DepositPostAsync<TestCommand, object>(
-            new[] { _batchCommand1, _batchCommand2 }, transactionProvider)
-            .GetAwaiter().GetResult();
+        _singleId = await _spy.DepositPostAsync<TestCommand, object>(_singleCommand, transactionProvider);
+        _batchIds = await _spy.DepositPostAsync<TestCommand, object>(
+            new[] { _batchCommand1, _batchCommand2 }, transactionProvider);
     }
 
     [Test]

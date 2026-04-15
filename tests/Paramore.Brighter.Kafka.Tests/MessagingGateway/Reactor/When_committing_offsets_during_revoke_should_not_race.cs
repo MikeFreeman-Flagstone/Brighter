@@ -82,7 +82,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
         //consume a few messages to get consumer A established
         for (int j = 0; j < 5; j++)
         {
-            var msg = ReadMessage(consumerA);
+            var msg = await ReadMessage(consumerA);
             if (msg.Header.MessageType != MessageType.MT_NONE)
             {
                 consumerA.Acknowledge(msg);
@@ -95,13 +95,13 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
         //by adding consumer B to the group
         Exception? caughtException = null;
 
-        var consumeTask = Task.Run(() =>
+        var consumeTask = Task.Run(async () =>
         {
             try
             {
                 for (int j = 0; j < 20; j++)
                 {
-                    var msg = ReadMessage(consumerA);
+                    var msg = await ReadMessage(consumerA);
                     if (msg.Header.MessageType != MessageType.MT_NONE)
                     {
                         //each acknowledge fires a background commit (batch size = 1)
@@ -166,7 +166,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
             ));
     }
 
-    private Message ReadMessage(KafkaMessageConsumer consumer)
+    private async Task<Message> ReadMessage(KafkaMessageConsumer consumer)
     {
         Message[] messages = [new Message()];
         int maxTries = 0;
@@ -185,7 +185,7 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
             catch (ChannelFailureException cfx)
             {
                 Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
-                Task.Delay(500).GetAwaiter().GetResult();
+                await Task.Delay(500);
             }
         } while (maxTries <= 10);
 

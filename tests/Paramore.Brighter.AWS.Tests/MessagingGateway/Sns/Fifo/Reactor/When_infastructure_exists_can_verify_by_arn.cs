@@ -13,15 +13,16 @@ namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Fifo.Reactor;
 
 [Category("AWS")]
 [Property("CI", "Fragile")]
-public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
+public class AwsValidateInfrastructureByArnTests : IAsyncDisposable
 {
-    private readonly Message _message;
-    private readonly IAmAMessageConsumerSync _consumer;
-    private readonly SnsMessageProducer _messageProducer;
-    private readonly ChannelFactory _channelFactory;
-    private readonly MyCommand _myCommand;
+    private Message _message;
+    private IAmAMessageConsumerSync _consumer;
+    private SnsMessageProducer _messageProducer;
+    private ChannelFactory _channelFactory;
+    private MyCommand _myCommand;
 
-    public AwsValidateInfrastructureByArnTests()
+    [Before(Test)]
+    public async Task Setup()
     {
         const string replyTo = "http:\\queueUrl";
         var contentType = new ContentType(MediaTypeNames.Text.Plain);
@@ -38,9 +39,9 @@ public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
             channelName: new ChannelName(channelName),
             channelType: ChannelType.PubSub,
             routingKey: routingKey,
-            queueAttributes: new SqsAttributes(type: SqsType.Fifo, tags: new Dictionary<string, string> { { "Environment", "Test" } }), 
+            queueAttributes: new SqsAttributes(type: SqsType.Fifo, tags: new Dictionary<string, string> { { "Environment", "Test" } }),
             topicAttributes: topicAttributes,
-            messagePumpType: MessagePumpType.Reactor, 
+            messagePumpType: MessagePumpType.Reactor,
             makeChannels: OnMissingChannel.Create);
 
         _message = new Message(
@@ -57,7 +58,7 @@ public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
         _channelFactory = new ChannelFactory(awsConnection);
         var channel = _channelFactory.CreateSyncChannel(subscription);
 
-        var topicArn = FindTopicArn(awsConnection, routingKey.ToValidSNSTopicName(true));
+        var topicArn = await FindTopicArn(awsConnection, routingKey.ToValidSNSTopicName(true));
         var routingKeyArn = new RoutingKey(topicArn);
 
         //Now change the subscription to validate, just check what we made
@@ -96,11 +97,12 @@ public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
         _consumer.Acknowledge(message);
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
         //Clean up resources that we have created
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
         _consumer.Dispose();
         _messageProducer.Dispose();
     }
@@ -113,10 +115,10 @@ public class AwsValidateInfrastructureByArnTests : IDisposable, IAsyncDisposable
         await _messageProducer.DisposeAsync();
     }
 
-    private static string FindTopicArn(AWSMessagingGatewayConnection connection, string topicName)
+    private static async Task<string> FindTopicArn(AWSMessagingGatewayConnection connection, string topicName)
     {
         using var snsClient = new AWSClientFactory(connection).CreateSnsClient();
-        var topicResponse = snsClient.FindTopicAsync(topicName).GetAwaiter().GetResult();
+        var topicResponse = await snsClient.FindTopicAsync(topicName);
         return topicResponse.TopicArn;
     }
 }

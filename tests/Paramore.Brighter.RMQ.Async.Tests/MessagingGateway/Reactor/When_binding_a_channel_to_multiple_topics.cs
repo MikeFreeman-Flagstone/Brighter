@@ -8,38 +8,45 @@ namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 [Category("RMQ")]
 public class RmqMessageConsumerMultipleTopicTests : IDisposable
 {        
-    private readonly IAmAMessageProducerSync _messageProducer;
-    private readonly IAmAMessageConsumerSync _messageConsumer;
-    private readonly Message _messageTopic1, _messageTopic2;
+    private IAmAMessageProducerSync _messageProducer;
+    private IAmAMessageConsumerSync _messageConsumer;
+    private Message _messageTopic1, _messageTopic2;
+    private RmqMessagingGatewayConnection _rmqConnection;
+    private RoutingKeys _topics;
+    private ChannelName _queueName;
 
     public RmqMessageConsumerMultipleTopicTests()
     {
         var routingKeyOne = new RoutingKey(Guid.NewGuid().ToString());
         var routingKeyTwo = new RoutingKey(Guid.NewGuid().ToString());
-            
+
         _messageTopic1 = new Message(
-            new MessageHeader(Guid.NewGuid().ToString(), routingKeyOne, MessageType.MT_COMMAND), 
+            new MessageHeader(Guid.NewGuid().ToString(), routingKeyOne, MessageType.MT_COMMAND),
             new MessageBody("test content for topic test 1"));
         _messageTopic2 = new Message(
-            new MessageHeader(Guid.NewGuid().ToString(), routingKeyTwo, MessageType.MT_COMMAND), 
+            new MessageHeader(Guid.NewGuid().ToString(), routingKeyTwo, MessageType.MT_COMMAND),
             new MessageBody("test content for topic test 2"));
 
-        var rmqConnection = new RmqMessagingGatewayConnection
+        _rmqConnection = new RmqMessagingGatewayConnection
         {
             AmpqUri = new AmqpUriSpecification(new Uri("amqp://guest:guest@localhost:5672/%2f")),
             Exchange = new Exchange("paramore.brighter.exchange")
         };
 
-        var topics = new RoutingKeys([
-            routingKeyOne, 
+        _topics = new RoutingKeys([
+            routingKeyOne,
             routingKeyTwo
         ]);
-        var queueName = new ChannelName(Guid.NewGuid().ToString());
+        _queueName = new ChannelName(Guid.NewGuid().ToString());
 
-        _messageProducer = new RmqMessageProducer(rmqConnection);
-        _messageConsumer = new RmqMessageConsumer(rmqConnection, queueName , topics, false, false);
+        _messageProducer = new RmqMessageProducer(_rmqConnection);
+        _messageConsumer = new RmqMessageConsumer(_rmqConnection, _queueName , _topics, false, false);
+    }
 
-        new QueueFactory(rmqConnection, queueName, topics).CreateAsync().GetAwaiter().GetResult();
+    [Before(Test)]
+    public async Task Setup()
+    {
+        await new QueueFactory(_rmqConnection, _queueName, _topics).CreateAsync();
     }
 
     [Test]

@@ -12,11 +12,12 @@ namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Proactor;
 [Category("AWS")]
 public class AwsValidateQueuesTestsAsync : IAsyncDisposable
 {
-    private readonly AWSMessagingGatewayConnection _awsConnection;
-    private readonly SqsSubscription<MyCommand> _subscription;
+    private AWSMessagingGatewayConnection _awsConnection;
+    private SqsSubscription<MyCommand> _subscription;
     private ChannelFactory? _channelFactory;
 
-    public AwsValidateQueuesTestsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         var channelName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
         string topicName = $"Producer-Send-Tests-{Guid.NewGuid().ToString()}".Truncate(45);
@@ -40,7 +41,7 @@ public class AwsValidateQueuesTestsAsync : IAsyncDisposable
             {
                 MakeChannels = OnMissingChannel.Create
             });
-        producer.ConfirmTopicExistsAsync(topicName).Wait();
+        await producer.ConfirmTopicExistsAsync(topicName);
     }
 
     [Test]

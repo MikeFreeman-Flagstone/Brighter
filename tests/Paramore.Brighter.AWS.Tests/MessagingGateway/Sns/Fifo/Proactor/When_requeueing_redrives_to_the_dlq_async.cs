@@ -15,16 +15,17 @@ namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Fifo.Proactor;
 
 [Category("AWS")]
 [Property("Fragile", "CI")]
-public class SqsMessageProducerDlqTestsAsync : IDisposable, IAsyncDisposable
+public class SqsMessageProducerDlqTestsAsync : IAsyncDisposable
 {
-    private readonly SnsMessageProducer _sender;
-    private readonly IAmAChannelAsync _channel;
-    private readonly ChannelFactory _channelFactory;
-    private readonly Message _message;
-    private readonly AWSMessagingGatewayConnection _awsConnection;
-    private readonly ChannelName _deadLetterChannel;
+    private SnsMessageProducer _sender;
+    private IAmAChannelAsync _channel;
+    private ChannelFactory _channelFactory;
+    private Message _message;
+    private AWSMessagingGatewayConnection _awsConnection;
+    private ChannelName _deadLetterChannel;
 
-    public SqsMessageProducerDlqTestsAsync()
+    [Before(Test)]
+    public async Task Setup()
     {
         MyCommand myCommand = new MyCommand { Value = "Test" };
         const string replyTo = "http:\\queueUrl";
@@ -66,7 +67,7 @@ public class SqsMessageProducerDlqTestsAsync : IDisposable, IAsyncDisposable
                 TopicAttributes = topicAttributes
             });
 
-        _sender.ConfirmTopicExistsAsync(topicName).Wait();
+        await _sender.ConfirmTopicExistsAsync(topicName);
 
         _channelFactory = new ChannelFactory(_awsConnection);
         _channel = _channelFactory.CreateAsyncChannel(subscription);
@@ -111,10 +112,11 @@ public class SqsMessageProducerDlqTestsAsync : IDisposable, IAsyncDisposable
         return response.Messages.Count;
     }
 
-    public void Dispose()
+    [After(Test)]
+    public async Task Cleanup()
     {
-        _channelFactory.DeleteTopicAsync().Wait();
-        _channelFactory.DeleteQueueAsync().Wait();
+        await _channelFactory.DeleteTopicAsync();
+        await _channelFactory.DeleteQueueAsync();
     }
 
     public async ValueTask DisposeAsync()
