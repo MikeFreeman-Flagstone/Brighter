@@ -33,16 +33,15 @@ using System.Linq;
 
 namespace Paramore.Brighter.DynamoDB.Tests.Outbox.Sync;
 
-public class WhenRetrievingMessagesByIdsItShouldReturnOnlyRequestedMessages : IDisposable
+public class WhenRetrievingMessagesByIdsItShouldReturnOnlyRequestedMessages 
 {
-    private readonly IAmAnOutboxProviderSync _outboxProvider;
+    private readonly Paramore.Brighter.DynamoDB.Tests.Outbox.DynamoDBOutboxProvider _outboxProvider;
     private readonly IAmAMessageFactory _messageFactory;
     private List<Message> _createdMessages = [];
 
     public WhenRetrievingMessagesByIdsItShouldReturnOnlyRequestedMessages()
     {
         _outboxProvider = new Paramore.Brighter.DynamoDB.Tests.Outbox.DynamoDBOutboxProvider();
-        _outboxProvider.CreateStore();
 
         _messageFactory = new DefaultMessageFactory();
     }
@@ -77,8 +76,15 @@ public class WhenRetrievingMessagesByIdsItShouldReturnOnlyRequestedMessages : ID
         await Assert.That(messages.Select(x => x.Id)).Contains(undispatched.Id);
     }
 
-    public void Dispose()
+    [Before(HookType.Test)]
+    public async Task Setup()
     {
-        _outboxProvider.DeleteStore(_createdMessages);
+        await _outboxProvider.CreateStoreAsync();
+    }
+
+    [After(HookType.Test)]
+    public async Task Cleanup()
+    {
+        await _outboxProvider.DeleteStoreAsync(_createdMessages);
     }
 }

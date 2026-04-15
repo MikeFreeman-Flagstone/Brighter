@@ -47,7 +47,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
             // Act: run pump in background
             var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
             // Wait for handler to process the message (DontAckAction thrown)
-            var handled = _commandProcessor.WaitForHandle(5000);
+            var handled = await _commandProcessor.WaitForHandleAsync(5000);
             await Assert.That(handled).IsTrue();
             // Send quit to stop the pump after DontAckAction processing
             _channel.Enqueue(MessageFactory.CreateQuitMessage(_routingKey));

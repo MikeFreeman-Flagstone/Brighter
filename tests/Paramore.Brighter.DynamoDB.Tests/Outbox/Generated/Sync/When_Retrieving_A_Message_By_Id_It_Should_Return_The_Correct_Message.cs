@@ -33,16 +33,15 @@ using System.Linq;
 
 namespace Paramore.Brighter.DynamoDB.Tests.Outbox.Sync;
 
-public class WhenRetrievingAMessageByIdItShouldReturnTheCorrectMessage : IDisposable
+public class WhenRetrievingAMessageByIdItShouldReturnTheCorrectMessage 
 {
-    private readonly IAmAnOutboxProviderSync _outboxProvider;
+    private readonly Paramore.Brighter.DynamoDB.Tests.Outbox.DynamoDBOutboxProvider _outboxProvider;
     private readonly IAmAMessageFactory _messageFactory;
     private List<Message> _createdMessages = [];
 
     public WhenRetrievingAMessageByIdItShouldReturnTheCorrectMessage()
     {
         _outboxProvider = new Paramore.Brighter.DynamoDB.Tests.Outbox.DynamoDBOutboxProvider();
-        _outboxProvider.CreateStore();
 
         _messageFactory = new DefaultMessageFactory();
     }
@@ -104,8 +103,15 @@ public class WhenRetrievingAMessageByIdItShouldReturnTheCorrectMessage : IDispos
         await Assert.That(dispatched.Header.TraceState).IsEqualTo(message.Header.TraceState);
     }
 
-    public void Dispose()
+    [Before(HookType.Test)]
+    public async Task Setup()
     {
-        _outboxProvider.DeleteStore(_createdMessages);
+        await _outboxProvider.CreateStoreAsync();
+    }
+
+    [After(HookType.Test)]
+    public async Task Cleanup()
+    {
+        await _outboxProvider.DeleteStoreAsync(_createdMessages);
     }
 }

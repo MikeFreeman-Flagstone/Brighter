@@ -33,16 +33,15 @@ using System.Linq;
 
 namespace Paramore.Brighter.DynamoDB.V4.Tests.Outbox.Sync;
 
-public class WhenAddingADuplicateMessageItShouldNotThrow : IDisposable
+public class WhenAddingADuplicateMessageItShouldNotThrow 
 {
-    private readonly IAmAnOutboxProviderSync _outboxProvider;
+    private readonly Paramore.Brighter.DynamoDB.V4.Tests.Outbox.DynamoDBOutboxProvider _outboxProvider;
     private readonly IAmAMessageFactory _messageFactory;
     private List<Message> _createdMessages = [];
 
     public WhenAddingADuplicateMessageItShouldNotThrow()
     {
         _outboxProvider = new Paramore.Brighter.DynamoDB.V4.Tests.Outbox.DynamoDBOutboxProvider();
-        _outboxProvider.CreateStore();
 
         _messageFactory = new DefaultMessageFactory();
     }
@@ -65,8 +64,15 @@ public class WhenAddingADuplicateMessageItShouldNotThrow : IDisposable
         await Assert.That(true).IsTrue();
     }
 
-    public void Dispose()
+    [Before(HookType.Test)]
+    public async Task Setup()
     {
-        _outboxProvider.DeleteStore(_createdMessages);
+        await _outboxProvider.CreateStoreAsync();
+    }
+
+    [After(HookType.Test)]
+    public async Task Cleanup()
+    {
+        await _outboxProvider.DeleteStoreAsync(_createdMessages);
     }
 }

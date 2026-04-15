@@ -136,7 +136,7 @@ public class SnsReDrivePolicySDlqTests : IAsyncDisposable
         var quitMessage = MessageFactory.CreateQuitMessage(_subscription.RoutingKey);
         _channel.Enqueue(quitMessage);
 
-        Task.WaitAll(task);
+        await task;
 
         await Task.Delay(5000);
 

@@ -46,7 +46,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             // Act: run the pump in the background
             var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
             // Wait for the handler to be invoked (first delivery)
-            await Assert.That(_commandProcessor.WaitForHandle()).IsTrue();
+            await Assert.That(await _commandProcessor.WaitForHandleAsync()).IsTrue();
             await Assert.That(_commandProcessor.SendCount).IsEqualTo(1);
             // Advance time past the ack timeout to trigger requeue of unacknowledged messages.
             // The message was received via InMemoryMessageConsumer.Receive which locks it in _lockedMessages.
@@ -56,7 +56,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             // it was removed from _lockedMessages and no requeue occurs.
             _timeProvider.Advance(TimeSpan.FromSeconds(2));
             // Wait for the handler to be invoked again (re-delivery of unacknowledged message)
-            await Assert.That(_commandProcessor.WaitForHandle()).IsTrue();
+            await Assert.That(await _commandProcessor.WaitForHandleAsync()).IsTrue();
             // Assert: handler was called at least twice (original delivery + re-delivery)
             // This proves the message was NOT acknowledged by the DontAckAction handler
             await Assert.That(_commandProcessor.SendCount >= 2).IsTrue();

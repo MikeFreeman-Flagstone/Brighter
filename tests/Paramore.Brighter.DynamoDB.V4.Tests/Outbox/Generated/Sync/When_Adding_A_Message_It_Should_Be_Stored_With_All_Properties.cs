@@ -33,16 +33,15 @@ using System.Linq;
 
 namespace Paramore.Brighter.DynamoDB.V4.Tests.Outbox.Sync;
 
-public class WhenAddingAMessageItShouldBeStoredWithAllProperties : IDisposable
+public class WhenAddingAMessageItShouldBeStoredWithAllProperties 
 {
-    private readonly IAmAnOutboxProviderSync _outboxProvider;
+    private readonly Paramore.Brighter.DynamoDB.V4.Tests.Outbox.DynamoDBOutboxProvider _outboxProvider;
     private readonly IAmAMessageFactory _messageFactory;
     private List<Message> _createdMessages = [];
 
     public WhenAddingAMessageItShouldBeStoredWithAllProperties()
     {
         _outboxProvider = new Paramore.Brighter.DynamoDB.V4.Tests.Outbox.DynamoDBOutboxProvider();
-        _outboxProvider.CreateStore();
 
         _messageFactory = new DefaultMessageFactory();
     }
@@ -97,8 +96,15 @@ public class WhenAddingAMessageItShouldBeStoredWithAllProperties : IDisposable
         await Assert.That(storedMessage.Header.TraceState).IsEqualTo(message.Header.TraceState);
     }
 
-    public void Dispose()
+    [Before(HookType.Test)]
+    public async Task Setup()
     {
-        _outboxProvider.DeleteStore(_createdMessages);
+        await _outboxProvider.CreateStoreAsync();
+    }
+
+    [After(HookType.Test)]
+    public async Task Cleanup()
+    {
+        await _outboxProvider.DeleteStoreAsync(_createdMessages);
     }
 }

@@ -33,16 +33,15 @@ using System.Linq;
 
 namespace Paramore.Brighter.DynamoDB.V4.Tests.Outbox.Sync;
 
-public class WhenRetrievingDispatchedMessagesItShouldFilterByAge : IDisposable
+public class WhenRetrievingDispatchedMessagesItShouldFilterByAge 
 {
-    private readonly IAmAnOutboxProviderSync _outboxProvider;
+    private readonly Paramore.Brighter.DynamoDB.V4.Tests.Outbox.DynamoDBOutboxProvider _outboxProvider;
     private readonly IAmAMessageFactory _messageFactory;
     private List<Message> _createdMessages = [];
 
     public WhenRetrievingDispatchedMessagesItShouldFilterByAge()
     {
         _outboxProvider = new Paramore.Brighter.DynamoDB.V4.Tests.Outbox.DynamoDBOutboxProvider();
-        _outboxProvider.CreateStore();
 
         _messageFactory = new DefaultMessageFactory();
     }
@@ -86,8 +85,15 @@ public class WhenRetrievingDispatchedMessagesItShouldFilterByAge : IDisposable
         await Assert.That(messagesOver4Hours.Select(x => x.Id)).DoesNotContain(undispatched.Id);
     }
 
-    public void Dispose()
+    [Before(HookType.Test)]
+    public async Task Setup()
     {
-        _outboxProvider.DeleteStore(_createdMessages);
+        await _outboxProvider.CreateStoreAsync();
+    }
+
+    [After(HookType.Test)]
+    public async Task Cleanup()
+    {
+        await _outboxProvider.DeleteStoreAsync(_createdMessages);
     }
 }

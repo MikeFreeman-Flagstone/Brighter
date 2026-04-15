@@ -41,7 +41,7 @@ public class MessageDispatchRejectMessageExceptionTests
     public async Task When_an_event_handler_throw_a_reject_message_exception()
     {
         // Wait for the handler to be invoked before stopping
-        await Assert.That(MyRejectedEventHandler.WaitForHandle()).IsTrue();
+        await Assert.That(await MyRejectedEventHandler.WaitForHandleAsync()).IsTrue();
         await _dispatcher.End();
         await Assert.That(_bus.Stream(_routingKey)).IsEmpty();
         await Assert.That(_bus.Stream(_deadLetterRoutingKey)).IsNotEmpty();
