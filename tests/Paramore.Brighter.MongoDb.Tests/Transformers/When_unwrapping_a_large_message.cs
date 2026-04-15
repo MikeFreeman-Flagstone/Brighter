@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -20,7 +20,6 @@ public class LargeMessagePayloadUnwrapTests
     public LargeMessagePayloadUnwrapTests()
     {
         //arrange
-        TransformPipelineBuilder.ClearPipelineCache();
 
         var mapperRegistry = new MessageMapperRegistry(
             new SimpleMessageMapperFactory(_ => new MyLargeCommandMessageMapper()),

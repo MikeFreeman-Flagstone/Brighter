@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Paramore.Brighter.Azure.Tests.Helpers;
@@ -31,7 +31,6 @@ public class LargeMessagePayloadAUnwrapAsyncTests : IAsyncDisposable
             Credential = new AzureCliCredential()
         });
         
-        TransformPipelineBuilder.ClearPipelineCache();
 
         var mapperRegistry = new MessageMapperRegistry(
             new SimpleMessageMapperFactory(_ => new MyLargeCommandMessageMapper()),

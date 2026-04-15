@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Amazon.S3;
@@ -29,7 +29,6 @@ public class LargeMessagePayloadWrapTests : IAsyncDisposable
     public LargeMessagePayloadWrapTests()
     {
         //arrange
-        TransformPipelineBuilderAsync.ClearPipelineCache();
             
         var mapperRegistry =
             new MessageMapperRegistry(null, new SimpleMessageMapperFactoryAsync(

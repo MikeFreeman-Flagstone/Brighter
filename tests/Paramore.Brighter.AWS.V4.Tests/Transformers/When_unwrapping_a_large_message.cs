@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json;
@@ -27,7 +27,6 @@ public class LargeMessagePaylodUnwrapTests : IAsyncDisposable
     public LargeMessagePaylodUnwrapTests()
     {
         //arrange
-        TransformPipelineBuilder.ClearPipelineCache();
 
         var mapperRegistry = new MessageMapperRegistry(
             null,

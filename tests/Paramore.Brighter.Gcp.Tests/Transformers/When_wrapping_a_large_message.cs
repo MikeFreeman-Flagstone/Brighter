@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.Gcp.Tests.Helper;
 using Paramore.Brighter.Gcp.Tests.TestDoubles;
@@ -23,7 +23,6 @@ public class LargeMessagePayloadWrapTests : IDisposable
     public LargeMessagePayloadWrapTests()
     {
         //arrange
-        TransformPipelineBuilderAsync.ClearPipelineCache();
             
         var mapperRegistry =
             new MessageMapperRegistry(null, new SimpleMessageMapperFactoryAsync(

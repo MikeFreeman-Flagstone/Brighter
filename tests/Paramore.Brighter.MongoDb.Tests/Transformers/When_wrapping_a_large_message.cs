@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.MongoDb.Tests.TestDoubles;
 using Paramore.Brighter.Transformers.MongoGridFS;
@@ -20,7 +20,6 @@ public class LargeMessagePayloadWrapTests : IDisposable
     public LargeMessagePayloadWrapTests ()
     {
         //arrange
-        TransformPipelineBuilderAsync.ClearPipelineCache();
 
         var mapperRegistry = new MessageMapperRegistry(
                 new SimpleMessageMapperFactory(_ => new MyLargeCommandMessageMapper()),
