@@ -34,7 +34,6 @@ namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 /// If no requeue was ever performed, disposal should succeed without error.
 /// </summary>
 [Category("Kafka")]
-[NotInParallel("Kafka")]
 public class KafkaConsumerDisposesRequeueProducerTests : IDisposable
 {
     private readonly string _topic = Guid.NewGuid().ToString();
@@ -147,3 +146,4 @@ public class KafkaConsumerDisposesRequeueProducerTests : IDisposable
         try { _consumer?.Dispose(); } catch { /* already disposed */ }
     }
 }
+

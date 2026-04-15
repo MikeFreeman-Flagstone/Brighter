@@ -35,7 +35,6 @@ namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 /// so that requeued messages are actually redelivered.
 /// </summary>
 [Category("Kafka")]
-[NotInParallel("Kafka")]
 public class KafkaConsumerRequeueTests : IDisposable
 {
     private readonly string _topic = Guid.NewGuid().ToString();
@@ -149,3 +148,4 @@ public class KafkaConsumerRequeueTests : IDisposable
         _consumer?.Dispose();
     }
 }
+

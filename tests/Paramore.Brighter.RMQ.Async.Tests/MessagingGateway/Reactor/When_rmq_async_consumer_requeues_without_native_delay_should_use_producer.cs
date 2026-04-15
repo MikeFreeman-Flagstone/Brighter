@@ -36,7 +36,6 @@ namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 /// the delayed redelivery.
 /// </summary>
 [Category("RMQ")]
-[NotInParallel("RMQ")]
 public class RmqMessageConsumerDelayTests : IDisposable
 {
     private readonly IAmAMessageProducerSync _messageProducer;
@@ -107,3 +106,4 @@ public class RmqMessageConsumerDelayTests : IDisposable
         _messageProducer.Dispose();
     }
 }
+

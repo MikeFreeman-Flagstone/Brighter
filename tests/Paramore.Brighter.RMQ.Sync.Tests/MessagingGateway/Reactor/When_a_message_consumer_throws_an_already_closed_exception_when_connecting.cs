@@ -6,7 +6,6 @@ using RabbitMQ.Client.Exceptions;
 namespace Paramore.Brighter.RMQ.Sync.Tests.MessagingGateway.Reactor;
 
 [Category("RMQ")]
-[NotInParallel("RMQ")]
 public class RmqMessageConsumerConnectionClosedTests : IDisposable
 {
     private readonly IAmAMessageProducerSync _sender;
@@ -62,3 +61,4 @@ public class RmqMessageConsumerConnectionClosedTests : IDisposable
         _receiver.Dispose();
     }
 }
+

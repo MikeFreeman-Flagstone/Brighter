@@ -33,7 +33,6 @@ using Paramore.Brighter.MQTT.Tests.TestDoubles;
 namespace Paramore.Brighter.MQTT.Tests;
 
 [Category("MQTT")]
-[NotInParallel("MQTT")]
 public class MqttMessageConsumerFactoryDlqTests : IDisposable
 {
     private readonly MqttTestServer? _mqttTestServer;
@@ -45,6 +44,7 @@ public class MqttMessageConsumerFactoryDlqTests : IDisposable
         //Arrange
         var mqttFactory = new MqttFactory();
         int serverPort = MqttTestServer.GetRandomServerPort();
+        var uniqueSuffix = Guid.NewGuid().ToString("N");
 
         _mqttTestServer = MqttTestServer.CreateTestMqttServer(mqttFactory, true, serverPort: serverPort);
 
@@ -52,8 +52,8 @@ public class MqttMessageConsumerFactoryDlqTests : IDisposable
         {
             Hostname = IPAddress.Loopback.ToString(),
             Port = serverPort,
-            TopicPrefix = "BrighterTests/FactoryDlq",
-            ClientID = "BrighterTests-FactoryDlq"
+            TopicPrefix = $"BrighterTests/FactoryDlq/{uniqueSuffix}",
+            ClientID = $"BrighterTests-FactoryDlq-{uniqueSuffix}"
         };
 
         _factory = new MqttMessageConsumerFactory(configuration);
@@ -105,3 +105,4 @@ public class MqttMessageConsumerFactoryDlqTests : IDisposable
         _mqttTestServer?.Dispose();
     }
 }
+

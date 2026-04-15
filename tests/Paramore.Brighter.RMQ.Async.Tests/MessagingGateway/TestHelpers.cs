@@ -29,7 +29,6 @@ using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
 using RabbitMQ.Client;
 
-[assembly: TUnit.Core.NotInParallel("RMQ")]
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway;
 
 internal sealed class QueueFactory(RmqMessagingGatewayConnection connection, ChannelName channelName, RoutingKeys routingKeys, bool isDurable = false, QueueType queueType = QueueType.Classic)
@@ -68,3 +67,4 @@ internal sealed class QueueFactory(RmqMessagingGatewayConnection connection, Cha
         }
     }
 }
+

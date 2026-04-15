@@ -33,7 +33,6 @@ using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server;
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 
 [Category("MQTT")]
-[NotInParallel("MQTT")]
 public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
 {
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/NoChannels";
@@ -106,3 +105,4 @@ public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
         _mqttTestServer?.Dispose();
     }
 }
+

@@ -33,7 +33,6 @@ using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server;
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 
 [Category("MQTT")]
-[NotInParallel("MQTT")]
 public class MqttMessageConsumerRejectUnacceptableFallbackToDlqTests : IDisposable
 {
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/FallbackSource";
@@ -131,3 +130,4 @@ public class MqttMessageConsumerRejectUnacceptableFallbackToDlqTests : IDisposab
         _mqttTestServer?.Dispose();
     }
 }
+

@@ -35,7 +35,6 @@ namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 /// constructor is wired through to the producer's Scheduler property.
 /// </summary>
 [Category("Kafka")]
-[NotInParallel("Kafka")]
 public class KafkaConsumerRequeueSchedulerTests : IDisposable
 {
     private readonly string _topic = Guid.NewGuid().ToString();
@@ -173,3 +172,4 @@ public class KafkaConsumerRequeueSchedulerTests : IDisposable
         public void Cancel(string id) { }
     }
 }
+

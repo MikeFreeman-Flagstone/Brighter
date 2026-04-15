@@ -5,7 +5,6 @@ using Paramore.Brighter.Observability;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway;
 
-[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
 [Category("Redis")]
 public class RedisGoodMessageParsingTests
 {
@@ -42,3 +41,4 @@ public class RedisGoodMessageParsingTests
         await Assert.That(message.Body.Value).IsEqualTo("more test content");
     }
 }
+

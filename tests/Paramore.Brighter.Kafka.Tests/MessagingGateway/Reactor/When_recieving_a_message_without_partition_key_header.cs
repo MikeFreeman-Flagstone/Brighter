@@ -11,7 +11,6 @@ using Acks = Confluent.Kafka.Acks;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")]   //
 public class KafkaMessageProducerMissingHeaderTests : IDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
@@ -141,3 +140,4 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
         _consumer?.Dispose();
     }
 }
+

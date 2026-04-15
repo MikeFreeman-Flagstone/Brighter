@@ -35,7 +35,6 @@ namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 /// so that requeued messages are actually redelivered.
 /// </summary>
 [Category("Kafka")]
-[NotInParallel("Kafka")]
 public class KafkaConsumerRequeueAsyncTests : IAsyncDisposable, IDisposable
 {
     private readonly string _topic = Guid.NewGuid().ToString();
@@ -153,3 +152,4 @@ public class KafkaConsumerRequeueAsyncTests : IAsyncDisposable, IDisposable
         await _consumer.DisposeAsync();
     }
 }
+

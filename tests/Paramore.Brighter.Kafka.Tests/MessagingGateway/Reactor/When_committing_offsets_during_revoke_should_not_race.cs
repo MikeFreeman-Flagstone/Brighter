@@ -9,7 +9,6 @@ namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
 [Category("Kafka")]
 [Property("Fragile", "CI")]
-[NotInParallel("Kafka")]   //Kafka doesn't like multiple consumers of a partition
 public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
@@ -198,3 +197,4 @@ public class KafkaMessageConsumerCommitRevokeConcurrency : IDisposable
         _producerRegistry?.Dispose();
     }
 }
+

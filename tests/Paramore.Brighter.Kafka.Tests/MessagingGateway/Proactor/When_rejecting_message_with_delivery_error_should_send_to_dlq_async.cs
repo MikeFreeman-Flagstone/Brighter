@@ -30,7 +30,6 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")]
 public class KafkaMessageConsumerDLQAsyncTests : IAsyncDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
@@ -203,3 +202,4 @@ public class KafkaMessageConsumerDLQAsyncTests : IAsyncDisposable
         await Task.CompletedTask;
     }
 }
+

@@ -30,7 +30,6 @@ using RabbitMQ.Client;
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 
 [Category("RMQ")]
-[NotInParallel("RMQ")]
 public class RmqMessageGatewayConnectionPoolResetConnectionDoesNotExist
 {
     private readonly RmqMessageGatewayConnectionPool _connectionPool = new("MyConnectionName", 7);
@@ -54,3 +53,4 @@ public class RmqMessageGatewayConnectionPoolResetConnectionDoesNotExist
 
     }
 }
+

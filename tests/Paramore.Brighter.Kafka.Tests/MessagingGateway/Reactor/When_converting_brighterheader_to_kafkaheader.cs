@@ -8,7 +8,6 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")] //
 public class KafkaDefaultMessageHeaderBuilderTests
 {
     [Test]
@@ -77,3 +76,4 @@ public class KafkaDefaultMessageHeaderBuilderTests
 
     }
 }
+

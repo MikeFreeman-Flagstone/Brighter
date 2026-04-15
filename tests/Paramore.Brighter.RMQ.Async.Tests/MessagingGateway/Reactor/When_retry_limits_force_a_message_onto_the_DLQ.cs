@@ -14,7 +14,6 @@ using Polly.Registry;
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 
 [Category("RMQ")]
-[NotInParallel("RMQ")]
 public class RMQMessageConsumerRetryDLQTests : IDisposable
 {
     private readonly IAmAMessagePump _messagePump;
@@ -159,3 +158,4 @@ public class RMQMessageConsumerRetryDLQTests : IDisposable
     }
 
 }
+

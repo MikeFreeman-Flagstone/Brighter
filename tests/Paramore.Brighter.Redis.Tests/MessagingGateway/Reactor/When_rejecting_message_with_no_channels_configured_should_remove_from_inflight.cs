@@ -28,7 +28,6 @@ using Paramore.Brighter.MessagingGateway.Redis;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
 
-[NotInParallel("Redis Shared Pool")]
 [Category("Redis")]
 [Property("Fragile", "CI")]
 public class RedisMessageConsumerNoChannelsRejectTests : IDisposable
@@ -83,3 +82,4 @@ public class RedisMessageConsumerNoChannelsRejectTests : IDisposable
         _messageProducer.Dispose();
     }
 }
+

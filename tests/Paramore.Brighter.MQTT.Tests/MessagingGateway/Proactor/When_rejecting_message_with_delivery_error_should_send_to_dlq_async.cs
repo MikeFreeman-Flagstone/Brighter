@@ -33,7 +33,6 @@ using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server;
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Proactor;
 
 [Category("MQTT")]
-[NotInParallel("MQTT")]
 public class MqttMessageConsumerRejectDeliveryErrorDlqAsyncTests : IDisposable
 {
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/DlqAsyncSource";
@@ -137,3 +136,4 @@ public class MqttMessageConsumerRejectDeliveryErrorDlqAsyncTests : IDisposable
         _mqttTestServer?.Dispose();
     }
 }
+

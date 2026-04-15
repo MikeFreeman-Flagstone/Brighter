@@ -36,7 +36,6 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 /// passed to the consumer. When the consumer is disposed, the producer should also be disposed.
 /// </summary>
 [Category("MQTT")]
-[NotInParallel("MQTT")]
 public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
 {
     private readonly MqttTestServer? _mqttTestServer;
@@ -174,3 +173,4 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
         public void Cancel(string id) { }
     }
 }
+

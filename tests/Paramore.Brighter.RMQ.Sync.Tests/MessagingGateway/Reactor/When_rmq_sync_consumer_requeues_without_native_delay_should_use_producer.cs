@@ -36,7 +36,6 @@ namespace Paramore.Brighter.RMQ.Sync.Tests.MessagingGateway.Reactor;
 /// with Task.Delay().Wait(). This also verifies lazy producer creation and disposal.
 /// </summary>
 [Category("RMQ")]
-[NotInParallel("RMQ")]
 public class RmqSyncConsumerDelayTests : IDisposable
 {
     private readonly IAmAMessageProducerSync _sendProducer;
@@ -142,3 +141,4 @@ public class RmqSyncConsumerDelayTests : IDisposable
         _sendProducer.Dispose();
     }
 }
+

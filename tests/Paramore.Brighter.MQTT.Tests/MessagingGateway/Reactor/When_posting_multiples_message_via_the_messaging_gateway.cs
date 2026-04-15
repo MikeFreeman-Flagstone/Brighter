@@ -31,7 +31,6 @@ using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base;
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor
 {
     [Category("MQTT")]
-    [NotInParallel("MQTT")]
     public class MqttMessageProducerSendMessageTests : MqttTestClassBase<MqttMessageProducerSendMessageTests>
     {
         private const string ClientId = "BrighterIntegrationTests-Produce";
@@ -113,3 +112,4 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor
         }
     }
 }
+

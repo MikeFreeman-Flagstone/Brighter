@@ -13,7 +13,6 @@ using Paramore.Brighter.Scheduler.Events;
 namespace Paramore.Brighter.AWSScheduler.Tests.Scheduler.Requests.Sns;
 
 [Property("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
-[NotInParallel("Scheduler SNS")]
 public class SnsSchedulingRequestAsyncTest : IDisposable
 {
     private readonly ContentType _contentType = new(MediaTypeNames.Text.Plain);
@@ -59,7 +58,7 @@ public class SnsSchedulingRequestAsyncTest : IDisposable
 
         _scheduler = new AWSClientFactory(awsConnection).CreateSchedulerClient();
 
-        _factory = new AwsSchedulerFactory(awsConnection, "brighter-scheduler")
+        _factory = new AwsSchedulerFactory(awsConnection, $"brighter-scheduler-{Guid.NewGuid():N}")
         {
             UseMessageTopicAsTarget = false, MakeRole = OnMissingRole.Create, SchedulerTopicOrQueue = routingKey
         };
@@ -243,3 +242,5 @@ public class SnsSchedulingRequestAsyncTest : IDisposable
         _scheduler.Dispose();
     }
 }
+
+

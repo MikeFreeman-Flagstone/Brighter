@@ -5,7 +5,6 @@ using Paramore.Brighter.MessagingGateway.RMQ.Async;
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 
 [Category("RMQ")]
-[NotInParallel("RMQ")]
 public class RmqMessageProducerSendPersistentMessageTests : IDisposable
 {
     private IAmAMessageProducerSync _messageProducer;
@@ -55,3 +54,4 @@ public class RmqMessageProducerSendPersistentMessageTests : IDisposable
         _messageProducer.Dispose();
     }
 }
+

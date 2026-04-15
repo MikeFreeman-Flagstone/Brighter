@@ -9,7 +9,6 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")]   //
 public class KafkaHeaderToBrighterTests  
 {
     [Test]
@@ -76,3 +75,4 @@ public class KafkaHeaderToBrighterTests
         await Assert.That(readMessage.Header.Bag["mydatetime"]).IsEqualTo(((DateTime)bag["mydatetime"]).ToString(CultureInfo.InvariantCulture));
     }
 }
+

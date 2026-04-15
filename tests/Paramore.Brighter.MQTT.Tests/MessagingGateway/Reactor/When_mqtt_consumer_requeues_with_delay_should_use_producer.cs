@@ -34,7 +34,6 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 /// delegates to the producer so that requeued messages are actually redelivered.
 /// </summary>
 [Category("MQTT")]
-[NotInParallel("MQTT")]
 public class MqttConsumerRequeueTests : MqttTestClassBase<MqttConsumerRequeueTests>
 {
     private const string ClientId = "BrighterIntegrationTests-Requeue";
@@ -90,3 +89,4 @@ public class MqttConsumerRequeueTests : MqttTestClassBase<MqttConsumerRequeueTes
         throw new Exception($"Failed to receive message after {maxTries} attempts");
     }
 }
+

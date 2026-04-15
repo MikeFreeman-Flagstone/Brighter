@@ -12,7 +12,6 @@ using Paramore.Brighter.Observability;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")] //Kafka doesn't like multiple consumers of a partition
 public class KafkaMessageProducerSendTests : IDisposable
 {
     private readonly string _channelName = Guid.NewGuid().ToString();
@@ -192,3 +191,4 @@ public class KafkaMessageProducerSendTests : IDisposable
         _consumer?.Dispose();
     }
 }
+

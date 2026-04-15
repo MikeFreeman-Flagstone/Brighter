@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Proactor;
 
-[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
 [Category("Redis")]
 [ClassDataSource<RedisFixture>(Shared = SharedType.PerClass)]
     public class RedisRequeueMessageTestsAsync : IAsyncDisposable
@@ -65,3 +64,4 @@ namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Proactor;
         await _redisFixture.MessageProducer.DisposeAsync();
     }
 }
+

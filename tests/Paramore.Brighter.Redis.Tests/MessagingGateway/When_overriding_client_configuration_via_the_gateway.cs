@@ -5,7 +5,6 @@ using ServiceStack.Redis;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway;
 
-[NotInParallel("Redis Shared Pool")] //shared connection pool so run sequentially
 [Category("Redis")]
 public class RedisGatewayConfigurationTests
 {
@@ -45,3 +44,4 @@ public class RedisGatewayConfigurationTests
         await Assert.That(RedisConfig.VerifyMasterConnections).IsEqualTo(configuration.VerifyMasterConnections.Value);
     }
 }
+

@@ -30,7 +30,6 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")]
 public class KafkaMessageConsumerMetadataTests : IDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
@@ -224,3 +223,4 @@ public class KafkaMessageConsumerMetadataTests : IDisposable
         _producer?.Dispose();
     }
 }
+

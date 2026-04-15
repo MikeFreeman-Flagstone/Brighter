@@ -5,7 +5,6 @@ using ServiceStack.Redis;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
 
-[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
 [Category("Redis")]
 public class RedisMessageConsumerRedisNotAvailableTests
 {
@@ -33,3 +32,4 @@ public class RedisMessageConsumerRedisNotAvailableTests
 
     //Do not dispose a fake client
 }
+

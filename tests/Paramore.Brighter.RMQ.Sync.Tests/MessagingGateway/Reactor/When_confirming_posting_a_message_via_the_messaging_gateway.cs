@@ -29,7 +29,6 @@ using Paramore.Brighter.MessagingGateway.RMQ.Sync;
 namespace Paramore.Brighter.RMQ.Sync.Tests.MessagingGateway.Reactor;
 
 [Category("RMQ")]
-[NotInParallel("RMQ")]
 public class RmqMessageProducerConfirmationsSendMessageTests : IDisposable
 {
     private readonly RmqMessageProducer _messageProducer;
@@ -88,3 +87,4 @@ public class RmqMessageProducerConfirmationsSendMessageTests : IDisposable
         _messageProducer.Dispose();
     }
 }
+

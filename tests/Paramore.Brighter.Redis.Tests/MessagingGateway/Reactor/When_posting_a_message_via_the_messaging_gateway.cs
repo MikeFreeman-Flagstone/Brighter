@@ -5,7 +5,6 @@ using Paramore.Brighter.Observability;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
 
-[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
 [Category("Redis")]
 [ClassDataSource<RedisFixture>(Shared = SharedType.PerClass)]
     public class RedisMessageProducerSendTests 
@@ -99,3 +98,4 @@ namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
         await Assert.That(sentMessage.Header.Baggage).IsEqualTo(_baggage);
     }
 }
+

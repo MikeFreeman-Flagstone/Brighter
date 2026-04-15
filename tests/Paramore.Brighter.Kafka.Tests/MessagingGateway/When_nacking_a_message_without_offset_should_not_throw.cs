@@ -5,20 +5,22 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")]
 public class When_nacking_a_message_without_offset_should_not_throw : IDisposable
 {
     private readonly KafkaMessageConsumer _consumer;
+    private readonly RoutingKey _topic = new(Guid.NewGuid().ToString("N"));
 
     public When_nacking_a_message_without_offset_should_not_throw()
     {
+        var groupId = Guid.NewGuid().ToString("N");
+
         _consumer = new KafkaMessageConsumer(
             new KafkaMessagingGatewayConfiguration
             {
                 Name = "test", BootStrapServers = ["localhost:9092"]
             },
-            routingKey: new RoutingKey("test.topic"),
-            groupId: "test-group",
+            routingKey: _topic,
+            groupId: groupId,
             offsetDefault: AutoOffsetReset.Earliest,
             numPartitions: 1,
             replicationFactor: 1,
@@ -31,7 +33,7 @@ public class When_nacking_a_message_without_offset_should_not_throw : IDisposabl
     {
         //Arrange - a message with no PARTITION_OFFSET in the header bag
         var message = new Message(
-            new MessageHeader("test-id", new RoutingKey("test.topic"), MessageType.MT_COMMAND),
+            new MessageHeader("test-id", _topic, MessageType.MT_COMMAND),
             new MessageBody("test body")
         );
 
@@ -44,7 +46,7 @@ public class When_nacking_a_message_without_offset_should_not_throw : IDisposabl
     {
         //Arrange - a message with PARTITION_OFFSET set to the wrong type
         var message = new Message(
-            new MessageHeader("test-id", new RoutingKey("test.topic"), MessageType.MT_COMMAND),
+            new MessageHeader("test-id", _topic, MessageType.MT_COMMAND),
             new MessageBody("test body")
         );
         message.Header.Bag[HeaderNames.PARTITION_OFFSET] = "not-a-TopicPartitionOffset";
@@ -58,3 +60,4 @@ public class When_nacking_a_message_without_offset_should_not_throw : IDisposabl
         _consumer?.Dispose();
     }
 }
+

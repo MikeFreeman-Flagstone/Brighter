@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Proactor;
 
-[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
 [Category("Redis")]
 [ClassDataSource<RedisFixture>(Shared = SharedType.PerClass)]
     public class RedisMessageProducerMultipleSendTestsAsync 
@@ -53,3 +52,4 @@ namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Proactor;
         await Assert.That(messageBodyTwo).IsEqualTo(_messageTwo.Body.Value);
     }
 }
+

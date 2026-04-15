@@ -9,7 +9,6 @@ using Paramore.Brighter.MessagingGateway.Kafka;
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 
 [Category("Kafka")]
-[NotInParallel("Kafka")]   //Kafka doesn't like multiple consumers of a partition
 public class KafkaMessageConsumerPreservesOrderAsync : IDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
@@ -170,3 +169,4 @@ public class KafkaMessageConsumerPreservesOrderAsync : IDisposable
         _producerRegistry.Dispose();
     }
 }
+

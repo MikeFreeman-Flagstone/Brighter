@@ -33,7 +33,6 @@ namespace Paramore.Brighter.Redis.Tests.MessagingGateway;
 /// lazily-created requeue producer, and that disposal works in all cases.
 /// Uses a non-zero delay to exercise the full scheduler path (lesson from Kafka/MQTT).
 /// </summary>
-[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
 [Category("Redis")]
 public class When_redis_consumer_creates_producer_should_configure_and_dispose_correctly
 {
@@ -151,3 +150,4 @@ public class When_redis_consumer_creates_producer_should_configure_and_dispose_c
         public void Cancel(string id) { }
     }
 }
+

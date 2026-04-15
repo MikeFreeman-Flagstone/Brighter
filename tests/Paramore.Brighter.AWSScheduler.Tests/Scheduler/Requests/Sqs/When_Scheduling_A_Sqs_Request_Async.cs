@@ -10,7 +10,6 @@ using Paramore.Brighter.MessagingGateway.AWSSQS;
 namespace Paramore.Brighter.AWSScheduler.Tests.Scheduler.Requests.Sqs;
 
 [Property("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
-[NotInParallel("Scheduler SQS")]
 public class SqsSchedulingRequestAsyncTest : IAsyncDisposable
 {
     private readonly ContentType _contentType = new(MediaTypeNames.Text.Plain);
@@ -56,7 +55,7 @@ public class SqsSchedulingRequestAsyncTest : IAsyncDisposable
             new SqsPublication{ QueueAttributes = sqsAttributes,  MakeChannels = OnMissingChannel.Create });
         
         _scheduler = new AWSClientFactory(awsConnection).CreateSchedulerClient();
-        _factory = new AwsSchedulerFactory(awsConnection, "brighter-scheduler")
+        _factory = new AwsSchedulerFactory(awsConnection, $"brighter-scheduler-{Guid.NewGuid():N}")
         {
             UseMessageTopicAsTarget = false, MakeRole = OnMissingRole.Create, SchedulerTopicOrQueue = routingKey
         };
@@ -110,3 +109,5 @@ public class SqsSchedulingRequestAsyncTest : IAsyncDisposable
         await _consumer.DisposeAsync();
     }
 }
+
+

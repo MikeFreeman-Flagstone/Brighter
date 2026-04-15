@@ -4,7 +4,6 @@ using Paramore.Brighter.Redis.Tests.TestDoubles;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
 
-[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
 [Category("Redis")]
 public class RedisMessageConsumerOperationInterruptedTests
 {
@@ -31,3 +30,4 @@ public class RedisMessageConsumerOperationInterruptedTests
 
     //don't try to dispose, not a real client
 }
+

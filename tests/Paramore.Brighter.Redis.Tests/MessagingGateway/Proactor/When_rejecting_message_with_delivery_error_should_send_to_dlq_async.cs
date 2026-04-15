@@ -29,7 +29,6 @@ using Paramore.Brighter.MessagingGateway.Redis;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Proactor;
 
-[NotInParallel("Redis Shared Pool")]
 [Category("Redis")]
 [Property("Fragile", "CI")]
 public class RedisMessageConsumerDeliveryErrorDlqAsyncTests : IAsyncDisposable
@@ -100,3 +99,4 @@ public class RedisMessageConsumerDeliveryErrorDlqAsyncTests : IAsyncDisposable
         await _messageProducer.DisposeAsync();
     }
 }
+

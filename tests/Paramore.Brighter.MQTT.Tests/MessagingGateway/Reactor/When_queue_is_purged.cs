@@ -30,7 +30,6 @@ using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base;
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor
 {
     [Category("MQTT")]
-    [NotInParallel("MQTT")]
     public class When_queue_is_Purged : MqttTestClassBase<When_queue_is_Purged>
     {
         private const string ClientId = "BrighterIntegrationTests-Purge";
@@ -95,3 +94,4 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor
         }
     }
 }
+

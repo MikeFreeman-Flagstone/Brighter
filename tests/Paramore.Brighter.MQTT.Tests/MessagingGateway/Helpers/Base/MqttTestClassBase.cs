@@ -43,6 +43,10 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
         protected MqttTestClassBase(string clientID, string topicPrefix)
         : base()
         {
+            var uniqueSuffix = Guid.NewGuid().ToString("N");
+            var uniqueClientId = $"{clientID}-{uniqueSuffix}";
+            var uniqueTopicPrefix = $"{topicPrefix}/{uniqueSuffix}";
+
             ApplicationLogging.LoggerFactory = LoggerFactory.Create(configure =>
             {
                 configure.Services.AddSingleton(TestOutputHelper);
@@ -61,7 +65,7 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
             {
                 Hostname = IPAddress.Loopback.ToString(),
                 Port = serverPort,
-                TopicPrefix = topicPrefix
+                TopicPrefix = uniqueTopicPrefix
             };
 
             MqttMessagePublisher mqttMessagePublisher = new(mqttProducerConfig);
@@ -71,8 +75,8 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
             {
                 Hostname = IPAddress.Loopback.ToString(),
                 Port = serverPort,
-                TopicPrefix = topicPrefix,
-                ClientID = clientID
+                TopicPrefix = uniqueTopicPrefix,
+                ClientID = uniqueClientId
             };
 
             MessageConsumerAsync = new MqttMessageConsumer(mqttConsumerConfig);
