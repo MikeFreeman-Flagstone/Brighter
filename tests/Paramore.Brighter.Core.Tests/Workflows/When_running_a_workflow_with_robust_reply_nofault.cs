@@ -6,13 +6,13 @@ using Paramore.Brighter.Mediator;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.Workflows;
-[NotInParallel("Workflows")]
 public class MediatorRobustReplyNoFaultStepFlowTests
 {
     private readonly Scheduler<WorkflowTestData> _scheduler;
     private readonly Runner<WorkflowTestData> _runner;
     private readonly InMemoryJobChannel<WorkflowTestData> _channel;
     private readonly Job<WorkflowTestData> _job;
+    private readonly WorkflowExecutionLog _executionLog = new();
     private bool _stepCompleted;
     private bool _stepFaulted;
     public MediatorRobustReplyNoFaultStepFlowTests()
@@ -23,8 +23,8 @@ public class MediatorRobustReplyNoFaultStepFlowTests
         IAmACommandProcessor commandProcessor = null;
         var handlerFactory = new SimpleHandlerFactoryAsync((handlerType) => handlerType switch
         {
-            _ when handlerType == typeof(MyCommandHandlerAsync) => new MyCommandHandlerAsync(commandProcessor),
-            _ when handlerType == typeof(MyEventHandlerAsync) => new MyEventHandlerAsync(_scheduler),
+            _ when handlerType == typeof(MyCommandHandlerAsync) => new MyCommandHandlerAsync(commandProcessor, _executionLog),
+            _ when handlerType == typeof(MyEventHandlerAsync) => new MyEventHandlerAsync(_scheduler, _executionLog),
             _ => throw new InvalidOperationException($"The handler type {handlerType} is not supported")});
         commandProcessor = new CommandProcessor(registry, handlerFactory, new InMemoryRequestContextFactory(), new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         var workflowData = new WorkflowTestData();
@@ -53,9 +53,6 @@ public class MediatorRobustReplyNoFaultStepFlowTests
     [Test]
     public async Task When_running_a_workflow_with_reply()
     {
-        MyCommandHandlerAsync.ReceivedCommands.Clear();
-        MyEventHandlerAsync.ReceivedEvents.Clear();
-        MyFaultHandlerAsync.ReceivedFaults.Clear();
         await _scheduler.ScheduleAsync(_job);
         _channel.Stop();
 
@@ -70,9 +67,9 @@ public class MediatorRobustReplyNoFaultStepFlowTests
             Console.WriteLine(e.ToString());
         }
 
-        await Assert.That(MyCommandHandlerAsync.ReceivedCommands).Contains(c => c.Value == "Test");
-        await Assert.That(MyEventHandlerAsync.ReceivedEvents).Contains(e => e.Value == "Test");
-        await Assert.That(MyFaultHandlerAsync.ReceivedFaults).IsEmpty();
+        await Assert.That(_executionLog.Commands).Contains(c => c.Value == "Test");
+        await Assert.That(_executionLog.Events).Contains(e => e.Value == "Test");
+        await Assert.That(_executionLog.Faults).IsEmpty();
         await Assert.That(_job.Data.Bag["MyValue"]).IsEqualTo("Test");
         await Assert.That(_job.Data.Bag["MyReply"]).IsEqualTo("Test");
         await Assert.That(_job.State).IsEqualTo(JobState.Done);

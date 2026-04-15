@@ -6,13 +6,13 @@ using Paramore.Brighter.Mediator;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.Workflows;
-[NotInParallel("Workflows")]
 public class MediatorParallelSplitFlowTests
 {
     private readonly Scheduler<WorkflowTestData> _scheduler;
     private readonly Runner<WorkflowTestData> _runner;
     private readonly InMemoryJobChannel<WorkflowTestData> _channel;
     private readonly Job<WorkflowTestData> _job;
+    private readonly WorkflowExecutionLog _executionLog = new();
     private bool _firstBranchFinished;
     private bool _secondBranchFinished;
     public MediatorParallelSplitFlowTests()
@@ -20,7 +20,7 @@ public class MediatorParallelSplitFlowTests
         var registry = new SubscriberRegistry();
         registry.RegisterAsync<MyCommand, MyCommandHandlerAsync>();
         CommandProcessor commandProcessor = null;
-        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyCommandHandlerAsync(commandProcessor));
+        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyCommandHandlerAsync(commandProcessor, _executionLog));
         commandProcessor = new CommandProcessor(registry, handlerFactory, new InMemoryRequestContextFactory(), new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         var workflowData = new WorkflowTestData();
         _job = new Job<WorkflowTestData>(workflowData);
@@ -48,7 +48,6 @@ public class MediatorParallelSplitFlowTests
     [Test]
     public async Task When_running_a_workflow_with_a_parallel_split()
     {
-        MyCommandHandlerAsync.ReceivedCommands.Clear();
         await _scheduler.ScheduleAsync(_job);
 
         var ct = new CancellationTokenSource();
@@ -65,8 +64,8 @@ public class MediatorParallelSplitFlowTests
             Console.WriteLine(e.ToString());
         }
 
-        await Assert.That(MyCommandHandlerAsync.ReceivedCommands).Contains(c => c.Value == "Test");
-        await Assert.That(MyCommandHandlerAsync.ReceivedCommands).Contains(c => c.Value == "TestTwo");
+        await Assert.That(_executionLog.Commands).Contains(c => c.Value == "Test");
+        await Assert.That(_executionLog.Commands).Contains(c => c.Value == "TestTwo");
         await Assert.That(_firstBranchFinished).IsTrue();
         await Assert.That(_secondBranchFinished).IsTrue();
         await Assert.That(_job.State).IsEqualTo(JobState.Done);

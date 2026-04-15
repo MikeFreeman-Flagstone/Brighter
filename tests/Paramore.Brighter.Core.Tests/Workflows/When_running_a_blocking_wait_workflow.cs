@@ -7,12 +7,12 @@ using Paramore.Brighter.Mediator;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.Workflows;
-[NotInParallel("Workflows")]
 public class MediatorWaitStepFlowTests
 {
     private readonly Scheduler<WorkflowTestData> _scheduler;
     private readonly Runner<WorkflowTestData> _runner;
     private readonly Job<WorkflowTestData> _job;
+    private readonly WorkflowExecutionLog _executionLog = new();
     private bool _stepCompleted;
     private readonly FakeTimeProvider _timeProvider = new();
     private readonly Waker<WorkflowTestData> _waker;
@@ -21,7 +21,7 @@ public class MediatorWaitStepFlowTests
         var registry = new SubscriberRegistry();
         registry.RegisterAsync<MyCommand, MyCommandHandlerAsync>();
         CommandProcessor commandProcessor = null;
-        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyCommandHandlerAsync(commandProcessor));
+        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyCommandHandlerAsync(commandProcessor, _executionLog));
         commandProcessor = new CommandProcessor(registry, handlerFactory, new InMemoryRequestContextFactory(), new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         var workflowData = new WorkflowTestData();
         workflowData.Bag["MyValue"] = "Test";

@@ -10,12 +10,12 @@ using Paramore.Brighter.Extensions.DependencyInjection;
 
 namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
 {
-    [NotInParallel("ExceptionPolicy")]
     public class CommandProcessorWithRetryPolicyTests
     {
         private readonly CommandProcessor _commandProcessor;
         private readonly MyCommand _myCommand = new MyCommand();
         private int _retryCount;
+        private readonly ServiceProvider _provider;
         public CommandProcessorWithRetryPolicyTests()
         {
             var registry = new SubscriberRegistry();
@@ -24,11 +24,11 @@ namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
             container.AddSingleton<MyFailsWithDivideByZeroHandler>();
             container.AddSingleton<ExceptionPolicyHandler<MyCommand>>();
             container.AddSingleton<IBrighterOptions>(new BrighterOptions { HandlerLifetime = ServiceLifetime.Transient });
-            var handlerFactory = new ServiceProviderHandlerFactory(container.BuildServiceProvider());
+            _provider = container.BuildServiceProvider();
+            var handlerFactory = new ServiceProviderHandlerFactory(_provider);
             var policyRegistry = new PolicyRegistry();
             var policy = Policy.Handle<DivideByZeroException>().WaitAndRetry([TimeSpan.FromMilliseconds(10), TimeSpan.FromMilliseconds(20), TimeSpan.FromMilliseconds(30)], (exception, timeSpan) => _retryCount++);
             policyRegistry.Add("MyDivideByZeroPolicy", policy);
-            MyFailsWithDivideByZeroHandler.ReceivedCommand = false;
             _commandProcessor = new CommandProcessor(registry, handlerFactory, new InMemoryRequestContextFactory(), policyRegistry, new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         }
 
@@ -38,9 +38,15 @@ namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
         {
             Catch.Exception(() => _commandProcessor.Send(_myCommand));
             //_should_send_the_command_to_the_command_handler
-            await Assert.That(MyFailsWithDivideByZeroHandler.ShouldReceive(_myCommand)).IsTrue();
+            await Assert.That(_provider.GetRequiredService<MyFailsWithDivideByZeroHandler>().ShouldReceive(_myCommand)).IsTrue();
             //_should_retry_three_times
             await Assert.That(_retryCount).IsEqualTo(3);
+        }
+
+        [After(Test)]
+        public void Dispose()
+        {
+            _provider.Dispose();
         }
     }
 }

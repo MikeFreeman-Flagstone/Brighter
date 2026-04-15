@@ -11,7 +11,6 @@ using Paramore.Brighter.Extensions.DependencyInjection;
 
 namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
 {
-    [NotInParallel("ExceptionPolicy")]
     public class CommandProcessorWithCircuitBreakerTests
     {
         private readonly CommandProcessor _commandProcessor;
@@ -19,6 +18,7 @@ namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
         private Exception _thirdException;
         private Exception _firstException;
         private Exception _secondException;
+        private readonly ServiceProvider _provider;
         public CommandProcessorWithCircuitBreakerTests()
         {
             var registry = new SubscriberRegistry();
@@ -27,11 +27,11 @@ namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
             container.AddSingleton<MyFailsWithDivideByZeroHandler>();
             container.AddSingleton<ExceptionPolicyHandler<MyCommand>>();
             container.AddSingleton<IBrighterOptions>(new BrighterOptions { HandlerLifetime = ServiceLifetime.Transient });
-            var handlerFactory = new ServiceProviderHandlerFactory(container.BuildServiceProvider());
+            _provider = container.BuildServiceProvider();
+            var handlerFactory = new ServiceProviderHandlerFactory(_provider);
             var policyRegistry = new PolicyRegistry();
             var policy = Policy.Handle<DivideByZeroException>().CircuitBreaker(2, TimeSpan.FromMinutes(1));
             policyRegistry.Add("MyDivideByZeroPolicy", policy);
-            MyFailsWithDivideByZeroHandler.ReceivedCommand = false;
             _commandProcessor = new CommandProcessor(registry, handlerFactory, new InMemoryRequestContextFactory(), policyRegistry, new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         }
 
@@ -45,13 +45,19 @@ namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
             //this one should tell us that the circuit is broken
             _thirdException = Catch.Exception(() => _commandProcessor.Send(_myCommand));
             // Should send the command to the command handler
-            await Assert.That(MyFailsWithDivideByZeroHandler.ShouldReceive(_myCommand)).IsTrue();
+            await Assert.That(_provider.GetRequiredService<MyFailsWithDivideByZeroHandler>().ShouldReceive(_myCommand)).IsTrue();
             // Should bubble up the first exception
             await Assert.That(_firstException).IsTypeOf<DivideByZeroException>();
             // Should bubble up the second exception
             await Assert.That(_secondException).IsTypeOf<DivideByZeroException>();
             // Should break the circuit after two fails
             await Assert.That(_thirdException).IsTypeOf<BrokenCircuitException>();
+        }
+
+        [After(Test)]
+        public void Dispose()
+        {
+            _provider.Dispose();
         }
     }
 }

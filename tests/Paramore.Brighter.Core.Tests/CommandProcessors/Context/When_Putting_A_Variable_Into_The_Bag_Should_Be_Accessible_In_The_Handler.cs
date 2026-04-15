@@ -9,13 +9,14 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Context
         private const string I_AM_A_TEST_OF_THE_CONTEXT_BAG = "I am a test of the context bag";
         private readonly CommandProcessor _commandProcessor;
         private readonly MyCommand _myCommand;
+        private readonly MyContextAwareCommandHandler _handler;
         public ContextBagVisibilityTests()
         {
             var registry = new SubscriberRegistry();
             registry.Register<MyCommand, MyContextAwareCommandHandler>();
-            var handlerFactory = new SimpleHandlerFactorySync(_ => new MyContextAwareCommandHandler());
+            _handler = new MyContextAwareCommandHandler();
+            var handlerFactory = new SimpleHandlerFactorySync(_ => _handler);
             _myCommand = new MyCommand();
-            MyContextAwareCommandHandler.TestString = null;
             _commandProcessor = new CommandProcessor(registry, handlerFactory, new InMemoryRequestContextFactory(), new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         }
 
@@ -25,7 +26,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Context
             var requestContext = new RequestContext();
             requestContext.Bag["TestString"] = I_AM_A_TEST_OF_THE_CONTEXT_BAG;
             _commandProcessor.Send(_myCommand, requestContext);
-            await Assert.That(MyContextAwareCommandHandler.TestString).IsEqualTo(I_AM_A_TEST_OF_THE_CONTEXT_BAG);
+            await Assert.That(_handler.TestString).IsEqualTo(I_AM_A_TEST_OF_THE_CONTEXT_BAG);
             await Assert.That(requestContext.Bag["MyContextAwareCommandHandler"]).IsEqualTo("I was called and set the context");
         }
     }

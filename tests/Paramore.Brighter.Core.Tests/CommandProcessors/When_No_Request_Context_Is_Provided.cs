@@ -9,7 +9,6 @@ using Paramore.Brighter.Observability;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.CommandProcessors;
-[NotInParallel("ContextAware")]
 public class RequestContextFromFactoryTests
 {
     private readonly SpyContextFactory _requestContextFactory;
@@ -17,10 +16,6 @@ public class RequestContextFromFactoryTests
     private readonly ResiliencePipelineRegistry<string> _resiliencePipelineRegistry;
     public RequestContextFromFactoryTests()
     {
-        MyContextAwareCommandHandler.TestString = null;
-        MyContextAwareCommandHandlerAsync.TestString = null;
-        MyContextAwareEventHandler.TestString = null;
-        MyContextAwareEventHandlerAsync.TestString = null;
         _policyRegistry = new DefaultPolicy();
         _resiliencePipelineRegistry = new ResiliencePipelineRegistry<string>().AddBrighterDefault();
         _requestContextFactory = new SpyContextFactory
@@ -36,14 +31,15 @@ public class RequestContextFromFactoryTests
         //arrange
         var registry = new SubscriberRegistry();
         registry.Register<MyCommand, MyContextAwareCommandHandler>();
-        var handlerFactory = new SimpleHandlerFactorySync(_ => new MyContextAwareCommandHandler());
+        var contextCapture = new ContextCapture();
+        var handlerFactory = new SimpleHandlerFactorySync(_ => new MyContextAwareCommandHandler(contextCapture));
         var myCommand = new MyCommand();
         var commandProcessor = new CommandProcessor(registry, handlerFactory, _requestContextFactory, new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         //act
         commandProcessor.Send(myCommand);
         //assert
         await Assert.That(_requestContextFactory.CreateWasCalled).IsTrue();
-        await Assert.That(MyContextAwareCommandHandler.TestString).IsEqualTo(_requestContextFactory.Context!.Bag["TestString"].ToString());
+        await Assert.That(contextCapture.TestString).IsEqualTo(_requestContextFactory.Context!.Bag["TestString"].ToString());
         await Assert.That(_requestContextFactory.Context.Bag["MyContextAwareCommandHandler"]).IsEqualTo("I was called and set the context");
     }
 
@@ -53,14 +49,15 @@ public class RequestContextFromFactoryTests
         //arrange
         var registry = new SubscriberRegistry();
         registry.RegisterAsync<MyCommand, MyContextAwareCommandHandlerAsync>();
-        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyContextAwareCommandHandlerAsync());
+        var contextCapture = new ContextCapture();
+        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyContextAwareCommandHandlerAsync(contextCapture));
         var myCommand = new MyCommand();
         var commandProcessor = new CommandProcessor(registry, handlerFactory, _requestContextFactory, new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         //act
         await commandProcessor.SendAsync(myCommand);
         //assert
         await Assert.That(_requestContextFactory.CreateWasCalled).IsTrue();
-        await Assert.That(MyContextAwareCommandHandlerAsync.TestString).IsEqualTo(_requestContextFactory.Context!.Bag["TestString"].ToString());
+        await Assert.That(contextCapture.TestString).IsEqualTo(_requestContextFactory.Context!.Bag["TestString"].ToString());
         await Assert.That(_requestContextFactory.Context.Bag["MyContextAwareCommandHandler"]).IsEqualTo("I was called and set the context");
     }
 
@@ -70,14 +67,15 @@ public class RequestContextFromFactoryTests
         //arrange
         var registry = new SubscriberRegistry();
         registry.Register<MyEvent, MyContextAwareEventHandler>();
-        var handlerFactory = new SimpleHandlerFactorySync(_ => new MyContextAwareEventHandler());
+        var contextCapture = new ContextCapture();
+        var handlerFactory = new SimpleHandlerFactorySync(_ => new MyContextAwareEventHandler(contextCapture));
         var myEvent = new MyEvent();
         var commandProcessor = new CommandProcessor(registry, handlerFactory, _requestContextFactory, new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         //act
         commandProcessor.Publish(myEvent);
         //assert
         await Assert.That(_requestContextFactory.CreateWasCalled).IsTrue();
-        await Assert.That(MyContextAwareEventHandler.TestString).IsEqualTo(_requestContextFactory.Context.Bag["TestString"].ToString());
+        await Assert.That(contextCapture.TestString).IsEqualTo(_requestContextFactory.Context.Bag["TestString"].ToString());
         await Assert.That(_requestContextFactory.Context.Bag["MyContextAwareEventHandler"]).IsEqualTo("I was called and set the context");
     }
 
@@ -87,14 +85,15 @@ public class RequestContextFromFactoryTests
         //arrange
         var registry = new SubscriberRegistry();
         registry.RegisterAsync<MyEvent, MyContextAwareEventHandlerAsync>();
-        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyContextAwareEventHandlerAsync());
+        var contextCapture = new ContextCapture();
+        var handlerFactory = new SimpleHandlerFactoryAsync(_ => new MyContextAwareEventHandlerAsync(contextCapture));
         var myEvent = new MyEvent();
         var commandProcessor = new CommandProcessor(registry, handlerFactory, _requestContextFactory, new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         //act
         await commandProcessor.PublishAsync(myEvent);
         //assert
         await Assert.That(_requestContextFactory.CreateWasCalled).IsTrue();
-        await Assert.That(MyContextAwareEventHandlerAsync.TestString).IsEqualTo(_requestContextFactory.Context.Bag["TestString"].ToString());
+        await Assert.That(contextCapture.TestString).IsEqualTo(_requestContextFactory.Context.Bag["TestString"].ToString());
         await Assert.That(_requestContextFactory.Context.Bag["MyContextAwareEventHandler"]).IsEqualTo("I was called and set the context");
     }
 
@@ -194,14 +193,5 @@ public class RequestContextFromFactoryTests
         await commandProcessor.ClearOutboxAsync(new[] { myCommand.Id });
         //assert
         await Assert.That(_requestContextFactory.CreateWasCalled).IsTrue();
-    }
-
-    [After(Test)]
-    public void Dispose()
-    {
-        MyContextAwareCommandHandler.TestString = null;
-        MyContextAwareCommandHandlerAsync.TestString = null;
-        MyContextAwareEventHandler.TestString = null;
-        MyContextAwareEventHandlerAsync.TestString = null;
     }
 }

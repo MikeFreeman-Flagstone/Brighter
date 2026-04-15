@@ -7,13 +7,13 @@ using Paramore.Brighter.Mediator;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.Workflows;
-[NotInParallel("Workflows")]
 public class MediatorFailingChoiceFlowTests
 {
     private readonly Scheduler<WorkflowTestData> _scheduler;
     private readonly Runner<WorkflowTestData> _runner;
     private readonly InMemoryJobChannel<WorkflowTestData> _channel;
     private readonly Job<WorkflowTestData> _job;
+    private readonly WorkflowExecutionLog _executionLog = new();
     private bool _stepCompletedOne;
     private bool _stepCompletedTwo;
     private bool _stepCompletedThree;
@@ -26,8 +26,8 @@ public class MediatorFailingChoiceFlowTests
         IAmACommandProcessor? commandProcessor = null;
         var handlerFactory = new SimpleHandlerFactoryAsync((handlerType) => handlerType switch
         {
-            _ when handlerType == typeof(MyCommandHandlerAsync) => new MyCommandHandlerAsync(commandProcessor),
-            _ when handlerType == typeof(MyOtherCommandHandlerAsync) => new MyOtherCommandHandlerAsync(commandProcessor),
+            _ when handlerType == typeof(MyCommandHandlerAsync) => new MyCommandHandlerAsync(commandProcessor, _executionLog),
+            _ when handlerType == typeof(MyOtherCommandHandlerAsync) => new MyOtherCommandHandlerAsync(commandProcessor, _executionLog),
             _ => throw new InvalidOperationException($"The handler type {handlerType} is not supported")});
         commandProcessor = new CommandProcessor(registry, handlerFactory, new InMemoryRequestContextFactory(), new PolicyRegistry(), new ResiliencePipelineRegistry<string>(), new InMemorySchedulerFactory());
         var workflowData = new WorkflowTestData();
@@ -55,8 +55,6 @@ public class MediatorFailingChoiceFlowTests
     [Test]
     public async Task When_running_a_choice_workflow_step()
     {
-        MyCommandHandlerAsync.ReceivedCommands.Clear();
-        MyOtherCommandHandlerAsync.ReceivedCommands.Clear();
         await _scheduler.ScheduleAsync(_job);
         _channel.Stop();
 
@@ -75,7 +73,7 @@ public class MediatorFailingChoiceFlowTests
         await Assert.That(_stepCompletedOne).IsTrue();
         await Assert.That(_stepCompletedTwo).IsFalse();
         await Assert.That(_stepCompletedThree).IsTrue();
-        await Assert.That(MyOtherCommandHandlerAsync.ReceivedCommands).Contains(c => c.Value == "Fail");
-        await Assert.That(MyCommandHandlerAsync.ReceivedCommands.Any()).IsFalse();
+        await Assert.That(_executionLog.OtherCommands).Contains(c => c.Value == "Fail");
+        await Assert.That(_executionLog.Commands.Any()).IsFalse();
     }
 }
