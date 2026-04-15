@@ -30,11 +30,10 @@ using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.RocketMQ;
 using Paramore.Brighter.RocketMQ.Tests.TestDoubles;
 using Paramore.Brighter.RocketMQ.Tests.Utils;
-using Xunit;
 
 namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RocketMQ")]
+[Category("RocketMQ")]
 public class RocketMqUnacceptableFallbackToDlqTests : IDisposable
 {
     private readonly RocketMqMessageProducer _producer;
@@ -85,8 +84,8 @@ public class RocketMqUnacceptableFallbackToDlqTests : IDisposable
                 (object)new MyCommand { Value = "Test Fallback" }, JsonSerialisationOptions.Options)));
     }
 
-    [Fact]
-    public void When_rejecting_message_with_unacceptable_and_no_invalid_channel_should_fallback_to_dlq()
+    [Test]
+    public async Task When_rejecting_message_with_unacceptable_and_no_invalid_channel_should_fallback_to_dlq()
     {
         // Arrange - send a message and consume it from the source topic
         _consumer.Purge();
@@ -99,18 +98,17 @@ public class RocketMqUnacceptableFallbackToDlqTests : IDisposable
             new MessageRejectionReason(RejectionReason.Unacceptable, "Message failed validation"));
 
         // Assert - reject returns true
-        Assert.True(result);
+        await Assert.That(result).IsTrue();
 
         // Assert - message should appear on DLQ (fallback)
         var dlqMessage = ConsumeMessage(_dlqConsumer);
-        Assert.NotEqual(MessageType.MT_NONE, dlqMessage.Header.MessageType);
-        Assert.Equal(_message.Body.Value, dlqMessage.Body.Value);
+        await Assert.That(dlqMessage.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
+        await Assert.That(dlqMessage.Body.Value).IsEqualTo(_message.Body.Value);
 
         // Assert - rejection metadata present
-        Assert.True(dlqMessage.Header.Bag.ContainsKey("originalTopic"));
-        Assert.True(dlqMessage.Header.Bag.ContainsKey("rejectionReason"));
-        Assert.Equal(RejectionReason.Unacceptable.ToString(),
-            dlqMessage.Header.Bag["rejectionReason"].ToString());
+        await Assert.That(dlqMessage.Header.Bag.ContainsKey("originalTopic")).IsTrue();
+        await Assert.That(dlqMessage.Header.Bag.ContainsKey("rejectionReason")).IsTrue();
+        await Assert.That(dlqMessage.Header.Bag["rejectionReason"].ToString()).IsEqualTo(RejectionReason.Unacceptable.ToString());
     }
 
     private static Message ConsumeMessage(IAmAMessageConsumerSync consumer)

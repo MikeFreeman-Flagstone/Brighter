@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.MsSql;
 using Paramore.Brighter.MSSQL.Tests.TestDoubles;
-using Xunit;
 
 namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
 {
-    [Trait("Category", "MSSQL")]
+    [Category("MSSQL")]
     public class PurgeTestAsync : IAsyncDisposable, IDisposable
     {
         private readonly string _queueName = Guid.NewGuid().ToString();
@@ -36,7 +35,7 @@ namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
             _consumer = new MsSqlMessageConsumerFactory(testHelper.QueueConfiguration).CreateAsync(sub);
         }
 
-        [Fact]
+        [Test]
         public async Task When_queue_is_Purged()
         {
             IAmAMessageConsumerAsync consumer = _consumer;
@@ -46,7 +45,7 @@ namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
             // Now read those messages in order
             var firstMessage = await ConsumeMessagesAsync(consumer);
             var message = firstMessage.First();
-            Assert.Equal(msgId, message.Id);
+            await Assert.That(message.Id).IsEqualTo(msgId);
 
             await _consumer.PurgeAsync();
 
@@ -54,7 +53,7 @@ namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
             var nextMessage = await ConsumeMessagesAsync(consumer);
             message = nextMessage.First();
 
-            Assert.Equal(new Message(), message);
+            await Assert.That(message).IsEqualTo(new Message());
         }
 
         private async Task<string> SendMessageAsync()

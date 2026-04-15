@@ -6,13 +6,12 @@ using System.Threading.Tasks;
 using Paramore.Brighter.AWS.V4.Tests.Helpers;
 using Paramore.Brighter.AWS.V4.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
-using Xunit;
 using Amazon.SimpleNotificationService.Model;
 
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Reactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SqsBufferedConsumerTests : IDisposable, IAsyncDisposable
 {
     private readonly SnsMessageProducer _messageProducer;
@@ -55,9 +54,9 @@ public class SqsBufferedConsumerTests : IDisposable, IAsyncDisposable
             });
     }
             
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
+    [Test]
+    [Arguments(true)]
+    [Arguments(false)]
     public async Task When_a_message_consumer_reads_multiple_messages(bool fairQueue)
     {
         var partitionOne = fairQueue ? new PartitionKey(Uuid.NewAsString()) : PartitionKey.Empty;
@@ -107,10 +106,10 @@ public class SqsBufferedConsumerTests : IDisposable, IAsyncDisposable
             //retrieve  messages
             var messages = _consumer.Receive(TimeSpan.FromMilliseconds(10000));
                 
-            Assert.True(messages.Length <= outstandingMessageCount);
+            await Assert.That(messages.Length <= outstandingMessageCount).IsTrue();
 
             //should not receive more than buffer in one hit
-            Assert.True(messages.Length <= BufferSize);
+            await Assert.That(messages.Length <= BufferSize).IsTrue();
 
             var moreMessages = messages.Where(m => m.Header.MessageType == MessageType.MT_COMMAND);
             foreach (var message in moreMessages)
@@ -126,7 +125,7 @@ public class SqsBufferedConsumerTests : IDisposable, IAsyncDisposable
         } while ((iteration <= 5) && (messagesReceivedCount <  MessageCount));
     
 
-        Assert.Equal(4, messagesReceivedCount);
+        await Assert.That(messagesReceivedCount).IsEqualTo(4);
 
     }
         

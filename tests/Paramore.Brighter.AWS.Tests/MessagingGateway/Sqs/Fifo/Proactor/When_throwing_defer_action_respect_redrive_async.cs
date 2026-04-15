@@ -12,12 +12,11 @@ using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
 using Paramore.Brighter.ServiceActivator;
 using Polly.Registry;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Proactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
 {
     private readonly IAmAMessagePump _messagePump;
@@ -127,7 +126,7 @@ public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
         return response.Messages.Count;
     }
 
-    [Fact(Skip = "This test is skipped because running tests of the DLQ is unreliable in the CI environment")]
+    [Test, Skip("This test is skipped because running tests of the DLQ is unreliable in the CI environment")]
     public async Task When_throwing_defer_action_respect_redrive_async()
     {
         await _sender.SendAsync(_message);
@@ -143,7 +142,7 @@ public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
         await Task.Delay(5000);
 
         var dlqCount = await GetDLQCountAsync(_dlqChannelName + ".fifo");
-        Assert.Equal(1, dlqCount);
+        await Assert.That(dlqCount).IsEqualTo(1);
     }
 
     public void Dispose()

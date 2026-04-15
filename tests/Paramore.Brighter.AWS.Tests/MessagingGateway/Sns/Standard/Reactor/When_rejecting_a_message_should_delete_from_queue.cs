@@ -8,12 +8,11 @@ using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Reactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SqsMessageConsumerRejectTests : IDisposable
 {
     private readonly Message _message;
@@ -58,8 +57,8 @@ public class SqsMessageConsumerRejectTests : IDisposable
         _messageProducer = new SnsMessageProducer(awsConnection, new SnsPublication{MakeChannels = OnMissingChannel.Create});
     }
 
-    [Fact]
-    public void When_rejecting_a_message_should_delete_from_queue()
+    [Test]
+    public async Task When_rejecting_a_message_should_delete_from_queue()
     {
         //Arrange
         _messageProducer.Send(_message);
@@ -71,7 +70,7 @@ public class SqsMessageConsumerRejectTests : IDisposable
         //Assert - message should be deleted, not requeued
         message = _channel.Receive(TimeSpan.FromMilliseconds(5000));
 
-        Assert.Equal(MessageType.MT_NONE, message.Header.MessageType);
+        await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
     public void Dispose()

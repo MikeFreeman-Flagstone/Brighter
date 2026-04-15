@@ -1,4 +1,4 @@
-﻿using System.Net.Mime;
+using System.Net.Mime;
 using System.Text.Json;
 using Paramore.Brighter.AWSScheduler.Tests.Helpers;
 using Paramore.Brighter.AWSScheduler.Tests.TestDoubles;
@@ -8,8 +8,8 @@ using Paramore.Brighter.MessagingGateway.AWSSQS;
 
 namespace Paramore.Brighter.AWSScheduler.Tests.Scheduler.Messages.Sqs;
 
-[Trait("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
-[Collection("Scheduler SQS")]
+[Property("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
+[NotInParallel("Scheduler SQS")]
 public class SqsSchedulingAsyncMessageViaFireSchedulerTest : IAsyncDisposable
 {
     private readonly ContentType _contentType = new(MediaTypeNames.Text.Plain);
@@ -51,7 +51,7 @@ public class SqsSchedulingAsyncMessageViaFireSchedulerTest : IAsyncDisposable
         };
     }
 
-    [Fact]
+    [Test]
     public async Task When_Scheduling_A_Sqs_Message_Via_FireScheduler_Async()
     {
         var routingKey = new RoutingKey(_queueName);
@@ -70,17 +70,17 @@ public class SqsSchedulingAsyncMessageViaFireSchedulerTest : IAsyncDisposable
         while (stopAt > DateTimeOffset.UtcNow)
         {
             var messages = await _consumer.ReceiveAsync(TimeSpan.FromMinutes(1));
-            Assert.Single(messages);
+            await Assert.That(messages).HasSingleItem();
 
             if (messages[0].Header.MessageType != MessageType.MT_NONE)
             {
-                Assert.Equal(MessageType.MT_COMMAND, messages[0].Header.MessageType);
-                Assert.True(Enumerable.Any<char>(messages[0].Body.Value));
+                await Assert.That(messages[0].Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
+                await Assert.That(Enumerable.Any<char>(messages[0].Body.Value)).IsTrue();
                 var m = JsonSerializer.Deserialize<FireAwsScheduler>(messages[0].Body.Value,
                     JsonSerialisationOptions.Options);
-                Assert.NotNull((object?)m);
-                Assert.Equivalent(message, m.Message);
-                Assert.True((bool)m.Async);
+                await Assert.That((object?)m).IsNotNull();
+                await Assert.That(m.Message).IsEquivalentTo(message);
+                await Assert.That((bool)m.Async).IsTrue();
                 await _consumer.AcknowledgeAsync(messages[0]);
                 return;
             }

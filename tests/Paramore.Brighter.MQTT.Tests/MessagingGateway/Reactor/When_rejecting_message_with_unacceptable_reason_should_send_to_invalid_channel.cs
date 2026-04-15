@@ -29,13 +29,11 @@ using System.Threading.Tasks;
 using MQTTnet;
 using Paramore.Brighter.MessagingGateway.MQTT;
 using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "MQTT")]
-[Collection("MQTT")]
+[Category("MQTT")]
+[NotInParallel("MQTT")]
 public class MqttMessageConsumerRejectUnacceptableInvalidChannelTests : IDisposable
 {
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/InvalidSource";
@@ -48,7 +46,7 @@ public class MqttMessageConsumerRejectUnacceptableInvalidChannelTests : IDisposa
     private readonly MqttMessageConsumer _invalidConsumer;
     private readonly MqttMessageConsumer _dlqConsumer;
 
-    public MqttMessageConsumerRejectUnacceptableInvalidChannelTests(ITestOutputHelper outputHelper)
+    public MqttMessageConsumerRejectUnacceptableInvalidChannelTests()
     {
         var mqttFactory = new MqttFactory();
         int serverPort = MqttTestServer.GetRandomServerPort();
@@ -101,7 +99,7 @@ public class MqttMessageConsumerRejectUnacceptableInvalidChannelTests : IDisposa
         _dlqConsumer = new MqttMessageConsumer(dlqConsumerConfig);
     }
 
-    [Fact]
+    [Test]
     public async Task When_rejecting_message_with_unacceptable_reason_should_send_to_invalid_channel()
     {
         //Arrange
@@ -116,7 +114,7 @@ public class MqttMessageConsumerRejectUnacceptableInvalidChannelTests : IDisposa
         await Task.Delay(500);
 
         var received = ((IAmAMessageConsumerSync)_sourceConsumer).Receive(TimeSpan.FromSeconds(2));
-        Assert.NotEmpty(received);
+        await Assert.That(received).IsNotEmpty();
         var sourceMessage = received.First(m => m.Header.MessageType != MessageType.MT_NONE);
 
         //Act — reject with Unacceptable
@@ -126,20 +124,20 @@ public class MqttMessageConsumerRejectUnacceptableInvalidChannelTests : IDisposa
         );
 
         //Assert — reject returns true
-        Assert.True(result);
+        await Assert.That(result).IsTrue();
 
         //Assert — invalid message consumer receives the rejected message
         await Task.Delay(500);
         var invalidMessages = ((IAmAMessageConsumerSync)_invalidConsumer).Receive(TimeSpan.FromSeconds(2));
-        Assert.NotEmpty(invalidMessages);
+        await Assert.That(invalidMessages).IsNotEmpty();
         var invalidMessage = invalidMessages.First(m => m.Header.MessageType != MessageType.MT_NONE);
 
-        Assert.Equal(message.Body.Value, invalidMessage.Body.Value);
-        Assert.Equal("Unacceptable", invalidMessage.Header.Bag["rejectionReason"]!.ToString());
+        await Assert.That(invalidMessage.Body.Value).IsEqualTo(message.Body.Value);
+        await Assert.That(invalidMessage.Header.Bag["rejectionReason"]!.ToString()).IsEqualTo("Unacceptable");
 
         //Assert — DLQ consumer does NOT receive the message
         var dlqMessages = ((IAmAMessageConsumerSync)_dlqConsumer).Receive(TimeSpan.FromMilliseconds(500));
-        Assert.All(dlqMessages, m => Assert.Equal(MessageType.MT_NONE, m.Header.MessageType));
+        await Assert.That(dlqMessages).All((Message m) => m.Header.MessageType == MessageType.MT_NONE);
     }
 
     public void Dispose()

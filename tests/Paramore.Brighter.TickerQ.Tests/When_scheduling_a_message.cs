@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.Json;
 using Paramore.Brighter.TickerQ.Tests.TestDoubles;
 using Paramore.Brighter.TickerQ.Tests.TestDoubles.Fixtures;
@@ -6,8 +6,9 @@ using Paramore.Brighter.TickerQ.Tests.TestDoubles.Fixtures;
 
 namespace Paramore.Brighter.TickerQ.Tests;
 
-[Collection("Scheduler")]
-public class TickerQSchedulerMessageTests : IClassFixture<TickerQMessageTestFixture>, IDisposable
+[NotInParallel("Scheduler")]
+[ClassDataSource<TickerQMessageTestFixture>(Shared = SharedType.PerClass)]
+    public class TickerQSchedulerMessageTests : IDisposable
 {
     private readonly TickerQMessageTestFixture _fixture;
 
@@ -17,67 +18,67 @@ public class TickerQSchedulerMessageTests : IClassFixture<TickerQMessageTestFixt
         _fixture = fixture;
     }
 
-    [Fact]
-    public void When_scheduler_a_message_with_a_datetimeoffset_sync()
+    [Test]
+    public async Task When_scheduler_a_message_with_a_datetimeoffset_sync()
     {
         Message message = GetMessage();
 
         var scheduler = (IAmAMessageSchedulerSync)_fixture.SchedulerFactory.Create(_fixture.Processor);
         var id = scheduler.Schedule(message, _fixture.TimeProvider.GetUtcNow().Add(TimeSpan.FromSeconds(1)));
 
-        Assert.NotEqual(0, id.Length);
+        await Assert.That(id.Length).IsNotEqualTo(0);
 
-        Assert.Empty(_fixture.InternalBus.Stream(_fixture.RoutingKey));
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsEmpty();
 
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
-        Assert.Equivalent(message, _fixture.Outbox.Get(message.Id, new RequestContext()));
+        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
 
-        Assert.NotEmpty(_fixture.InternalBus.Stream(_fixture.RoutingKey));
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
     }
 
-    [Fact]
-    public void When_scheduler_a_message_with_a_timespan_sync()
+    [Test]
+    public async Task When_scheduler_a_message_with_a_timespan_sync()
     {
         Message message = GetMessage();
 
         var scheduler = (IAmAMessageSchedulerSync)_fixture.SchedulerFactory.Create(_fixture.Processor);
         var id = scheduler.Schedule(message, TimeSpan.FromSeconds(1));
 
-        Assert.NotEqual(0, id.Length);
+        await Assert.That(id.Length).IsNotEqualTo(0);
 
-        Assert.Empty(_fixture.InternalBus.Stream(_fixture.RoutingKey));
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsEmpty();
 
         Thread.Sleep(TimeSpan.FromSeconds(2));
 
-        Assert.Equivalent(message, _fixture.Outbox.Get(message.Id, new RequestContext()));
+        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
 
-        Assert.NotEmpty(_fixture.InternalBus.Stream(_fixture.RoutingKey));
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
     }
 
-    [Fact]
-    public void When_reschedule_a_message_with_a_datetimeoffset_sync()
+    [Test]
+    public async Task When_reschedule_a_message_with_a_datetimeoffset_sync()
     {
         var message = GetMessage();
 
         var scheduler = (IAmAMessageSchedulerSync)_fixture.SchedulerFactory.Create(_fixture.Processor);
         var id = scheduler.Schedule(message, _fixture.TimeProvider.GetUtcNow().Add(TimeSpan.FromSeconds(2)));
 
-        Assert.True((id)?.Any());
-        Assert.Empty(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []);
+        await Assert.That((id)?.Any()).IsTrue();
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []).IsEmpty();
 
         scheduler.ReScheduler(id, _fixture.TimeProvider.GetUtcNow().Add(TimeSpan.FromSeconds(5)));
 
         Thread.Sleep(TimeSpan.FromSeconds(2));
-        Assert.Empty(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []);
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []).IsEmpty();
 
         Thread.Sleep(TimeSpan.FromSeconds(5));
 
-        Assert.NotEmpty(_fixture.InternalBus.Stream(_fixture.RoutingKey));
-        Assert.Equivalent(message, _fixture.Outbox.Get(message.Id, new RequestContext()));
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
+        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
     }
 
-    [Fact]
+    [Test]
     public async Task When_reschedule_a_message_with_a_timespan_sync()
     {
         var message = GetMessage();
@@ -85,28 +86,28 @@ public class TickerQSchedulerMessageTests : IClassFixture<TickerQMessageTestFixt
         var scheduler = (IAmAMessageSchedulerSync)_fixture.SchedulerFactory.Create(_fixture.Processor);
         var id = scheduler.Schedule(message, TimeSpan.FromSeconds(2));
 
-        Assert.True((id)?.Any());
-        Assert.Empty(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []);
+        await Assert.That((id)?.Any()).IsTrue();
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []).IsEmpty();
 
         scheduler.ReScheduler(id, TimeSpan.FromSeconds(5));
 
         Thread.Sleep(TimeSpan.FromSeconds(2));
-        Assert.Empty(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []);
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey) ?? []).IsEmpty();
 
         await Task.Delay(TimeSpan.FromSeconds(5));
 
-        Assert.NotEmpty(_fixture.InternalBus.Stream(_fixture.RoutingKey));
-        Assert.Equivalent(message, _fixture.Outbox.Get(message.Id, new RequestContext()));
+        await Assert.That(_fixture.InternalBus.Stream(_fixture.RoutingKey)).IsNotEmpty();
+        await Assert.That(_fixture.Outbox.Get(message.Id, new RequestContext())).IsEquivalentTo(message);
     }
-    [Fact]
-    public void When_cancel_scheduler_message_with_a_datetimeoffset()
+    [Test]
+    public async Task When_cancel_scheduler_message_with_a_datetimeoffset()
     {
         var message = GetMessage();
 
         var scheduler = (IAmAMessageSchedulerSync)_fixture.SchedulerFactory.Create(_fixture.Processor);
         var id = scheduler.Schedule(message, TimeSpan.FromSeconds(2));
 
-        Assert.NotEqual(0, id.Length);
+        await Assert.That(id.Length).IsNotEqualTo(0);
 
         scheduler.Cancel(id);
 
@@ -115,30 +116,30 @@ public class TickerQSchedulerMessageTests : IClassFixture<TickerQMessageTestFixt
         var expected = Message.Empty;
         var actual = _fixture.Outbox.Get(message.Id, new RequestContext());
 
-        Assert.Equivalent(expected.Body, actual.Body);
-        Assert.Equal(expected.Id, actual.Id);
-        Assert.Equal(expected.Persist, actual.Persist);
-        Assert.Equal(expected.Redelivered, actual.Redelivered);
-        Assert.Equal(expected.DeliveryTag, actual.DeliveryTag);
-        Assert.Equal(expected.Header.MessageType, actual.Header.MessageType);
-        Assert.Equal(expected.Header.Topic, actual.Header.Topic);
-        Assert.Equal(expected.Header.TimeStamp, actual.Header.TimeStamp, TimeSpan.FromSeconds(1));
-        Assert.Equal(expected.Header.CorrelationId, actual.Header.CorrelationId);
-        Assert.Equal(expected.Header.ReplyTo, actual.Header.ReplyTo);
-        Assert.Equal(expected.Header.ContentType, actual.Header.ContentType);
-        Assert.Equal(expected.Header.HandledCount, actual.Header.HandledCount);
+        await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
+        await Assert.That(actual.Id).IsEqualTo(expected.Id);
+        await Assert.That(actual.Persist).IsEqualTo(expected.Persist);
+        await Assert.That(actual.Redelivered).IsEqualTo(expected.Redelivered);
+        await Assert.That(actual.DeliveryTag).IsEqualTo(expected.DeliveryTag);
+        await Assert.That(actual.Header.MessageType).IsEqualTo(expected.Header.MessageType);
+        await Assert.That(actual.Header.Topic).IsEqualTo(expected.Header.Topic);
+        await Assert.That(actual.Header.TimeStamp).IsEqualTo(expected.Header.TimeStamp).Within(TimeSpan.FromSeconds(1));
+        await Assert.That(actual.Header.CorrelationId).IsEqualTo(expected.Header.CorrelationId);
+        await Assert.That(actual.Header.ReplyTo).IsEqualTo(expected.Header.ReplyTo);
+        await Assert.That(actual.Header.ContentType).IsEqualTo(expected.Header.ContentType);
+        await Assert.That(actual.Header.HandledCount).IsEqualTo(expected.Header.HandledCount);
     }
 
 
-    [Fact]
-    public void When_cancel_scheduler_request_with_a_timespan()
+    [Test]
+    public async Task When_cancel_scheduler_request_with_a_timespan()
     {
         var message = GetMessage();
 
         var scheduler = (IAmAMessageSchedulerSync)_fixture.SchedulerFactory.Create(_fixture.Processor);
         var id = scheduler.Schedule(message, TimeSpan.FromSeconds(2));
 
-        Assert.NotEqual(0, id.Length);
+        await Assert.That(id.Length).IsNotEqualTo(0);
 
         scheduler.Cancel(id);
 
@@ -147,18 +148,18 @@ public class TickerQSchedulerMessageTests : IClassFixture<TickerQMessageTestFixt
         var expected = Message.Empty;
         var actual = _fixture.Outbox.Get(message.Id, new RequestContext());
 
-        Assert.Equivalent(expected.Body, actual.Body);
-        Assert.Equal(expected.Id, actual.Id);
-        Assert.Equal(expected.Persist, actual.Persist);
-        Assert.Equal(expected.Redelivered, actual.Redelivered);
-        Assert.Equal(expected.DeliveryTag, actual.DeliveryTag);
-        Assert.Equal(expected.Header.MessageType, actual.Header.MessageType);
-        Assert.Equal(expected.Header.Topic, actual.Header.Topic);
-        Assert.Equal(expected.Header.TimeStamp, actual.Header.TimeStamp, TimeSpan.FromSeconds(1));
-        Assert.Equal(expected.Header.CorrelationId, actual.Header.CorrelationId);
-        Assert.Equal(expected.Header.ReplyTo, actual.Header.ReplyTo);
-        Assert.Equal(expected.Header.ContentType, actual.Header.ContentType);
-        Assert.Equal(expected.Header.HandledCount, actual.Header.HandledCount);
+        await Assert.That(actual.Body).IsEquivalentTo(expected.Body);
+        await Assert.That(actual.Id).IsEqualTo(expected.Id);
+        await Assert.That(actual.Persist).IsEqualTo(expected.Persist);
+        await Assert.That(actual.Redelivered).IsEqualTo(expected.Redelivered);
+        await Assert.That(actual.DeliveryTag).IsEqualTo(expected.DeliveryTag);
+        await Assert.That(actual.Header.MessageType).IsEqualTo(expected.Header.MessageType);
+        await Assert.That(actual.Header.Topic).IsEqualTo(expected.Header.Topic);
+        await Assert.That(actual.Header.TimeStamp).IsEqualTo(expected.Header.TimeStamp).Within(TimeSpan.FromSeconds(1));
+        await Assert.That(actual.Header.CorrelationId).IsEqualTo(expected.Header.CorrelationId);
+        await Assert.That(actual.Header.ReplyTo).IsEqualTo(expected.Header.ReplyTo);
+        await Assert.That(actual.Header.ContentType).IsEqualTo(expected.Header.ContentType);
+        await Assert.That(actual.Header.HandledCount).IsEqualTo(expected.Header.HandledCount);
     }
 
     private Message GetMessage()

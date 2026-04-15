@@ -7,12 +7,11 @@ using Paramore.Brighter.AWS.V4.Tests.Helpers;
 using Paramore.Brighter.AWS.V4.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
-using Xunit;
 using System.Collections.Generic;
 
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Fifo.Reactor;
 
-[Trait("Category", "AWS")]
+[Category("AWS")]
 public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable, IDisposable
 {
     private readonly Message _message;
@@ -72,7 +71,7 @@ public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable,
         _consumer = new SqsMessageConsumerFactory(awsConnection).Create(subscription);
     }
 
-    [Fact]
+    [Test]
     public async Task When_infrastructure_exists_can_verify_async()
     {
         _messageProducer.Send(_message);
@@ -82,7 +81,7 @@ public class AwsValidateInfrastructureByConventionTestsAsync : IAsyncDisposable,
         var messages = _consumer.Receive(TimeSpan.FromMilliseconds(5000));
 
         var message = messages.First();
-        Assert.Equal(_myCommand.Id, message.Id);
+        await Assert.That(message.Id).IsEqualTo(_myCommand.Id);
 
         _consumer.Acknowledge(message);
     }

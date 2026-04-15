@@ -8,7 +8,6 @@ using OpenTelemetry;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Acceptance;
 
@@ -22,11 +21,11 @@ namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Acceptance;
 /// Rule #11: BrighterTracer.WriteProducerEvent must be called for all producers
 /// Rule #12: CloudEvents trace context must survive serialization
 /// </summary>
-[Trait("Category", "RabbitMQ")]
-[Trait("Category", "MutualTLS")]
-[Trait("Category", "Quorum")]
-[Trait("Category", "Observability")]
-[Trait("Requires", "Docker-mTLS")]
+[Category("RabbitMQ")]
+[Category("MutualTLS")]
+[Category("Quorum")]
+[Category("Observability")]
+[Property("Requires", "Docker-mTLS")]
 public class RmqMutualTlsQuorumObservabilityAsyncTests : IDisposable
 {
     private readonly string _clientCertPath;
@@ -63,7 +62,7 @@ public class RmqMutualTlsQuorumObservabilityAsyncTests : IDisposable
             .Build();
     }
 
-    [Fact]
+    [Test]
     public async Task When_publishing_with_mtls_and_quorum_trace_context_is_preserved_async()
     {
         // Arrange - mTLS connection
@@ -123,19 +122,19 @@ public class RmqMutualTlsQuorumObservabilityAsyncTests : IDisposable
         var receivedMessages = await consumer.ReceiveAsync(TimeSpan.FromSeconds(5));
 
         // Assert - Verify message was received
-        Assert.NotEmpty(receivedMessages);
+        await Assert.That(receivedMessages).IsNotEmpty();
         var receivedMessage = receivedMessages.First();
 
         // Assert - Rule #10: TraceParent must be preserved
-        Assert.NotNull(receivedMessage.Header.TraceParent);
-        Assert.Contains(activity?.TraceId.ToString() ?? "", receivedMessage.Header.TraceParent.Value);
+        await Assert.That(receivedMessage.Header.TraceParent).IsNotNull();
+        await Assert.That(receivedMessage.Header.TraceParent.Value).Contains(activity?.TraceId.ToString() ?? "");
 
         // Assert - Rule #11: BrighterTracer.WriteProducerEvent was called
         // The presence of activities in our exporter confirms the tracer is working
-        Assert.NotEmpty(_exportedActivities);
+        await Assert.That(_exportedActivities).IsNotEmpty();
     }
 
-    [Fact]
+    [Test]
     public async Task When_publishing_with_mtls_quorum_and_baggage_context_survives_async()
     {
         // Arrange - mTLS connection
@@ -178,13 +177,13 @@ public class RmqMutualTlsQuorumObservabilityAsyncTests : IDisposable
             var receivedMessages = await consumer.ReceiveAsync(TimeSpan.FromSeconds(5));
 
             // Assert - Baggage must survive (Rule #12)
-            Assert.NotEmpty(receivedMessages);
+            await Assert.That(receivedMessages).IsNotEmpty();
             var receivedMessage = receivedMessages.First();
 
-            Assert.NotNull(receivedMessage.Header.Baggage);
+            await Assert.That(receivedMessage.Header.Baggage).IsNotNull();
             var baggageString = receivedMessage.Header.Baggage.ToString();
-            Assert.Contains("userId=alice", baggageString);
-            Assert.Contains("serverNode=node-42", baggageString);
+            await Assert.That(baggageString).Contains("userId=alice");
+            await Assert.That(baggageString).Contains("serverNode=node-42");
         }
         finally
         {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Mime;
@@ -10,12 +10,11 @@ using Paramore.Brighter.MessagingGateway.RMQ.Async;
 using Paramore.Brighter.RMQ.Async.Tests.TestDoubles;
 using Paramore.Brighter.ServiceActivator;
 using Polly.Registry;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RMQ")]
-[Collection("RMQ")]
+[Category("RMQ")]
+[NotInParallel("RMQ")]
 public class RMQMessageConsumerRetryDLQTests : IDisposable
 {
     private readonly IAmAMessagePump _messagePump;
@@ -117,7 +116,7 @@ public class RMQMessageConsumerRetryDLQTests : IDisposable
         );
     }
 
-    [Fact(Skip = "Breaks due to fault in Task Scheduler running after context has closed")]
+    [Test, Skip("Breaks due to fault in Task Scheduler running after context has closed")]
     [SuppressMessage("Usage", "xUnit1031:Do not use blocking task operations in test method")]
     public async Task When_retry_limits_force_a_message_onto_the_dlq()
     {
@@ -147,7 +146,7 @@ public class RMQMessageConsumerRetryDLQTests : IDisposable
         var dlqMessage = _deadLetterConsumer.Receive(new TimeSpan(10000)).First();
 
         //assert this is our message
-        Assert.Equal(_message.Body.Value, dlqMessage.Body.Value);
+        await Assert.That(dlqMessage.Body.Value).IsEqualTo(_message.Body.Value);
 
         _deadLetterConsumer.Acknowledge(dlqMessage);
 

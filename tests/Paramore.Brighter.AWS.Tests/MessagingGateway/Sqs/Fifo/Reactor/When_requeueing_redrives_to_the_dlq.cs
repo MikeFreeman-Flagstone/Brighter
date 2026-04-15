@@ -9,13 +9,12 @@ using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 using System.Collections.Generic;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Reactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SqsMessageProducerDlqTests : IDisposable, IAsyncDisposable
 {
     private readonly SqsMessageProducer _sender;
@@ -71,8 +70,8 @@ public class SqsMessageProducerDlqTests : IDisposable, IAsyncDisposable
         _channel = _channelFactory.CreateSyncChannel(subscription);
     }
 
-    [Fact]
-    public void When_requeueing_redrives_to_the_queue()
+    [Test]
+    public async Task When_requeueing_redrives_to_the_queue()
     {
         _sender.Send(_message);
         var receivedMessage = _channel.Receive(TimeSpan.FromMilliseconds(5000));
@@ -88,7 +87,7 @@ public class SqsMessageProducerDlqTests : IDisposable, IAsyncDisposable
         Task.Delay(5000);
 
         //inspect the dlq
-        Assert.Equal(1, GetDLQCount(_dlqChannelName + ".fifo"));
+        await Assert.That(GetDLQCount(_dlqChannelName + ".fifo")).IsEqualTo(1);
     }
 
     private int GetDLQCount(string queueName)

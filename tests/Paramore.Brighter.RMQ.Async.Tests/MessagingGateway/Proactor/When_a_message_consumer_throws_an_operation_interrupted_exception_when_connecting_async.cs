@@ -27,11 +27,10 @@ using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
 using Paramore.Brighter.RMQ.Async.Tests.TestDoubles;
 using RabbitMQ.Client.Exceptions;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RMQ")]
+[Category("RMQ")]
 public class AsyncRmqMessageConsumerOperationInterruptedTestsAsync : IAsyncDisposable, IDisposable
 {
     private readonly IAmAMessageProducerAsync _sender;
@@ -59,7 +58,7 @@ public class AsyncRmqMessageConsumerOperationInterruptedTestsAsync : IAsyncDispo
         _sender.SendAsync(sentMessage).GetAwaiter().GetResult();
     }
 
-    [Fact]
+    [Test]
     public async Task  When_a_message_consumer_throws_an_operation_interrupted_exception_when_connecting()
     {
         bool exceptionHappened = false;
@@ -70,10 +69,10 @@ public class AsyncRmqMessageConsumerOperationInterruptedTestsAsync : IAsyncDispo
         catch (ChannelFailureException cfe)
         {
             exceptionHappened = true;
-            Assert.True((cfe.InnerException) is OperationInterruptedException);
+            await Assert.That((cfe.InnerException) is OperationInterruptedException).IsTrue();
         }
             
-        Assert.True(exceptionHappened);
+        await Assert.That(exceptionHappened).IsTrue();
     }
 
     public void Dispose()

@@ -1,4 +1,4 @@
-﻿using System.Net.Mime;
+using System.Net.Mime;
 using Paramore.Brighter.AWSScheduler.Tests.Helpers;
 using Paramore.Brighter.AWSScheduler.Tests.TestDoubles;
 using Paramore.Brighter.MessageScheduler.AWS;
@@ -6,8 +6,8 @@ using Paramore.Brighter.MessagingGateway.AWSSQS;
 
 namespace Paramore.Brighter.AWSScheduler.Tests.Scheduler.Messages.Sqs;
 
-[Trait("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
-[Collection("Scheduler SQS")]
+[Property("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
+[NotInParallel("Scheduler SQS")]
 public class SqsSchedulingMessageTest : IDisposable
 {
     private readonly ContentType _contentType = new(MediaTypeNames.Text.Plain);
@@ -48,8 +48,8 @@ public class SqsSchedulingMessageTest : IDisposable
         };
     }
 
-    [Fact]
-    public void When_Scheduling_A_Sqs_Message()
+    [Test]
+    public async Task When_Scheduling_A_Sqs_Message()
     {
         var routingKey = new RoutingKey(_queueName);
         var message = new Message(
@@ -67,12 +67,12 @@ public class SqsSchedulingMessageTest : IDisposable
         while (stopAt > DateTimeOffset.UtcNow)
         {
             var messages = _consumer.Receive(TimeSpan.FromMinutes(1));
-            Assert.Single(messages);
+            await Assert.That(messages).HasSingleItem();
 
             if (messages[0].Header.MessageType != MessageType.MT_NONE)
             {
-                Assert.Equal((string?)message.Body.Value, (string?)messages[0].Body.Value);
-                Assert.Equivalent(message.Header, messages[0].Header);
+                await Assert.That((string?)messages[0].Body.Value).IsEqualTo((string?)message.Body.Value);
+                await Assert.That(messages[0].Header).IsEquivalentTo(message.Header);
                 _consumer.Acknowledge(messages[0]);
                 return;
             }

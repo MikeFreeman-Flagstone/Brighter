@@ -1,10 +1,9 @@
-﻿using Paramore.Brighter.MessagingGateway.RocketMQ;
+using Paramore.Brighter.MessagingGateway.RocketMQ;
 using Paramore.Brighter.RocketMQ.Tests.Utils;
-using Xunit;
 
 namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RocketMQ")]
+[Category("RocketMQ")]
 public class BufferedConsumerTests : IDisposable
 {
     private readonly IAmAMessageProducerSync _messageProducer;
@@ -23,8 +22,8 @@ public class BufferedConsumerTests : IDisposable
         _messageProducer = new RocketMqMessageProducer(connection, producer, publication);
     }
 
-    [Fact]
-    public void When_a_message_consumer_reads_multiple_messages()
+    [Test]
+    public async Task When_a_message_consumer_reads_multiple_messages()
     {
         _messageConsumer.Purge();
         //Post one more than batch size messages
@@ -44,7 +43,7 @@ public class BufferedConsumerTests : IDisposable
         var messages = _messageConsumer.Receive(TimeSpan.FromMilliseconds(1000));
 
         //We should only have three messages
-        Assert.Equal(3, messages.Length);
+        await Assert.That(messages.Length).IsEqualTo(3);
 
         //ack those to remove from the queue
         foreach (var message in messages)
@@ -59,7 +58,7 @@ public class BufferedConsumerTests : IDisposable
         messages = _messageConsumer.Receive(TimeSpan.FromMilliseconds(500));
 
         //This time, just the one message
-        Assert.Single(messages);
+        await Assert.That(messages).HasSingleItem();
     }
 
     public void Dispose()

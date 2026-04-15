@@ -1,19 +1,18 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Mime;
 using Confluent.Kafka;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")] //
+[Category("Kafka")]
+[NotInParallel("Kafka")] //
 public class KafkaDefaultMessageHeaderBuilderTests
 {
-    [Fact]
-    public void When_converting_brighterheader_to_kafkaheader()
+    [Test]
+    public async Task When_converting_brighterheader_to_kafkaheader()
     {
         //arrange
         var message = new Message(
@@ -54,27 +53,27 @@ public class KafkaDefaultMessageHeaderBuilderTests
         //assert
 
         //known properties
-        Assert.Equal(message.Header.MessageType.ToString().ToByteArray(), headers.GetLastBytes(HeaderNames.MESSAGE_TYPE));
-        Assert.Equal(message.Header.MessageId.Value.ToByteArray(), headers.GetLastBytes(HeaderNames.MESSAGE_ID));
-        Assert.Equal(message.Header.Topic.Value.ToByteArray(), headers.GetLastBytes(HeaderNames.TOPIC));
-        Assert.Equal(message.Header.TimeStamp.DateTime.ToString(CultureInfo.InvariantCulture).ToByteArray(), headers.GetLastBytes(HeaderNames.TIMESTAMP));
-        Assert.Equal(message.Header.CorrelationId.Value.ToByteArray(), headers.GetLastBytes(HeaderNames.CORRELATION_ID));
-        Assert.Equal(message.Header.PartitionKey.Value.ToByteArray(), headers.GetLastBytes(HeaderNames.PARTITIONKEY));
-        Assert.Equal(message.Header.ContentType!.ToString().ToByteArray(), headers.GetLastBytes(HeaderNames.CONTENT_TYPE));
-        Assert.Equal(message.Header.ReplyTo!.Value.ToByteArray(), headers.GetLastBytes(HeaderNames.REPLY_TO));
-        Assert.Equal(message.Header.Delayed.TotalMilliseconds.ToString().ToByteArray(), headers.GetLastBytes(HeaderNames.DELAYED_MILLISECONDS));
-        Assert.Equal(message.Header.HandledCount.ToString().ToByteArray(), headers.GetLastBytes(HeaderNames.HANDLED_COUNT));
-        Assert.Equal(message.Header.Type.Value.ToByteArray(), headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_TYPE));
-        Assert.Equal(message.Header.Subject!.ToByteArray(), headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_SUBJECT));
-        Assert.Equal(message.Header.Source.ToString().ToByteArray(), headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_SOURCE));
-        Assert.Equal(message.Header.DataSchema!.ToString().ToByteArray(), headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_DATA_SCHEMA));
+        await Assert.That(headers.GetLastBytes(HeaderNames.MESSAGE_TYPE)).IsEqualTo(message.Header.MessageType.ToString().ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.MESSAGE_ID)).IsEqualTo(message.Header.MessageId.Value.ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.TOPIC)).IsEqualTo(message.Header.Topic.Value.ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.TIMESTAMP)).IsEqualTo(message.Header.TimeStamp.DateTime.ToString(CultureInfo.InvariantCulture).ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.CORRELATION_ID)).IsEqualTo(message.Header.CorrelationId.Value.ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.PARTITIONKEY)).IsEqualTo(message.Header.PartitionKey.Value.ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.CONTENT_TYPE)).IsEqualTo(message.Header.ContentType!.ToString().ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.REPLY_TO)).IsEqualTo(message.Header.ReplyTo!.Value.ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.DELAYED_MILLISECONDS)).IsEqualTo(message.Header.Delayed.TotalMilliseconds.ToString().ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.HANDLED_COUNT)).IsEqualTo(message.Header.HandledCount.ToString().ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_TYPE)).IsEqualTo(message.Header.Type.Value.ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_SUBJECT)).IsEqualTo(message.Header.Subject!.ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_SOURCE)).IsEqualTo(message.Header.Source.ToString().ToByteArray());
+        await Assert.That(headers.GetLastBytes(HeaderNames.CLOUD_EVENTS_DATA_SCHEMA)).IsEqualTo(message.Header.DataSchema!.ToString().ToByteArray());
 
         //bag properties
-        Assert.Equal(bag["myguid"].ToString()!.ToByteArray(), headers.GetLastBytes("myguid"));
-        Assert.Equal(bag["mystring"].ToString()!.ToByteArray(), headers.GetLastBytes("mystring"));
-        Assert.Equal(bag["myint"].ToString()!.ToByteArray(), headers.GetLastBytes("myint"));
-        Assert.Equal(bag["mydouble"].ToString()!.ToByteArray(), headers.GetLastBytes("mydouble"));
-        Assert.Equal(myDateTime.ToByteArray(), headers.GetLastBytes("mydatetime"));
+        await Assert.That(headers.GetLastBytes("myguid")).IsEqualTo(bag["myguid"].ToString()!.ToByteArray());
+        await Assert.That(headers.GetLastBytes("mystring")).IsEqualTo(bag["mystring"].ToString()!.ToByteArray());
+        await Assert.That(headers.GetLastBytes("myint")).IsEqualTo(bag["myint"].ToString()!.ToByteArray());
+        await Assert.That(headers.GetLastBytes("mydouble")).IsEqualTo(bag["mydouble"].ToString()!.ToByteArray());
+        await Assert.That(headers.GetLastBytes("mydatetime")).IsEqualTo(myDateTime.ToByteArray());
 
     }
 }

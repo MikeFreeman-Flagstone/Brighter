@@ -26,25 +26,21 @@ using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]
+[Category("Kafka")]
+[NotInParallel("Kafka")]
 public class KafkaMessageConsumerDLQTests : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly string _dlqTopic;
     private readonly KafkaMessageProducer _producer;
     private readonly string _partitionKey = Guid.NewGuid().ToString();
 
-    public KafkaMessageConsumerDLQTests(ITestOutputHelper output)
+    public KafkaMessageConsumerDLQTests()
     {
-        _output = output;
         _dlqTopic = $"{_topic}.dlq";
 
         // Create producer directly for the data topic
@@ -69,7 +65,7 @@ public class KafkaMessageConsumerDLQTests : IDisposable
         _producer.Init();
     }
 
-    [Fact]
+    [Test]
     public async Task When_rejecting_message_with_delivery_error_should_send_to_dlq()
     {
         //Arrange - let topics propagate in the broker
@@ -93,20 +89,20 @@ public class KafkaMessageConsumerDLQTests : IDisposable
         using (var consumer = CreateConsumer(groupId, dlqRoutingKey))
         {
             receivedMessage = ConsumeMessage(consumer);
-            Assert.Equal(messageId, receivedMessage.Id);
+            await Assert.That(receivedMessage.Id).IsEqualTo(messageId);
 
-            _output.WriteLine($"About to reject message {messageId} with DeliveryError");
+            Console.WriteLine($"About to reject message {messageId} with DeliveryError");
 
             //reject with DeliveryError reason
             consumer.Reject(receivedMessage, new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
-            _output.WriteLine($"Message {messageId} rejected, waiting for DLQ propagation");
+            Console.WriteLine($"Message {messageId} rejected, waiting for DLQ propagation");
 
             //yield to allow DLQ message to be produced and topic to be created
             await Task.Delay(TimeSpan.FromMilliseconds(3000));
         }
 
-        _output.WriteLine("Creating DLQ consumer");
+        Console.WriteLine("Creating DLQ consumer");
 
         //yield to allow DLQ topic to propagate
         await Task.Delay(TimeSpan.FromMilliseconds(1000));
@@ -114,17 +110,17 @@ public class KafkaMessageConsumerDLQTests : IDisposable
         //Assert - verify message appears on DLQ
         using (var dlqConsumer = CreateDLQConsumer(groupId))
         {
-            _output.WriteLine("Attempting to consume from DLQ");
+            Console.WriteLine("Attempting to consume from DLQ");
             var dlqMessage = ConsumeMessage(dlqConsumer);
 
-            Assert.NotNull(dlqMessage);
-            Assert.Equal(MessageType.MT_COMMAND, dlqMessage.Header.MessageType);
-            Assert.Equal(receivedMessage.Body.Value, dlqMessage.Body.Value);
+            await Assert.That(dlqMessage).IsNotNull();
+            await Assert.That(dlqMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
+            await Assert.That(dlqMessage.Body.Value).IsEqualTo(receivedMessage.Body.Value);
 
             //verify rejection metadata was added
-            Assert.True(dlqMessage.Header.Bag.ContainsKey("OriginalTopic"));
-            Assert.Equal(_topic, dlqMessage.Header.Bag["OriginalTopic"]);
-            Assert.True(dlqMessage.Header.Bag.ContainsKey("RejectionReason"));
+            await Assert.That(dlqMessage.Header.Bag.ContainsKey("OriginalTopic")).IsTrue();
+            await Assert.That(dlqMessage.Header.Bag["OriginalTopic"]).IsEqualTo(_topic);
+            await Assert.That(dlqMessage.Header.Bag.ContainsKey("RejectionReason")).IsTrue();
         }
     }
 
@@ -190,7 +186,7 @@ public class KafkaMessageConsumerDLQTests : IDisposable
             }
             catch (ChannelFailureException cfx)
             {
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
         } while (maxTries <= 10);

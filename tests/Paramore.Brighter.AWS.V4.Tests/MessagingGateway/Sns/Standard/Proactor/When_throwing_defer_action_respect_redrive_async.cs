@@ -13,12 +13,11 @@ using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
 using Paramore.Brighter.ServiceActivator;
 using Polly.Registry;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Proactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
 {
     private readonly IAmAMessagePump _messagePump;
@@ -126,7 +125,7 @@ public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
         return response.Messages.Count;
     }
 
-    [Fact(Skip = "Failing async tests caused by task scheduler issues")]
+    [Test, Skip("Failing async tests caused by task scheduler issues")]
     public async Task When_throwing_defer_action_respect_redrive_async()
     {
         await _sender.SendAsync(_message);
@@ -142,7 +141,7 @@ public class SnsReDrivePolicySDlqTestsAsync : IDisposable, IAsyncDisposable
         await Task.Delay(5000);
 
         int dlqCount = await GetDLQCountAsync(_dlqChannelName);
-        Assert.Equal(1, dlqCount);
+        await Assert.That(dlqCount).IsEqualTo(1);
     }
 
     public void Dispose()

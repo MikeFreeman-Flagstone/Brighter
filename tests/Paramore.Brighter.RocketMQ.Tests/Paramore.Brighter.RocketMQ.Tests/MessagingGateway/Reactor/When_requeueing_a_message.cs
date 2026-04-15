@@ -1,14 +1,13 @@
-﻿using System.Net.Mime;
+using System.Net.Mime;
 using System.Text.Json;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.RocketMQ;
 using Paramore.Brighter.RocketMQ.Tests.TestDoubles;
 using Paramore.Brighter.RocketMQ.Tests.Utils;
-using Xunit;
 
 namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RocketMQ")]
+[Category("RocketMQ")]
 public class MessageProducerRequeueTests
 {
     private readonly IAmAMessageProducerSync _sender;
@@ -51,8 +50,8 @@ public class MessageProducerRequeueTests
         _channel = channelFactory.CreateSyncChannel(subscription);
     }
 
-    [Fact]
-    public void When_requeueing_a_message_async()
+    [Test]
+    public async Task When_requeueing_a_message_async()
     {
         _channel.Purge();
         _sender.Send(_message);
@@ -72,6 +71,6 @@ public class MessageProducerRequeueTests
             break;
         }
 
-        Assert.Equal(_receivedMessage.Body.Value, _requeuedMessage.Body.Value);
+        await Assert.That(_requeuedMessage.Body.Value).IsEqualTo(_receivedMessage.Body.Value);
     }
 }

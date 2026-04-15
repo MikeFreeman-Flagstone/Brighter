@@ -4,13 +4,12 @@ using Amazon.SQS.Model;
 using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 using System.Collections.Generic;
 using Amazon.SimpleNotificationService.Model;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Reactor;
 
-[Trait("Category", "AWS")] 
+[Category("AWS")] 
 public class AwsValidateQueuesTests  : IDisposable, IAsyncDisposable
 {
     private readonly AWSMessagingGatewayConnection _awsConnection;
@@ -45,13 +44,13 @@ public class AwsValidateQueuesTests  : IDisposable, IAsyncDisposable
             
     }
 
-    [Fact]
-    public void When_queues_missing_verify_throws()
+    [Test]
+    public async Task When_queues_missing_verify_throws()
     {
         //We have no queues so we should throw
         //We need to do this manually in a test - will create the channel from subscriber parameters
         _channelFactory = new ChannelFactory(_awsConnection);
-        Assert.Throws<QueueDoesNotExistException>(() => _channelFactory.CreateSyncChannel(_subscription));
+        await Assert.That(() => _channelFactory.CreateSyncChannel(_subscription)).ThrowsExactly<QueueDoesNotExistException>();
     }
  
     public void Dispose()

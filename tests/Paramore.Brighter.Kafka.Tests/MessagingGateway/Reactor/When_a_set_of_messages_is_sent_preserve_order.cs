@@ -1,20 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]   //Kafka doesn't like multiple consumers of a partition
+[Category("Kafka")]
+[NotInParallel("Kafka")]   //Kafka doesn't like multiple consumers of a partition
 public class KafkaMessageConsumerPreservesOrder : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly RoutingKey _topic = new(Guid.NewGuid().ToString());
     private readonly IAmAProducerRegistry _producerRegistry;
@@ -22,9 +19,8 @@ public class KafkaMessageConsumerPreservesOrder : IDisposable
     private readonly string _kafkaGroupId = Guid.NewGuid().ToString();
 
 
-    public KafkaMessageConsumerPreservesOrder (ITestOutputHelper output)
+    public KafkaMessageConsumerPreservesOrder ()
     {
-        _output = output;
         _producerRegistry = new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
@@ -46,7 +42,7 @@ public class KafkaMessageConsumerPreservesOrder : IDisposable
             ]).Create();
     }
 
-    [Fact]
+    [Test]
     public async Task When_a_message_is_sent_keep_order()
     {
         //Let topic propogate
@@ -71,22 +67,22 @@ public class KafkaMessageConsumerPreservesOrder : IDisposable
             //Now read messages in order
             var firstMessage = ConsumeMessages(consumer);
             var message = firstMessage.First();
-            Assert.Equal(msgId, message.Id);
+            await Assert.That(message.Id).IsEqualTo(msgId);
             consumer.Acknowledge(message);
 
             var secondMessage = ConsumeMessages(consumer);
             message = secondMessage.First();
-            Assert.Equal(msgId2, message.Id);
+            await Assert.That(message.Id).IsEqualTo(msgId2);
             consumer.Acknowledge(message);
 
             var thirdMessages = ConsumeMessages(consumer);
             message = thirdMessages.First();
-            Assert.Equal(msgId3, message.Id);
+            await Assert.That(message.Id).IsEqualTo(msgId3);
             consumer.Acknowledge(message);
 
             var fourthMessage = ConsumeMessages(consumer);
             message = fourthMessage.First();
-            Assert.Equal(msgId4, message.Id);
+            await Assert.That(message.Id).IsEqualTo(msgId4);
             consumer.Acknowledge(message);
  
         }
@@ -130,7 +126,7 @@ public class KafkaMessageConsumerPreservesOrder : IDisposable
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
         } while (maxTries <= 10);

@@ -4,12 +4,11 @@ using Amazon.SQS.Model;
 using Paramore.Brighter.AWS.V4.Tests.Helpers;
 using Paramore.Brighter.AWS.V4.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
-using Xunit;
 using System.Collections.Generic;
 
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Fifo.Proactor;
 
-[Trait("Category", "AWS")]
+[Category("AWS")]
 public class AwsAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
 {
     private readonly ChannelFactory _channelFactory;
@@ -51,7 +50,7 @@ public class AwsAssumeQueuesTestsAsync : IAsyncDisposable, IDisposable
         _consumer = new SqsMessageConsumerFactory(awsConnection).CreateAsync(subscription);
     }
 
-    [Fact]
+    [Test]
     public async Task When_queues_missing_assume_throws_async()
     {
         //we will try to get the queue url, and fail because it does not exist

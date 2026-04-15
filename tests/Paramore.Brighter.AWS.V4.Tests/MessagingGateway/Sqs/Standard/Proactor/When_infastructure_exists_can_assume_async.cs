@@ -7,13 +7,12 @@ using Paramore.Brighter.AWS.V4.Tests.Helpers;
 using Paramore.Brighter.AWS.V4.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
-using Xunit;
 using System.Collections.Generic;
 
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Standard.Proactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class AWSAssumeInfrastructureTestsAsync  : IDisposable, IAsyncDisposable
 {    
     private readonly Message _message;
@@ -67,7 +66,7 @@ public class AWSAssumeInfrastructureTestsAsync  : IDisposable, IAsyncDisposable
         _consumer = new SqsMessageConsumer(awsConnection, channel.Name.ToValidSQSQueueName());
     }
 
-    [Fact]
+    [Test]
     public async Task When_infastructure_exists_can_assume()
     {
         //arrange
@@ -77,7 +76,7 @@ public class AWSAssumeInfrastructureTestsAsync  : IDisposable, IAsyncDisposable
             
         //Assert
         var message = messages.First();
-        Assert.Equal(_myCommand.Id, message.Id);
+        await Assert.That(message.Id).IsEqualTo(_myCommand.Id);
 
         //clear the queue
         await _consumer.AcknowledgeAsync(message);

@@ -1,27 +1,23 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]   //Kafka doesn't like multiple consumers of a partition
+[Category("Kafka")]
+[NotInParallel("Kafka")]   //Kafka doesn't like multiple consumers of a partition
 public class KafkaConsumerDeclareTests : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString(); 
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly IAmAProducerRegistry _producerRegistry;
     private readonly IAmAMessageConsumerSync _consumer;
     private readonly string _partitionKey = Guid.NewGuid().ToString();
 
-    public KafkaConsumerDeclareTests (ITestOutputHelper output)
+    public KafkaConsumerDeclareTests ()
     {
         string groupId = Guid.NewGuid().ToString();
-        _output = output;
         _producerRegistry = new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
@@ -61,7 +57,7 @@ public class KafkaConsumerDeclareTests : IDisposable
              
     }
 
-    [Fact]
+    [Test]
     public async Task When_a_consumer_declares_topics()
     {
         //Let topic propogate
@@ -85,9 +81,9 @@ public class KafkaConsumerDeclareTests : IDisposable
 
         Message receivedMessage = ConsumeMessage();
 
-        Assert.Equal(MessageType.MT_COMMAND, receivedMessage.Header.MessageType);
-        Assert.Equal(_partitionKey, receivedMessage.Header.PartitionKey);
-        Assert.Equal(message.Body.Value, receivedMessage.Body.Value);
+        await Assert.That(receivedMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
+        await Assert.That(receivedMessage.Header.PartitionKey).IsEqualTo(_partitionKey);
+        await Assert.That(receivedMessage.Body.Value).IsEqualTo(message.Body.Value);
     }
 
     private Message ConsumeMessage()
@@ -109,7 +105,7 @@ public class KafkaConsumerDeclareTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
 

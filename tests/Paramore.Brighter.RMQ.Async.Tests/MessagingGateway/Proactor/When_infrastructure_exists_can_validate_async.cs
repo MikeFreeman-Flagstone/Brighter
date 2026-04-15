@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
@@ -42,7 +41,7 @@ public class RmqValidateExistingInfrastructureTestsAsync : IDisposable, IAsyncDi
             .GetResult();
     }
         
-    [Fact]
+    [Test]
     public async Task When_infrastructure_exists_can_validate_producer()
     {
         var exceptionThrown = false;
@@ -57,7 +56,7 @@ public class RmqValidateExistingInfrastructureTestsAsync : IDisposable, IAsyncDi
             exceptionThrown = true;
         }
 
-        Assert.False(exceptionThrown);
+        await Assert.That(exceptionThrown).IsFalse();
     }
 
     public void Dispose()

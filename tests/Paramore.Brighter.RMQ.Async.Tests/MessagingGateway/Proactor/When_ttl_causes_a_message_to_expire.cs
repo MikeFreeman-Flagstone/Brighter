@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -26,11 +26,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RMQ")]
+[Category("RMQ")]
 public class RmqMessageProducerTTLTests : IAsyncDisposable, IDisposable
 {
     private readonly IAmAMessageProducerAsync _messageProducer;
@@ -73,7 +72,7 @@ public class RmqMessageProducerTTLTests : IAsyncDisposable, IDisposable
              
     }
 
-    [Fact]
+    [Test]
     public async Task When_rejecting_a_message_to_a_dead_letter_queue()
     {
         await _messageProducer.SendAsync(_messageOne);
@@ -81,7 +80,7 @@ public class RmqMessageProducerTTLTests : IAsyncDisposable, IDisposable
 
         //check messages are flowing - absence needs to be expiry
         var messageOne = (await _messageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(5000))).First();
-        Assert.Equal(_messageOne.Id, messageOne.Id);
+        await Assert.That(messageOne.Id).IsEqualTo(_messageOne.Id);
 
         //Let it expire
         await Task.Delay(11000);
@@ -89,7 +88,7 @@ public class RmqMessageProducerTTLTests : IAsyncDisposable, IDisposable
         var dlqMessage = (await _messageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(10000))).First();
             
         //assert this is our message
-        Assert.Equal(MessageType.MT_NONE, dlqMessage.Header.MessageType);
+        await Assert.That(dlqMessage.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
     public void Dispose()

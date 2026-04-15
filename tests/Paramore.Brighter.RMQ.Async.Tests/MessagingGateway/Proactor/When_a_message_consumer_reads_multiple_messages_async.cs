@@ -1,11 +1,10 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RMQ")]
+[Category("RMQ")]
 public class RMQBufferedConsumerTestsAsync : IDisposable, IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _messageProducer;
@@ -29,7 +28,7 @@ public class RMQBufferedConsumerTestsAsync : IDisposable, IAsyncDisposable
         new QueueFactory(rmqConnection, _channelName, new RoutingKeys(_routingKey)).CreateAsync().GetAwaiter().GetResult();
     }
 
-    [Fact]
+    [Test]
     public async Task When_a_message_consumer_reads_multiple_messages()
     {
         //Post one more than batch size messages
@@ -49,7 +48,7 @@ public class RMQBufferedConsumerTestsAsync : IDisposable, IAsyncDisposable
         var messages = await _messageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
 
         //We should only have three messages
-        Assert.Equal(3, messages.Length);
+        await Assert.That(messages.Length).IsEqualTo(3);
 
         //ack those to remove from the queue
         foreach (var message in messages)
@@ -64,7 +63,7 @@ public class RMQBufferedConsumerTestsAsync : IDisposable, IAsyncDisposable
         messages = await _messageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(500));
 
         //This time, just the one message
-        Assert.Equal(1, messages.Length);
+        await Assert.That(messages.Length).IsEqualTo(1);
     }
 
     public void Dispose()

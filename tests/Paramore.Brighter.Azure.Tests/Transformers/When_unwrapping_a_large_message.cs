@@ -42,7 +42,7 @@ public class LargeMessagePayloadAUnwrapTests : IDisposable
     }
     
     [Test]
-    public void When_unwrapping_a_large_message_async()
+    public async Task When_unwrapping_a_large_message_async()
     {
         //arrange
         Thread.Sleep(3000); //allow bucket definition to propagate
@@ -77,8 +77,8 @@ public class LargeMessagePayloadAUnwrapTests : IDisposable
         
         //assert
         //contents should be from storage
-        Assert.Equals(contents, transformedMessage.Value);
-        Assert.That(_luggageStore.HasClaim(id));
+        await Assert.That(transformedMessage.Value).IsEqualTo(contents);
+        await Assert.That(_luggageStore.HasClaim(id)).IsTrue();
     }
     
     public void Dispose()

@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -26,11 +26,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RMQ")]
+[Category("RMQ")]
 public class RmqMessageProducerQueueLengthTestsAsync : IDisposable, IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _messageProducer;
@@ -74,7 +73,7 @@ public class RmqMessageProducerQueueLengthTestsAsync : IDisposable, IAsyncDispos
              
     }
 
-    [Fact]
+    [Test]
     public async Task When_rejecting_a_message_due_to_queue_length()
     {
         //create the infrastructure
@@ -93,7 +92,7 @@ public class RmqMessageProducerQueueLengthTestsAsync : IDisposable, IAsyncDispos
         //try to grab the next message
         var nextMessages = await _messageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(5000));
         message = nextMessages.First();
-        Assert.Equal(MessageType.MT_NONE, message.Header.MessageType);
+        await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
 
     }
 

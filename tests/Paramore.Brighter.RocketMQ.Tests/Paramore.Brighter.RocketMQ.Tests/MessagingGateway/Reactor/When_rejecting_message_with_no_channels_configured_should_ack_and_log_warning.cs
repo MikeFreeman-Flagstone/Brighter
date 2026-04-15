@@ -30,11 +30,10 @@ using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.RocketMQ;
 using Paramore.Brighter.RocketMQ.Tests.TestDoubles;
 using Paramore.Brighter.RocketMQ.Tests.Utils;
-using Xunit;
 
 namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RocketMQ")]
+[Category("RocketMQ")]
 public class RocketMqNoChannelsConfiguredTests : IDisposable
 {
     private readonly RocketMqMessageProducer _producer;
@@ -72,8 +71,8 @@ public class RocketMqNoChannelsConfiguredTests : IDisposable
                 (object)new MyCommand { Value = "Test No Channels" }, JsonSerialisationOptions.Options)));
     }
 
-    [Fact]
-    public void When_rejecting_message_with_no_channels_configured_should_ack_and_return_true()
+    [Test]
+    public async Task When_rejecting_message_with_no_channels_configured_should_ack_and_return_true()
     {
         // Arrange - send a message and consume it from the source topic
         _consumer.Purge();
@@ -85,7 +84,7 @@ public class RocketMqNoChannelsConfiguredTests : IDisposable
             new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
         // Assert - reject returns true (source Ack'd, breaking requeue loop)
-        Assert.True(result);
+        await Assert.That(result).IsTrue();
 
         // Assert - consumer can continue to receive subsequent messages (not stuck in requeue loop)
         var followUpMessage = new Message(
@@ -96,8 +95,8 @@ public class RocketMqNoChannelsConfiguredTests : IDisposable
 
         _producer.Send(followUpMessage);
         var nextMessage = ConsumeMessage(_consumer);
-        Assert.NotEqual(MessageType.MT_NONE, nextMessage.Header.MessageType);
-        Assert.Equal(followUpMessage.Body.Value, nextMessage.Body.Value);
+        await Assert.That(nextMessage.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
+        await Assert.That(nextMessage.Body.Value).IsEqualTo(followUpMessage.Body.Value);
     }
 
     private static Message ConsumeMessage(IAmAMessageConsumerSync consumer)

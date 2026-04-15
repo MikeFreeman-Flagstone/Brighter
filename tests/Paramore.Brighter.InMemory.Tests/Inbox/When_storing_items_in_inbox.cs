@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 
 /* The MIT License (MIT)
 Copyright © 2020 Ian Cooper <ian_hammond_cooper@yahoo.co.uk> 
@@ -26,16 +26,15 @@ THE SOFTWARE. */
 using System;
 using Microsoft.Extensions.Time.Testing;
 using Paramore.Brighter.InMemory.Tests.Data;
-using Xunit;
 
 namespace Paramore.Brighter.InMemory.Tests.Inbox
 {
-    [Trait("Category", "InMemory")]
+    [Category("InMemory")]
      public class InMemoryInboxTests
     {
 
-        [Fact]
-        public void When_storing_a_seen_message_in_the_inbox()
+        [Test]
+        public async Task When_storing_a_seen_message_in_the_inbox()
         {
             //Arrange
             var inbox = new InMemoryInbox(new FakeTimeProvider());
@@ -49,13 +48,13 @@ namespace Paramore.Brighter.InMemory.Tests.Inbox
             var storedCommand = inbox.Get<SimpleCommand>(command.Id, contextKey, null);
 
             //Assert
-            Assert.NotNull(storedCommand);
-            Assert.Equal(command.Id, storedCommand.Id);
+            await Assert.That(storedCommand).IsNotNull();
+            await Assert.That(storedCommand.Id).IsEqualTo(command.Id);
 
         }
 
-        [Fact]
-        public void When_testing_for_a_message_in_the_inbox()
+        [Test]
+        public async Task When_testing_for_a_message_in_the_inbox()
         {
             //Arrange
             var inbox = new InMemoryInbox(new FakeTimeProvider());
@@ -69,11 +68,11 @@ namespace Paramore.Brighter.InMemory.Tests.Inbox
             var exists = inbox.Exists<SimpleCommand>(command.Id, contextKey, null);
 
             //Assert
-            Assert.True(exists);
+            await Assert.That(exists).IsTrue();
         }
 
-        [Fact]
-        public void When_testing_for_a_missing_command()
+        [Test]
+        public async Task When_testing_for_a_missing_command()
         {
             //Arrange
             var inbox = new InMemoryInbox(new FakeTimeProvider());
@@ -85,12 +84,12 @@ namespace Paramore.Brighter.InMemory.Tests.Inbox
             var exists = inbox.Exists<SimpleCommand>(command.Id, contextKey, null);
 
             //Assert
-            Assert.False(exists);
+            await Assert.That(exists).IsFalse();
 
         }
 
-        [Fact]
-        public void When_storing_multiple_entries_retrieve_the_right_one()
+        [Test]
+        public async Task When_storing_multiple_entries_retrieve_the_right_one()
         {
            //Arrange
            var inbox = new InMemoryInbox(new FakeTimeProvider());
@@ -107,16 +106,16 @@ namespace Paramore.Brighter.InMemory.Tests.Inbox
            var lastCommand = inbox.Get<SimpleCommand>(commands[4].Id, contextKey, null);
 
            //Assert
-           Assert.NotNull(firstCommand);
-           Assert.NotNull(lastCommand);
+           await Assert.That(firstCommand).IsNotNull();
+           await Assert.That(lastCommand).IsNotNull();
 
-           Assert.Equal(commands[0].Id, firstCommand.Id);
-           Assert.Equal(commands[4].Id, lastCommand.Id);
+           await Assert.That(firstCommand.Id).IsEqualTo(commands[0].Id);
+           await Assert.That(lastCommand.Id).IsEqualTo(commands[4].Id);
 
         }
 
-        [Fact]
-        public void When_storing_multiple_entries_exists_should_find()
+        [Test]
+        public async Task When_storing_multiple_entries_exists_should_find()
         {
             //Arrange
             var inbox = new InMemoryInbox(new FakeTimeProvider());
@@ -133,13 +132,13 @@ namespace Paramore.Brighter.InMemory.Tests.Inbox
             var lastCommandExists = inbox.Exists<SimpleCommand>(commands[4].Id, contextKey, null);
  
             //Assert
-            Assert.True(firstCommandExists);
-            Assert.True(lastCommandExists);
+            await Assert.That(firstCommandExists).IsTrue();
+            await Assert.That(lastCommandExists).IsTrue();
 
         }
 
-        [Fact]
-        public void When_storing_many_but_not_requested_exists_should_not_find()
+        [Test]
+        public async Task When_storing_many_but_not_requested_exists_should_not_find()
         {
             //Arrange
             var inbox = new InMemoryInbox(new FakeTimeProvider());
@@ -155,7 +154,7 @@ namespace Paramore.Brighter.InMemory.Tests.Inbox
             var firstCommandExists = inbox.Exists<SimpleCommand>(Guid.NewGuid().ToString(), contextKey, null);
  
             //Assert
-            Assert.False(firstCommandExists);
+            await Assert.That(firstCommandExists).IsFalse();
              
         }
 

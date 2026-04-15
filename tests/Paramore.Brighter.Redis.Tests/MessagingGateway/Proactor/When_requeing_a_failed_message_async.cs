@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Proactor;
 
-[Collection("Redis Shared Pool")]   //shared connection pool so run sequentially
-[Trait("Category", "Redis")]
-public class RedisRequeueMessageTestsAsync : IClassFixture<RedisFixture>, IAsyncDisposable
+[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
+[Category("Redis")]
+[ClassDataSource<RedisFixture>(Shared = SharedType.PerClass)]
+    public class RedisRequeueMessageTestsAsync : IAsyncDisposable
 {
     private readonly RedisFixture _redisFixture;
     private readonly Message _messageOne;
@@ -29,7 +29,7 @@ public class RedisRequeueMessageTestsAsync : IClassFixture<RedisFixture>, IAsync
         );
     }
 
-    [Fact]
+    [Test]
     public async Task When_requeing_a_failed_message_async()
     {
         // Need to receive to subscribe to feed, before we send a message. This returns an empty message we discard
@@ -55,8 +55,8 @@ public class RedisRequeueMessageTestsAsync : IClassFixture<RedisFixture>, IAsync
         await _redisFixture.MessageConsumer.AcknowledgeAsync(sentMessageOne);
 
         // _should_send_a_message_via_restms_with_the_matching_body
-        Assert.Equal(_messageOne.Body.Value, messageBodyOne);
-        Assert.Equal(_messageTwo.Body.Value, messageBodyTwo);
+        await Assert.That(messageBodyOne).IsEqualTo(_messageOne.Body.Value);
+        await Assert.That(messageBodyTwo).IsEqualTo(_messageTwo.Body.Value);
     }
 
     public async ValueTask DisposeAsync()

@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -25,12 +25,11 @@ THE SOFTWARE. */
 using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Sync;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Sync.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RMQ")]
-[Collection("RMQ")]
+[Category("RMQ")]
+[NotInParallel("RMQ")]
 public class RmqMessageProducerConfirmationsSendMessageTests : IDisposable
 {
     private readonly RmqMessageProducer _messageProducer;
@@ -56,7 +55,7 @@ public class RmqMessageProducerConfirmationsSendMessageTests : IDisposable
         {
             if (success)
             {
-                Assert.Equal(_message.Id, guid);
+                if (guid != _message.Id) throw new InvalidOperationException($"Expected message id {_message.Id} but got {guid}");
                 _messageWasPublished = true;
                 _messageWasNotPublished = false;
             }
@@ -71,7 +70,7 @@ public class RmqMessageProducerConfirmationsSendMessageTests : IDisposable
             .Create(TimeSpan.FromMilliseconds(1000));
     }
 
-    [Fact]
+    [Test]
     public async Task When_confirming_posting_a_message_via_the_messaging_gateway()
     {
         _messageProducer.Send(_message);
@@ -79,9 +78,9 @@ public class RmqMessageProducerConfirmationsSendMessageTests : IDisposable
         await Task.Delay(500);
 
         //if this is true, then possible test failed because of timeout or RMQ issues
-        Assert.False(_messageWasNotPublished);
+        await Assert.That(_messageWasNotPublished).IsFalse();
         //did we see the message - intent to test logic here
-        Assert.True(_messageWasPublished);
+        await Assert.That(_messageWasPublished).IsTrue();
     }
 
     public void Dispose()

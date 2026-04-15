@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Linq;
 using Microsoft.Extensions.Time.Testing;
-using Xunit;
 
 namespace Paramore.Brighter.InMemory.Tests.Consumer;
 
 public class InMemoryConsumerRejectTests
 {
-    [Fact]
-    public void When_a_dequeued_item_is_rejected()
+    [Test]
+    public async Task When_a_dequeued_item_is_rejected()
     {
         //arrange
         const string myTopic = "my topic";
@@ -31,6 +30,6 @@ public class InMemoryConsumerRejectTests
         timeProvider.Advance(TimeSpan.FromSeconds(2));  //-- the message should be returned to the bus if there is no Acknowledge or Reject
         
         //assert
-        Assert.Empty(bus.Stream(routingKey));
+        await Assert.That(bus.Stream(routingKey)).IsEmpty();
     }
 }

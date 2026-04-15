@@ -10,11 +10,10 @@ using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Proactor;
 
-[Trait("Category", "AWS")]
+[Category("AWS")]
 public class SqsMessageProducerCreateTopicWithTagsAsyncTests : IAsyncDisposable, IDisposable
 {
     private readonly SnsMessageProducer _messageProducer;
@@ -64,7 +63,7 @@ public class SqsMessageProducerCreateTopicWithTagsAsyncTests : IAsyncDisposable,
             });
     }
 
-    [Fact]
+    [Test]
     public async Task When_creating_a_topic_with_custom_tags_async()
     {
         //arrange
@@ -77,8 +76,8 @@ public class SqsMessageProducerCreateTopicWithTagsAsyncTests : IAsyncDisposable,
             new ListTagsForResourceRequest { ResourceArn = topicArn });
 
         //assert
-        Assert.Contains(tagsResponse.Tags, t => t.Key == "Source" && t.Value == "Brighter");
-        Assert.Contains(tagsResponse.Tags, t => t.Key == "Environment" && t.Value == "Test");
+        await Assert.That(tagsResponse.Tags).Contains(t => t.Key == "Source" && t.Value == "Brighter");
+        await Assert.That(tagsResponse.Tags).Contains(t => t.Key == "Environment" && t.Value == "Test");
     }
 
     public void Dispose()

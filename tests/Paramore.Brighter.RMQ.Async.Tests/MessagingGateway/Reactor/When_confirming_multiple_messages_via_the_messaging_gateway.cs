@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -27,12 +27,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RMQ")]
-[Collection("RMQ")]
+[Category("RMQ")]
+[NotInParallel("RMQ")]
 public class RmqMessageProducerConfirmationsMultipleMessagesTests : IDisposable
 {
     private readonly RmqMessageProducer _messageProducer;
@@ -66,7 +65,7 @@ public class RmqMessageProducerConfirmationsMultipleMessagesTests : IDisposable
             .GetResult();
     }
 
-    [Fact]
+    [Test]
     public async Task When_confirming_multiple_messages_via_the_messaging_gateway()
     {
         // Subscribe to the OnMessagePublished event
@@ -85,7 +84,7 @@ public class RmqMessageProducerConfirmationsMultipleMessagesTests : IDisposable
         await Task.Delay(1000);
 
         // Verify that OnMessagePublished was called for all messages
-        Assert.Equal(_numberOfMessages, _totalPublished);
+        await Assert.That(_totalPublished).IsEqualTo(_numberOfMessages);
     }
 
     public void Dispose()

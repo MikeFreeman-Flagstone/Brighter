@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -6,26 +6,22 @@ using Confluent.Kafka;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 using Acks = Confluent.Kafka.Acks;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]   //
+[Category("Kafka")]
+[NotInParallel("Kafka")]   //
 public class KafkaMessageProducerMissingHeaderTests : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly IAmAMessageConsumerSync _consumer;
     private readonly IProducer<string,byte[]> _producer;
 
-    public KafkaMessageProducerMissingHeaderTests(ITestOutputHelper output)
+    public KafkaMessageProducerMissingHeaderTests()
     {
         string groupId = Guid.NewGuid().ToString();
-        _output = output;
         
         
         var clientConfig = new ClientConfig
@@ -53,7 +49,7 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
         _producer = new ProducerBuilder<string, byte[]>(producerConfig)
             .SetErrorHandler((_, error) =>
             {
-                output.WriteLine($"Kafka producer failed with Code: {error.Code}, Reason: { error.Reason}, Fatal: {error.IsFatal}", error.Code, error.Reason, error.IsFatal);
+                Console.WriteLine($"Kafka producer failed with Code: {error.Code}, Reason: { error.Reason}, Fatal: {error.IsFatal}");
             })
             .Build();
 
@@ -74,7 +70,7 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
             );
     }
 
-    [Fact]
+    [Test]
     public async Task When_recieving_a_message_without_partition_key_header()
     {
         await Task.Delay(500); //Let topic propagate in the broker
@@ -90,7 +86,7 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
             Value = value
         };
 
-       _producer.Produce(_topic, kafkaMessage, report => _output.WriteLine(report.ToString()) );
+       _producer.Produce(_topic, kafkaMessage, report => Console.WriteLine(report.ToString()) );
        
        //ensure any messages are flushed
        _producer.Flush();
@@ -101,8 +97,8 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
         var receivedMessage = GetMessage();
 
         //Where we lack a partition key header, assume non-Brighter header and set to message key
-        Assert.Equal(command.Id, receivedMessage.Header.PartitionKey);
-        Assert.Equal(value, receivedMessage.Body.Bytes);
+        await Assert.That(receivedMessage.Header.PartitionKey).IsEqualTo(command.Id);
+        await Assert.That(receivedMessage.Body.Bytes).IsEqualTo(value);
     }
 
     private Message GetMessage()
@@ -128,7 +124,7 @@ public class KafkaMessageProducerMissingHeaderTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
         } while (maxTries <= 10);

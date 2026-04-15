@@ -1,4 +1,4 @@
-﻿using System.Net.Mime;
+using System.Net.Mime;
 using Paramore.Brighter.AWSScheduler.V4.Tests.Helpers;
 using Paramore.Brighter.AWSScheduler.V4.Tests.TestDoubles;
 using Paramore.Brighter.MessageScheduler.AWS.V4;
@@ -7,8 +7,8 @@ using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
 
 namespace Paramore.Brighter.AWSScheduler.V4.Tests.Scheduler.Messages.Sns;
 
-[Trait("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
-[Collection("Scheduler SNS")]
+[Property("Fragile", "CI")] // It isn't really fragile, it's time consumer (1-2 per test)
+[NotInParallel("Scheduler SNS")]
 public class SnsSchedulingMessageTest : IDisposable
 {
     private readonly ContentType _contentType = new ContentType(MediaTypeNames.Text.Plain);
@@ -59,8 +59,8 @@ public class SnsSchedulingMessageTest : IDisposable
         };
     }
 
-    [Fact]
-    public void When_Scheduling_A_Sns_Message()
+    [Test]
+    public async Task When_Scheduling_A_Sns_Message()
     {
         var routingKey = new RoutingKey(_topicName);
         var message = new Message(
@@ -78,13 +78,13 @@ public class SnsSchedulingMessageTest : IDisposable
         while (stopAt > DateTimeOffset.UtcNow)
         {
             var messages = _consumer.Receive();
-            Assert.Single(messages);
+            await Assert.That(messages).HasSingleItem();
 
             if (messages[0].Header.MessageType != MessageType.MT_NONE)
             {
-                Assert.Equal(message.Header.MessageType, messages[0].Header.MessageType);
-                Assert.Equal((string?)message.Body.Value, (string?)messages[0].Body.Value);
-                Assert.Equivalent(message.Header, messages[0].Header);
+                await Assert.That(messages[0].Header.MessageType).IsEqualTo(message.Header.MessageType);
+                await Assert.That((string?)messages[0].Body.Value).IsEqualTo((string?)message.Body.Value);
+                await Assert.That(messages[0].Header).IsEquivalentTo(message.Header);
                 _consumer.Acknowledge(messages[0]);
                 return;
             }

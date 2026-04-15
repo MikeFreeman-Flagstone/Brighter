@@ -1,13 +1,12 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RMQ")]
-[Collection("RMQ")]
+[Category("RMQ")]
+[NotInParallel("RMQ")]
 public class RmqMessageConsumerMultipleTopicTests : IDisposable
 {        
     private readonly IAmAMessageProducerSync _messageProducer;
@@ -44,8 +43,8 @@ public class RmqMessageConsumerMultipleTopicTests : IDisposable
         new QueueFactory(rmqConnection, queueName, topics).CreateAsync().GetAwaiter().GetResult();
     }
 
-    [Fact]
-    public void When_reading_a_message_from_a_channel_with_multiple_topics()
+    [Test]
+    public async Task When_reading_a_message_from_a_channel_with_multiple_topics()
     {
         _messageProducer.Send(_messageTopic1);
         _messageProducer.Send(_messageTopic2);
@@ -58,11 +57,11 @@ public class RmqMessageConsumerMultipleTopicTests : IDisposable
         var topic2Result = _messageConsumer.Receive(TimeSpan.FromMilliseconds(10000)).First();
         _messageConsumer.Acknowledge(topic2Result);
         
-        Assert.Equal(_messageTopic1.Header.Topic, topic1Result.Header.Topic);
-        Assert.Equivalent(_messageTopic1.Body.Value, topic1Result.Body.Value);
+        await Assert.That(topic1Result.Header.Topic).IsEqualTo(_messageTopic1.Header.Topic);
+        await Assert.That(topic1Result.Body.Value).IsEquivalentTo(_messageTopic1.Body.Value);
 
-        Assert.Equal(_messageTopic2.Header.Topic, topic2Result.Header.Topic);
-        Assert.Equivalent(_messageTopic2.Body.Value, topic2Result.Body.Value);            
+        await Assert.That(topic2Result.Header.Topic).IsEqualTo(_messageTopic2.Header.Topic);
+        await Assert.That(topic2Result.Body.Value).IsEquivalentTo(_messageTopic2.Body.Value);
     }
 
     public void Dispose()

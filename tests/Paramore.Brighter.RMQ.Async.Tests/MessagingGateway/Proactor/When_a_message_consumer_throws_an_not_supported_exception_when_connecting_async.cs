@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -26,11 +26,10 @@ using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
 using Paramore.Brighter.RMQ.Async.Tests.TestDoubles;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RMQ")]
+[Category("RMQ")]
 
 public class AsyncRmqMessageConsumerChannelFailureTests : IAsyncDisposable, IDisposable
 {
@@ -59,7 +58,7 @@ public class AsyncRmqMessageConsumerChannelFailureTests : IAsyncDisposable, IDis
         _sender.SendAsync(sentMessage).GetAwaiter().GetResult();
     }
 
-    [Fact]
+    [Test]
     public async Task When_a_message_consumer_throws_an_not_supported_exception_when_connecting()
     {
         //let messages propogate
@@ -73,13 +72,12 @@ public class AsyncRmqMessageConsumerChannelFailureTests : IAsyncDisposable, IDis
         catch (ChannelFailureException cfe)
         {
             exceptionHappened = true;
-            Assert.True((cfe.InnerException) is NotSupportedException);
+            await Assert.That((cfe.InnerException) is NotSupportedException).IsTrue();
         }
             
-        Assert.True(exceptionHappened);
+        await Assert.That(exceptionHappened).IsTrue();
     }
 
-    [Fact]
     public void Dispose()
     {
         ((IAmAMessageProducerSync)_sender).Dispose();

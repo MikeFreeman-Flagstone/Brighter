@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -8,16 +8,13 @@ using Confluent.SchemaRegistry;
 using Confluent.SchemaRegistry.Serdes;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]   //Kafka doesn't like multiple consumers of a partition
+[Category("Kafka")]
+[NotInParallel("Kafka")]   //Kafka doesn't like multiple consumers of a partition
 public class KafkaMessageProducerHeaderBytesSendTests : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString(); 
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly IAmAProducerRegistry _producerRegistry;
@@ -28,10 +25,9 @@ public class KafkaMessageProducerHeaderBytesSendTests : IDisposable
     private readonly SerializationContext _serializationContext;
 
 
-    public KafkaMessageProducerHeaderBytesSendTests (ITestOutputHelper output)
+    public KafkaMessageProducerHeaderBytesSendTests ()
     {
         string groupId = Guid.NewGuid().ToString();
-        _output = output;
         _producerRegistry = new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
@@ -81,7 +77,7 @@ public class KafkaMessageProducerHeaderBytesSendTests : IDisposable
     /// NOTE: This test needs the schema registry to be running, and has hardcoded it's port to 8081. Both of those
     /// may cause this test to fail, so check them if in doubt
     /// </summary>
-    [Fact]
+    [Test]
     public async Task When_posting_a_message_via_the_messaging_gateway()
     {
         
@@ -118,20 +114,20 @@ public class KafkaMessageProducerHeaderBytesSendTests : IDisposable
 
         var received = GetMessage();
 
-        Assert.True(received.Body.Bytes.Length > 5);
+        await Assert.That(received.Body.Bytes.Length > 5).IsTrue();
             
         var receivedSchemaId = IPAddress.NetworkToHostOrder(BitConverter.ToInt32(received.Body.Bytes.Skip(1).Take(4).ToArray()));
             
         var receivedCommand = _deserializer.Deserialize(received.Body.Bytes, received.Body.Bytes is null, _serializationContext);
             
         //assert
-        Assert.Equal(MessageType.MT_COMMAND, received.Header.MessageType);
-        Assert.Equal(_partitionKey, received.Header.PartitionKey);
-        Assert.Equal(received.Body.Bytes, received.Body.Bytes);
-        Assert.Equal(received.Body.Value, received.Body.Value);
-        Assert.Equal(schemaId, receivedSchemaId);
-        Assert.Equal(myCommand.Id, receivedCommand.Id);
-        Assert.Equal(myCommand.Value, receivedCommand.Value);
+        await Assert.That(received.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
+        await Assert.That(received.Header.PartitionKey).IsEqualTo(_partitionKey);
+        await Assert.That(received.Body.Bytes).IsEqualTo(received.Body.Bytes);
+        await Assert.That(received.Body.Value).IsEqualTo(received.Body.Value);
+        await Assert.That(receivedSchemaId).IsEqualTo(schemaId);
+        await Assert.That(receivedCommand.Id).IsEqualTo(myCommand.Id);
+        await Assert.That(receivedCommand.Value).IsEqualTo(myCommand.Value);
     }
 
     private Message GetMessage()
@@ -155,7 +151,7 @@ public class KafkaMessageProducerHeaderBytesSendTests : IDisposable
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
 

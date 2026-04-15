@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2025 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -25,7 +25,6 @@ THE SOFTWARE. */
 using System;
 using System.Linq;
 using Microsoft.Extensions.Time.Testing;
-using Xunit;
 
 namespace Paramore.Brighter.InMemory.Tests.Consumer;
 
@@ -64,35 +63,35 @@ public class InMemoryConsumerRequeueWithDelayProducerTests
         _consumer.Receive();
     }
 
-    [Fact]
-    public void Should_use_scheduler_when_requeuing_with_delay()
+    [Test]
+    public async Task Should_use_scheduler_when_requeuing_with_delay()
     {
         // Act
         _consumer.Requeue(_message, _delay);
 
         // Assert
-        Assert.True(_scheduler.ScheduleCalled, "Scheduler.Schedule should have been called via producer");
+        await Assert.That(_scheduler.ScheduleCalled).IsTrue();
     }
 
-    [Fact]
-    public void Should_not_have_message_immediately_available_on_bus()
+    [Test]
+    public async Task Should_not_have_message_immediately_available_on_bus()
     {
         // Act
         _consumer.Requeue(_message, _delay);
 
         // Assert - message should not be immediately available (scheduler holds it)
         var messagesOnBus = _bus.Stream(_routingKey);
-        Assert.Empty(messagesOnBus);
+        await Assert.That(messagesOnBus).IsEmpty();
     }
 
-    [Fact]
-    public void Should_remove_message_from_locked_messages()
+    [Test]
+    public async Task Should_remove_message_from_locked_messages()
     {
         // Act
         var result = _consumer.Requeue(_message, _delay);
 
         // Assert
-        Assert.True(result, "Requeue should return true");
+        await Assert.That(result).IsTrue();
     }
 
     /// <summary>

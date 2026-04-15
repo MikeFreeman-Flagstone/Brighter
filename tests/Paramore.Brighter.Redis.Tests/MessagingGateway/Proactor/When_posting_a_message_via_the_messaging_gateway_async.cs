@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Proactor;
 
-[Collection("Redis Shared Pool")]   //shared connection pool so run sequentially
-[Trait("Category", "Redis")]
-public class RedisMessageProducerSendTestsAsync : IClassFixture<RedisFixture>
+[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
+[Category("Redis")]
+[ClassDataSource<RedisFixture>(Shared = SharedType.PerClass)]
+    public class RedisMessageProducerSendTestsAsync 
 {
     private readonly RedisFixture _redisFixture;
     private readonly Message _message;
@@ -21,7 +21,7 @@ public class RedisMessageProducerSendTestsAsync : IClassFixture<RedisFixture>
         );
     }
 
-    [Fact]
+    [Test]
     public async Task When_posting_a_message_via_the_messaging_gateway_async()
     {
         await _redisFixture.MessageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000)); //Need to receive to subscribe to feed, before we send a message. This returns an empty message we discard
@@ -30,6 +30,6 @@ public class RedisMessageProducerSendTestsAsync : IClassFixture<RedisFixture>
         var messageBody = sentMessage.Body.Value;
         await _redisFixture.MessageConsumer.AcknowledgeAsync(sentMessage);
 
-        Assert.Equal(_message.Body.Value, messageBody);
+        await Assert.That(messageBody).IsEqualTo(_message.Body.Value);
     }
 }

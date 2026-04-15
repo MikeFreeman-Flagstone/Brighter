@@ -2,11 +2,10 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RMQ")]
+[Category("RMQ")]
 public class RmqMessageProducerSupportsMultipleThreadsTestsAsync : IDisposable, IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _messageProducer;
@@ -28,7 +27,7 @@ public class RmqMessageProducerSupportsMultipleThreadsTestsAsync : IDisposable, 
         _messageProducer = new RmqMessageProducer(rmqConnection);
     }
 
-    [Fact]
+    [Test]
     public async Task When_multiple_threads_try_to_post_a_message_at_the_same_time()
     {
         bool exceptionHappened = false;
@@ -46,7 +45,7 @@ public class RmqMessageProducerSupportsMultipleThreadsTestsAsync : IDisposable, 
         }
 
         //_should_not_throw
-        Assert.False(exceptionHappened);
+        await Assert.That(exceptionHappened).IsFalse();
     }
 
     public void Dispose()

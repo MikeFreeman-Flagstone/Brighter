@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Net.Mime;
 using System.Text.Json;
@@ -9,11 +9,10 @@ using Paramore.Brighter.MessagingGateway.RMQ.Async;
 using Paramore.Brighter.RMQ.Async.Tests.TestDoubles;
 using Paramore.Brighter.ServiceActivator;
 using Polly.Registry;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RMQ")]
+[Category("RMQ")]
 public class RMQMessageConsumerRetryDLQTestsAsync : IDisposable
 {
     private readonly IAmAMessagePump _messagePump;
@@ -115,8 +114,8 @@ public class RMQMessageConsumerRetryDLQTestsAsync : IDisposable
         );
     }
 
-    [Fact(Skip = "Breaks due to fault in Task Scheduler running after context has closed")]
-    //[Fact]
+    [Test, Skip("Breaks due to fault in Task Scheduler running after context has closed")]
+    //[Test]
     public async Task When_retry_limits_force_a_message_onto_the_dlq()
     {
         //NOTE: This test is **slow** because it needs to ensure infrastructure and then wait whilst we requeue a message a number of times,
@@ -145,8 +144,8 @@ public class RMQMessageConsumerRetryDLQTestsAsync : IDisposable
         var dlqMessage = (await _deadLetterConsumer.ReceiveAsync(new TimeSpan(10000))).First();
 
         //assert this is our message
-        Assert.Equal(MessageType.MT_COMMAND, dlqMessage.Header.MessageType);
-        Assert.Equal(_message.Body.Value, dlqMessage.Body.Value);
+        await Assert.That(dlqMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
+        await Assert.That(dlqMessage.Body.Value).IsEqualTo(_message.Body.Value);
 
         await _deadLetterConsumer.AcknowledgeAsync(dlqMessage);
 

@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Fifo.Proactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable, IDisposable
 {
     private readonly SqsMessageProducer _messageProducer;
@@ -55,7 +54,7 @@ public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable, IDisposable
             );
     }
 
-    [Fact]
+    [Test]
     public async Task When_raw_message_delivery_disabled_async()
     {
         // Arrange
@@ -83,18 +82,18 @@ public class SqsRawMessageDeliveryTestsAsync : IAsyncDisposable, IDisposable
         await _channel.AcknowledgeAsync(messageReceived);
 
         // Assert
-        Assert.Equal(messageToSend.Id, messageReceived.Id);
-        Assert.Equal(messageToSend.Header.Topic.ToValidSNSTopicName(true), messageReceived.Header.Topic);
-        Assert.Equal(messageToSend.Header.MessageType, messageReceived.Header.MessageType);
-        Assert.Equal(messageToSend.Header.CorrelationId, messageReceived.Header.CorrelationId);
-        Assert.Equal(messageToSend.Header.ReplyTo, messageReceived.Header.ReplyTo);
-        Assert.StartsWith(messageToSend.Header.ContentType?.ToString(), messageReceived.Header.ContentType?.ToString());
-        Assert.Contains(customHeaderItem.Key, messageReceived.Header.Bag);
-        Assert.Equal(customHeaderItem.Value, messageReceived.Header.Bag[customHeaderItem.Key]);
-        Assert.Equal(messageToSend.Body.Value, messageReceived.Body.Value);
-        Assert.Equal(messageGroupId, messageReceived.Header.PartitionKey);
-        Assert.Contains(HeaderNames.DeduplicationId, messageReceived.Header.Bag);
-        Assert.Equal(deduplicationId, messageReceived.Header.Bag[HeaderNames.DeduplicationId]);
+        await Assert.That(messageReceived.Id).IsEqualTo(messageToSend.Id);
+        await Assert.That(messageReceived.Header.Topic).IsEqualTo(messageToSend.Header.Topic.ToValidSNSTopicName(true));
+        await Assert.That(messageReceived.Header.MessageType).IsEqualTo(messageToSend.Header.MessageType);
+        await Assert.That(messageReceived.Header.CorrelationId).IsEqualTo(messageToSend.Header.CorrelationId);
+        await Assert.That(messageReceived.Header.ReplyTo).IsEqualTo(messageToSend.Header.ReplyTo);
+        await Assert.That(messageReceived.Header.ContentType?.ToString()).StartsWith(messageToSend.Header.ContentType?.ToString());
+        await Assert.That(messageReceived.Header.Bag).ContainsKey(customHeaderItem.Key);
+        await Assert.That(messageReceived.Header.Bag[customHeaderItem.Key]).IsEqualTo(customHeaderItem.Value);
+        await Assert.That(messageReceived.Body.Value).IsEqualTo(messageToSend.Body.Value);
+        await Assert.That(messageReceived.Header.PartitionKey).IsEqualTo(messageGroupId);
+        await Assert.That(messageReceived.Header.Bag).ContainsKey(HeaderNames.DeduplicationId);
+        await Assert.That(messageReceived.Header.Bag[HeaderNames.DeduplicationId]).IsEqualTo(deduplicationId);
     }
 
     public void Dispose()

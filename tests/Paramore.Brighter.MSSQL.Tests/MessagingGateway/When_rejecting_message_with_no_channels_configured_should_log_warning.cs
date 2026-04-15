@@ -26,11 +26,10 @@ using System;
 using System.Linq;
 using Paramore.Brighter.MessagingGateway.MsSql;
 using Paramore.Brighter.MSSQL.Tests.TestDoubles;
-using Xunit;
 
 namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway;
 
-[Trait("Category", "MSSQL")]
+[Category("MSSQL")]
 public class MsSqlMessageConsumerNoChannelsConfiguredTests : IDisposable
 {
     private readonly MsSqlMessageProducer _producer;
@@ -56,8 +55,8 @@ public class MsSqlMessageConsumerNoChannelsConfiguredTests : IDisposable
         _consumer = (MsSqlMessageConsumer)new MsSqlMessageConsumerFactory(testHelper.QueueConfiguration).Create(sub);
     }
 
-    [Fact]
-    public void When_rejecting_message_with_no_channels_configured_should_return_true()
+    [Test]
+    public async Task When_rejecting_message_with_no_channels_configured_should_return_true()
     {
         // Arrange - send a message and consume it
         var message = new Message(
@@ -71,7 +70,7 @@ public class MsSqlMessageConsumerNoChannelsConfiguredTests : IDisposable
             new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
         // Assert - reject returns true (message is silently dropped)
-        Assert.True(result);
+        await Assert.That(result).IsTrue();
 
         // Assert - consumer can continue to receive subsequent messages
         var nextMessage = new Message(
@@ -79,7 +78,7 @@ public class MsSqlMessageConsumerNoChannelsConfiguredTests : IDisposable
             new MessageBody("second message"));
         _producer.Send(nextMessage);
         var received = ConsumeMessage(_consumer);
-        Assert.Equal(nextMessage.Id, received.Id);
+        await Assert.That(received.Id).IsEqualTo(nextMessage.Id);
     }
 
     private static Message ConsumeMessage(IAmAMessageConsumerSync consumer)

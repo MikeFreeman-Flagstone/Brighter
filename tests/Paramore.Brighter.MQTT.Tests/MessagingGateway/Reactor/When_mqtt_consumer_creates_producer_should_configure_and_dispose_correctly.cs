@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -28,8 +28,6 @@ using System.Threading;
 using MQTTnet;
 using Paramore.Brighter.MessagingGateway.MQTT;
 using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 
@@ -37,8 +35,8 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 /// When the MQTT consumer creates a lazy requeue producer, it should be configured with the scheduler
 /// passed to the consumer. When the consumer is disposed, the producer should also be disposed.
 /// </summary>
-[Trait("Category", "MQTT")]
-[Collection("MQTT")]
+[Category("MQTT")]
+[NotInParallel("MQTT")]
 public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
 {
     private readonly MqttTestServer? _mqttTestServer;
@@ -46,7 +44,7 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
     private readonly MqttMessageConsumer _consumer;
     private readonly SpySchedulerSync _scheduler;
 
-    public MqttConsumerProducerConfigAndDisposeTests(ITestOutputHelper testOutputHelper)
+    public MqttConsumerProducerConfigAndDisposeTests()
     {
 
         int serverPort = MqttTestServer.GetRandomServerPort();
@@ -79,8 +77,8 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
         _consumer = new MqttMessageConsumer(consumerConfig, _scheduler);
     }
 
-    [Fact]
-    public void When_requeuing_with_delay_should_use_scheduler()
+    [Test]
+    public async Task When_requeuing_with_delay_should_use_scheduler()
     {
         // Arrange - send a message and receive it
         var message = new Message(
@@ -94,13 +92,12 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
         _consumer.Requeue(received, TimeSpan.FromSeconds(5));
 
         // Assert - scheduler should have been called (proves producer has scheduler configured)
-        Assert.True(_scheduler.ScheduleCalled,
-            "Scheduler.Schedule should have been called via the lazily created producer");
-        Assert.Equal(message.Body.Value, _scheduler.ScheduledMessage?.Body.Value);
+        await Assert.That(_scheduler.ScheduleCalled).IsTrue();
+        await Assert.That(_scheduler.ScheduledMessage?.Body.Value).IsEqualTo(message.Body.Value);
     }
 
-    [Fact]
-    public void When_consumer_disposes_after_requeue_should_dispose_producer()
+    [Test]
+    public async Task When_consumer_disposes_after_requeue_should_dispose_producer()
     {
         // Arrange - trigger lazy producer creation via requeue
         var message = new Message(
@@ -112,16 +109,14 @@ public class MqttConsumerProducerConfigAndDisposeTests : IDisposable
         _consumer.Requeue(received, TimeSpan.FromSeconds(5));
 
         // Act + Assert - disposing should not throw (producer cleanup succeeds)
-        var exception = Record.Exception(() => _consumer.Dispose());
-        Assert.Null(exception);
+        await Assert.That(() => _consumer.Dispose()).ThrowsNothing();
     }
 
-    [Fact]
-    public void When_consumer_disposes_without_requeue_should_not_throw()
+    [Test]
+    public async Task When_consumer_disposes_without_requeue_should_not_throw()
     {
         // Act + Assert - disposing without ever requeuing should succeed (no producer created)
-        var exception = Record.Exception(() => _consumer.Dispose());
-        Assert.Null(exception);
+        await Assert.That(() => _consumer.Dispose()).ThrowsNothing();
     }
 
     private Message ReceiveMessage()

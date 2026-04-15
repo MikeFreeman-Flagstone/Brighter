@@ -25,13 +25,12 @@ THE SOFTWARE. */
 using System;
 using System.Linq;
 using Paramore.Brighter.MessagingGateway.Redis;
-using Xunit;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
 
-[Collection("Redis Shared Pool")]
-[Trait("Category", "Redis")]
-[Trait("Fragile", "CI")]
+[NotInParallel("Redis Shared Pool")]
+[Category("Redis")]
+[Property("Fragile", "CI")]
 public class RedisMessageConsumerNoChannelsRejectTests : IDisposable
 {
     private readonly RedisMessageProducer _messageProducer;
@@ -56,8 +55,8 @@ public class RedisMessageConsumerNoChannelsRejectTests : IDisposable
             new MessageBody("test content"));
     }
 
-    [Fact]
-    public void When_rejecting_message_with_no_channels_configured_should_remove_from_inflight()
+    [Test]
+    public async Task When_rejecting_message_with_no_channels_configured_should_remove_from_inflight()
     {
         //Arrange - subscribe then send
         _consumer.Receive(TimeSpan.FromMilliseconds(1000));
@@ -69,12 +68,12 @@ public class RedisMessageConsumerNoChannelsRejectTests : IDisposable
             new MessageRejectionReason(RejectionReason.DeliveryError, "Test delivery error"));
 
         //Assert - reject returns true and consumer can receive again without "unacked message" error
-        Assert.True(result);
+        await Assert.That(result).IsTrue();
 
         // This would throw ChannelFailureException("Unacked message still in flight...")
         // if reject didn't remove from inflight
         var nextMessages = _consumer.Receive(TimeSpan.FromMilliseconds(1000));
-        Assert.Empty(nextMessages);
+        await Assert.That(nextMessages).IsEmpty();
     }
 
     public void Dispose()

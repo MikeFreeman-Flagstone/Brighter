@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Linq;
-using Xunit;
 
 namespace Paramore.Brighter.Redis.Tests.MessagingGateway.Reactor;
 
-[Collection("Redis Shared Pool")]   //shared connection pool so run sequentially
-[Trait("Category", "Redis")]
-public class RedisRequeueMessageTests : IClassFixture<RedisFixture>
+[NotInParallel("Redis Shared Pool")]   //shared connection pool so run sequentially
+[Category("Redis")]
+[ClassDataSource<RedisFixture>(Shared = SharedType.PerClass)]
+    public class RedisRequeueMessageTests 
 {
     private readonly RedisFixture _redisFixture;
     private readonly Message _messageOne;
@@ -28,8 +28,8 @@ public class RedisRequeueMessageTests : IClassFixture<RedisFixture>
         );
     }
 
-    [Fact]
-    public void When_requeing_a_failed_message()
+    [Test]
+    public async Task When_requeing_a_failed_message()
     {
         //Need to receive to subscribe to feed, before we send a message. This returns an empty message we discard
         _redisFixture.MessageConsumer.Receive(TimeSpan.FromMilliseconds(1000));
@@ -53,7 +53,7 @@ public class RedisRequeueMessageTests : IClassFixture<RedisFixture>
         var messageBodyOne = sentMessageOne.Body.Value;
         _redisFixture.MessageConsumer.Acknowledge(sentMessageOne);
 
-        Assert.Equal(_messageOne.Body.Value, messageBodyOne);
-        Assert.Equal(_messageTwo.Body.Value, messageBodyTwo);
+        await Assert.That(messageBodyOne).IsEqualTo(_messageOne.Body.Value);
+        await Assert.That(messageBodyTwo).IsEqualTo(_messageTwo.Body.Value);
     }
 }

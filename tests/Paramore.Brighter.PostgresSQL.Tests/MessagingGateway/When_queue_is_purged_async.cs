@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.Postgres;
 using Paramore.Brighter.PostgresSQL.Tests.TestDoubles;
-using Xunit;
 
 namespace Paramore.Brighter.PostgresSQL.Tests.MessagingGateway;
 
-[Trait("Category", "PostgresSql")]
+[Category("PostgresSql")]
 public class PurgeTestAsync : IAsyncDisposable, IDisposable
 {
     private readonly string _queueName = Guid.NewGuid().ToString();
@@ -36,7 +35,7 @@ public class PurgeTestAsync : IAsyncDisposable, IDisposable
         _consumer = new PostgresConsumerFactory(new PostgresMessagingGatewayConnection(testHelper.Configuration)).CreateAsync(sub);
     }
 
-    [Fact]
+    [Test]
     public async Task When_queue_is_Purged()
     {
         //Send a sequence of messages to postgres 
@@ -45,7 +44,7 @@ public class PurgeTestAsync : IAsyncDisposable, IDisposable
         // Now read those messages in order
         var firstMessage = await ConsumeMessagesAsync(_consumer);
         var message = firstMessage.First();
-        Assert.Equal(msgId, message.Id);
+        await Assert.That(message.Id).IsEqualTo(msgId);
 
         await _consumer.PurgeAsync();
 
@@ -53,7 +52,7 @@ public class PurgeTestAsync : IAsyncDisposable, IDisposable
         var nextMessage = await ConsumeMessagesAsync(_consumer);
         message = nextMessage.First();
 
-        Assert.Equal(new Message(), message);
+        await Assert.That(message).IsEqualTo(new Message());
     }
 
     private async Task<string> SendMessageAsync()

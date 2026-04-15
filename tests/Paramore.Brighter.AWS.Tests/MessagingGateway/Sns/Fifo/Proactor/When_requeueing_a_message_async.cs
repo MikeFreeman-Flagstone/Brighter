@@ -6,13 +6,12 @@ using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 using System.Collections.Generic;
 using Amazon.SimpleNotificationService.Model;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Fifo.Proactor;
 
-[Trait("Category", "AWS")]
+[Category("AWS")]
 public class SqsMessageProducerRequeueTestsAsync : IDisposable, IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _sender;
@@ -63,7 +62,7 @@ public class SqsMessageProducerRequeueTestsAsync : IDisposable, IAsyncDisposable
         _channel = _channelFactory.CreateAsyncChannel(subscription);
     }
 
-    [Fact]
+    [Test]
     public async Task When_requeueing_a_message_async()
     {
         await _sender.SendAsync(_message);
@@ -74,7 +73,7 @@ public class SqsMessageProducerRequeueTestsAsync : IDisposable, IAsyncDisposable
 
         await _channel.AcknowledgeAsync(_requeuedMessage);
 
-        Assert.Equal(_receivedMessage.Body.Value, _requeuedMessage.Body.Value);
+        await Assert.That(_requeuedMessage.Body.Value).IsEqualTo(_receivedMessage.Body.Value);
     }
 
     public void Dispose()

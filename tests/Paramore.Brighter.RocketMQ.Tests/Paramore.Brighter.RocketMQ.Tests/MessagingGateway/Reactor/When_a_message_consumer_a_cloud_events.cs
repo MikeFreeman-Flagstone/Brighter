@@ -1,10 +1,9 @@
-﻿using Paramore.Brighter.MessagingGateway.RocketMQ;
+using Paramore.Brighter.MessagingGateway.RocketMQ;
 using Paramore.Brighter.RocketMQ.Tests.Utils;
-using Xunit;
 
 namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RocketMQ")]
+[Category("RocketMQ")]
 public class BufferedConsumerCloudEventsTests : IDisposable 
 {
     private readonly RoutingKey _routingKey = new(Guid.NewGuid().ToString());
@@ -23,8 +22,8 @@ public class BufferedConsumerCloudEventsTests : IDisposable
         _producer = new RocketMqMessageProducer(connection, producer, publication);
     }
 
-    [Fact]
-    public void When_uses_cloud_events()
+    [Test]
+    public async Task When_uses_cloud_events()
     {
         _consumer.Purge();
         
@@ -47,13 +46,13 @@ public class BufferedConsumerCloudEventsTests : IDisposable
         var messages = _consumer.Receive(TimeSpan.FromMilliseconds(1000));
 
         //We should only have three messages
-        Assert.Single(messages);
+        await Assert.That(messages).HasSingleItem();
 
-        Assert.Equal(messageOne.Header.MessageId, messages[0].Header.MessageId);
-        Assert.Equal(messageOne.Header.Subject, messages[0].Header.Subject);
-        Assert.Equal(messageOne.Header.Type, messages[0].Header.Type);
-        Assert.Equal(messageOne.Header.Source, messages[0].Header.Source);
-        Assert.Equal(messageOne.Header.DataSchema, messages[0].Header.DataSchema);
+        await Assert.That(messages[0].Header.MessageId).IsEqualTo(messageOne.Header.MessageId);
+        await Assert.That(messages[0].Header.Subject).IsEqualTo(messageOne.Header.Subject);
+        await Assert.That(messages[0].Header.Type).IsEqualTo(messageOne.Header.Type);
+        await Assert.That(messages[0].Header.Source).IsEqualTo(messageOne.Header.Source);
+        await Assert.That(messages[0].Header.DataSchema).IsEqualTo(messageOne.Header.DataSchema);
     }
 
     public void Dispose()

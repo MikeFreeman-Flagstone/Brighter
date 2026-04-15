@@ -30,12 +30,11 @@ using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Standard.Reactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SqsMessageConsumerNoChannelsRejectTests : IDisposable, IAsyncDisposable
 {
     private readonly Message _message;
@@ -79,8 +78,8 @@ public class SqsMessageConsumerNoChannelsRejectTests : IDisposable, IAsyncDispos
             new SqsPublication(channelName: channelName, makeChannels: OnMissingChannel.Create));
     }
 
-    [Fact]
-    public void When_rejecting_message_with_no_channels_configured_should_acknowledge_and_log()
+    [Test]
+    public async Task When_rejecting_message_with_no_channels_configured_should_acknowledge_and_log()
     {
         //Arrange
         _messageProducer.Send(_message);
@@ -91,7 +90,7 @@ public class SqsMessageConsumerNoChannelsRejectTests : IDisposable, IAsyncDispos
 
         //Assert - original message should be deleted (acknowledged) since there is no DLQ
         var sourceMessage = _channel.Receive(TimeSpan.FromMilliseconds(5000));
-        Assert.Equal(MessageType.MT_NONE, sourceMessage.Header.MessageType);
+        await Assert.That(sourceMessage.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
     public void Dispose()

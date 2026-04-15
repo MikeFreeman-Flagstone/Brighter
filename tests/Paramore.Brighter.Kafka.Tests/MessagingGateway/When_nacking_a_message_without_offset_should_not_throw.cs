@@ -1,12 +1,11 @@
 using System;
 using Confluent.Kafka;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]
+[Category("Kafka")]
+[NotInParallel("Kafka")]
 public class When_nacking_a_message_without_offset_should_not_throw : IDisposable
 {
     private readonly KafkaMessageConsumer _consumer;
@@ -27,8 +26,8 @@ public class When_nacking_a_message_without_offset_should_not_throw : IDisposabl
         );
     }
 
-    [Fact]
-    public void When_message_has_no_partition_offset_in_bag_should_not_throw()
+    [Test]
+    public async Task When_message_has_no_partition_offset_in_bag_should_not_throw()
     {
         //Arrange - a message with no PARTITION_OFFSET in the header bag
         var message = new Message(
@@ -37,12 +36,11 @@ public class When_nacking_a_message_without_offset_should_not_throw : IDisposabl
         );
 
         //Act & Assert - should return without throwing
-        var exception = Record.Exception(() => _consumer.Nack(message));
-        Assert.Null(exception);
+        await Assert.That(() => _consumer.Nack(message)).ThrowsNothing();
     }
 
-    [Fact]
-    public void When_message_has_wrong_type_for_partition_offset_should_not_throw()
+    [Test]
+    public async Task When_message_has_wrong_type_for_partition_offset_should_not_throw()
     {
         //Arrange - a message with PARTITION_OFFSET set to the wrong type
         var message = new Message(
@@ -52,8 +50,7 @@ public class When_nacking_a_message_without_offset_should_not_throw : IDisposabl
         message.Header.Bag[HeaderNames.PARTITION_OFFSET] = "not-a-TopicPartitionOffset";
 
         //Act & Assert - should return without throwing
-        var exception = Record.Exception(() => _consumer.Nack(message));
-        Assert.Null(exception);
+        await Assert.That(() => _consumer.Nack(message)).ThrowsNothing();
     }
 
     public void Dispose()

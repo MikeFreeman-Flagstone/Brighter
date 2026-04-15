@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2025 Rafael Andrade
 
@@ -27,16 +27,13 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Time.Testing;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]   //Kafka doesn't like multiple consumers of a partition
+[Category("Kafka")]
+[NotInParallel("Kafka")]   //Kafka doesn't like multiple consumers of a partition
 public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsyncDisposable, IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly IAmAProducerRegistry _producerRegistry;
@@ -44,10 +41,9 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
     private readonly string _partitionKey = Guid.NewGuid().ToString();
     private readonly FakeTimeProvider _fakeTimeProvider;
 
-    public WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync(ITestOutputHelper output)
+    public WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync()
     {
         var groupId = Uuid.New().ToString("N");
-        _output = output;
         
         _producerRegistry = new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
@@ -93,7 +89,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
             .CreateAsync(subscription);
     }
 
-    [Fact]
+    [Test]
     public async Task When_sweeper_timeout_reached_should_commit_uncommitted_offsets_async()
     {
         //Arrange
@@ -128,8 +124,8 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
         }
 
         //Assert - messages consumed and acknowledged but not yet committed
-        Assert.Equal(5, consumedMessages.Count);
-        Assert.Equal(5, _consumer.StoredOffsets());
+        await Assert.That(consumedMessages.Count).IsEqualTo(5);
+        await Assert.That(_consumer.StoredOffsets()).IsEqualTo(5);
 
         //Act - Advance time beyond the sweeper interval (30 seconds)
         _fakeTimeProvider.Advance(TimeSpan.FromSeconds(31));
@@ -138,7 +134,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
         await Task.Delay(2000);
 
         //Assert - Sweeper should have committed the offsets
-        Assert.Equal(0, _consumer.StoredOffsets());
+        await Assert.That(_consumer.StoredOffsets()).IsEqualTo(0);
 
         _consumer.Close();
     }
@@ -168,7 +164,7 @@ public class WhenSweeperTimeoutReachedShouldCommitUncommittedOffsetsAsync : IAsy
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 await Task.Delay(1000);
             }
         } while (maxTries <= 10);

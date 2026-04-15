@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.MsSql;
 using Paramore.Brighter.MSSQL.Tests.TestDoubles;
 using Paramore.Brighter.Observability;
-using Xunit;
 
 namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
 {
-    [Trait("Category", "MSSQL")]
+    [Category("MSSQL")]
     public class PostMessageTestAsync : IAsyncDisposable, IDisposable
     {
         private readonly string _queueName = Guid.NewGuid().ToString();
@@ -37,7 +36,7 @@ namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
             _consumer = new MsSqlMessageConsumerFactory(testHelper.QueueConfiguration).CreateAsync(sub);
         }
 
-        [Fact]
+        [Test]
         public async Task When_a_message_is_sent_keep_order()
         {
             IAmAMessageConsumerAsync consumer = _consumer;
@@ -88,8 +87,8 @@ namespace Paramore.Brighter.MSSQL.Tests.MessagingGateway
 
             var firstMessage = await ConsumeMessagesAsync(consumer);
             var message = firstMessage.First();
-            Assert.False(message.IsEmpty);
-            Assert.Equal(msgId, message.Id);
+            await Assert.That(message.IsEmpty).IsFalse();
+            await Assert.That(message.Id).IsEqualTo(msgId);
         }
 
         private async Task<IEnumerable<Message>> ConsumeMessagesAsync(IAmAMessageConsumerAsync consumer)

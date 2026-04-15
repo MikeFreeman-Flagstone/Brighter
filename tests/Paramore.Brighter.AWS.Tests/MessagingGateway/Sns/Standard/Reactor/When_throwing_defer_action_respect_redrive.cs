@@ -13,12 +13,11 @@ using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
 using Paramore.Brighter.ServiceActivator;
 using Polly.Registry;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Reactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SnsReDrivePolicySDlqTests : IDisposable, IAsyncDisposable
 {
     private readonly IAmAMessagePump _messagePump;
@@ -139,7 +138,7 @@ public class SnsReDrivePolicySDlqTests : IDisposable, IAsyncDisposable
     }
 
 
-    [Fact]
+    [Test]
     public async Task When_throwing_defer_action_respect_redrive()
     {
         //put something on an SNS topic, which will be delivered to our SQS queue
@@ -159,7 +158,7 @@ public class SnsReDrivePolicySDlqTests : IDisposable, IAsyncDisposable
         await Task.Delay(5000);
 
         //inspect the dlq
-        Assert.Equal(1, GetDLQCount(_dlqChannelName));
+        await Assert.That(GetDLQCount(_dlqChannelName)).IsEqualTo(1);
     }
 
     public void Dispose()

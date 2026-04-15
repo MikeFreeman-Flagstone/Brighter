@@ -1,10 +1,9 @@
-﻿using Paramore.Brighter.MessagingGateway.RocketMQ;
+using Paramore.Brighter.MessagingGateway.RocketMQ;
 using Paramore.Brighter.RocketMQ.Tests.Utils;
-using Xunit;
 
 namespace Paramore.Brighter.RocketMQ.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "RocketMQ")]
+[Category("RocketMQ")]
 public class BufferedConsumerTestsAsync : IAsyncDisposable
 {
     private readonly IAmAMessageProducerAsync _messageProducer;
@@ -23,7 +22,7 @@ public class BufferedConsumerTestsAsync : IAsyncDisposable
         _messageProducer = new RocketMqMessageProducer(connection, producer, publication);
     }
 
-    [Fact]
+    [Test]
     public async Task When_a_message_consumer_reads_multiple_messages_async()
     {
         await _messageConsumer.PurgeAsync();
@@ -45,7 +44,7 @@ public class BufferedConsumerTestsAsync : IAsyncDisposable
         var messages = await _messageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
 
         //We should only have three messages
-        Assert.Equal(3, messages.Length);
+        await Assert.That(messages.Length).IsEqualTo(3);
 
         //ack those to remove from the queue
         foreach (var message in messages)
@@ -60,7 +59,7 @@ public class BufferedConsumerTestsAsync : IAsyncDisposable
         messages = await _messageConsumer.ReceiveAsync(TimeSpan.FromMilliseconds(500));
 
         //This time, just the one message
-        Assert.Single(messages);
+        await Assert.That(messages).HasSingleItem();
     }
 
     public async ValueTask DisposeAsync()

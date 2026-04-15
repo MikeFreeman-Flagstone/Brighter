@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
 
@@ -25,12 +25,11 @@ THE SOFTWARE. */
 using System;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
 using Paramore.Brighter.RMQ.Async.Tests.TestDoubles;
-using Xunit;
 
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "RMQ")]
-[Collection("RMQ")]
+[Category("RMQ")]
+[NotInParallel("RMQ")]
 public class RmqMessageConsumerChannelFailureTests : IDisposable
 {
     private readonly IAmAMessageProducerSync _sender;
@@ -58,8 +57,8 @@ public class RmqMessageConsumerChannelFailureTests : IDisposable
         _sender.Send(sentMessage);
     }
 
-    [Fact]
-    public void When_a_message_consumer_throws_an_not_supported_exception_when_connecting()
+    [Test]
+    public async Task When_a_message_consumer_throws_an_not_supported_exception_when_connecting()
     {
         bool exceptionHappened = false;
         try
@@ -69,13 +68,12 @@ public class RmqMessageConsumerChannelFailureTests : IDisposable
         catch (ChannelFailureException cfe)
         {
             exceptionHappened = true;
-            Assert.True((cfe.InnerException) is NotSupportedException);
+            await Assert.That((cfe.InnerException) is NotSupportedException).IsTrue();
         }
             
-        Assert.True(exceptionHappened);
+        await Assert.That(exceptionHappened).IsTrue();
     }
 
-    [Fact]
     public void Dispose()
     {
         _sender.Dispose();

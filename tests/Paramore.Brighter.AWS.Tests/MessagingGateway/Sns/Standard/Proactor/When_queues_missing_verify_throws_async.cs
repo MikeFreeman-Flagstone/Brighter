@@ -4,13 +4,12 @@ using Amazon.SQS.Model;
 using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 using System.Collections.Generic;
 using Amazon.SimpleNotificationService.Model;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sns.Standard.Proactor;
 
-[Trait("Category", "AWS")]
+[Category("AWS")]
 public class AwsValidateQueuesTestsAsync : IAsyncDisposable
 {
     private readonly AWSMessagingGatewayConnection _awsConnection;
@@ -44,7 +43,7 @@ public class AwsValidateQueuesTestsAsync : IAsyncDisposable
         producer.ConfirmTopicExistsAsync(topicName).Wait();
     }
 
-    [Fact]
+    [Test]
     public async Task When_queues_missing_verify_throws_async()
     {
         // We have no queues so we should throw

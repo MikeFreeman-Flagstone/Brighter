@@ -29,13 +29,11 @@ using System.Threading.Tasks;
 using MQTTnet;
 using Paramore.Brighter.MessagingGateway.MQTT;
 using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "MQTT")]
-[Collection("MQTT")]
+[Category("MQTT")]
+[NotInParallel("MQTT")]
 public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
 {
     private const string SOURCE_TOPIC_PREFIX = "BrighterTests/NoChannels";
@@ -44,7 +42,7 @@ public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
     private readonly MqttMessageProducer _sourceProducer;
     private readonly MqttMessageConsumer _sourceConsumer;
 
-    public MqttMessageConsumerRejectNoChannelsTests(ITestOutputHelper outputHelper)
+    public MqttMessageConsumerRejectNoChannelsTests()
     {
         var mqttFactory = new MqttFactory();
         int serverPort = MqttTestServer.GetRandomServerPort();
@@ -73,7 +71,7 @@ public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
         _sourceConsumer = new MqttMessageConsumer(consumerConfig);
     }
 
-    [Fact]
+    [Test]
     public async Task When_rejecting_message_with_no_channels_configured_should_return_true()
     {
         //Arrange
@@ -88,7 +86,7 @@ public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
         await Task.Delay(500);
 
         var received = ((IAmAMessageConsumerSync)_sourceConsumer).Receive(TimeSpan.FromSeconds(2));
-        Assert.NotEmpty(received);
+        await Assert.That(received).IsNotEmpty();
         var sourceMessage = received.First(m => m.Header.MessageType != MessageType.MT_NONE);
 
         //Act — reject with DeliveryError (no channels configured)
@@ -98,7 +96,7 @@ public class MqttMessageConsumerRejectNoChannelsTests : IDisposable
         );
 
         //Assert — reject returns true (not false as before the DLQ work)
-        Assert.True(result);
+        await Assert.That(result).IsTrue();
     }
 
     public void Dispose()

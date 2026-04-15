@@ -5,11 +5,10 @@ using Paramore.Brighter.MongoDb.Tests.TestDoubles;
 using Paramore.Brighter.Observability;
 using Paramore.Brighter.Transformers.MongoGridFS;
 using Paramore.Brighter.Transforms.Transformers;
-using Xunit;
 
 namespace Paramore.Brighter.MongoDb.Tests.Transformers;
 
-[Trait("Category", "MongoDb")]
+[Category("MongoDb")]
 public class LargeMessagePayloadAsyncWrapTests : IAsyncDisposable 
 {
     private string? _id;
@@ -45,7 +44,7 @@ public class LargeMessagePayloadAsyncWrapTests : IAsyncDisposable
         _pipelineBuilder = new TransformPipelineBuilderAsync(mapperRegistry, transformerFactoryAsync, InstrumentationOptions.All);
     }
 
-    [Fact]
+    [Test]
     public async Task When_wrapping_a_large_message_async()
     {
         //act
@@ -53,12 +52,12 @@ public class LargeMessagePayloadAsyncWrapTests : IAsyncDisposable
         var message = await _transformPipeline.WrapAsync(_myCommand, new RequestContext(), _publication);
 
         //assert
-        Assert.True(message.Header.Bag.ContainsKey(ClaimCheckTransformer.CLAIM_CHECK));
-        Assert.NotNull(message.Header.DataRef);
+        await Assert.That(message.Header.Bag.ContainsKey(ClaimCheckTransformer.CLAIM_CHECK)).IsTrue();
+        await Assert.That(message.Header.DataRef).IsNotNull();
         _id = (string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK];
-        Assert.Equal($"Claim Check {_id}", message.Body.Value);
+        await Assert.That(message.Body.Value).IsEqualTo($"Claim Check {_id}");
             
-        Assert.True(await _luggageStore.HasClaimAsync(_id));
+        await Assert.That(await _luggageStore.HasClaimAsync(_id)).IsTrue();
     }
 
     public async ValueTask DisposeAsync()

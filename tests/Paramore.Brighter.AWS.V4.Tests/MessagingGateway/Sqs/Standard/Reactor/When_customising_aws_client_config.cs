@@ -6,12 +6,11 @@ using Paramore.Brighter.AWS.V4.Tests.Helpers;
 using Paramore.Brighter.AWS.V4.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
-using Xunit;
 using System.Collections.Generic;
 
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sqs.Standard.Reactor;
 
-[Trait("Category", "AWS")]
+[Category("AWS")]
 public class CustomisingAwsClientConfigTests : IDisposable, IAsyncDisposable
 {
     private readonly Message _message;
@@ -60,7 +59,7 @@ public class CustomisingAwsClientConfigTests : IDisposable, IAsyncDisposable
             new SqsPublication { ChannelName = channelName, MakeChannels = OnMissingChannel.Create });
     }
 
-    [Fact]
+    [Test]
     public async Task When_customising_aws_client_config()
     {
         //arrange
@@ -74,11 +73,11 @@ public class CustomisingAwsClientConfigTests : IDisposable, IAsyncDisposable
         _channel.Acknowledge(message);
 
         //publish_and_subscribe_should_use_custom_http_client_factory
-        Assert.Contains("sqs_sync_sub", InterceptingDelegatingHandler.RequestCount);
-        Assert.True((InterceptingDelegatingHandler.RequestCount["sqs_sync_sub"]) > (0));
+        await Assert.That(InterceptingDelegatingHandler.RequestCount).ContainsKey("sqs_sync_sub");
+        await Assert.That((InterceptingDelegatingHandler.RequestCount["sqs_sync_sub"]) > (0)).IsTrue();
         
-        Assert.Contains("sqs_sync_pub", InterceptingDelegatingHandler.RequestCount);
-        Assert.True((InterceptingDelegatingHandler.RequestCount["sqs_sync_pub"]) > (0));
+        await Assert.That(InterceptingDelegatingHandler.RequestCount).ContainsKey("sqs_sync_pub");
+        await Assert.That((InterceptingDelegatingHandler.RequestCount["sqs_sync_pub"]) > (0)).IsTrue();
     }
 
     public void Dispose()

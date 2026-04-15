@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Mime;
 using System.Threading.Tasks;
 using Paramore.Brighter.Gcp.Tests.Helper;
@@ -7,7 +7,7 @@ using Paramore.Brighter.MessagingGateway.GcpPubSub;
 
 namespace Paramore.Brighter.Gcp.Tests.MessagingGateway.Stream.Proactor;
 
-[Trait("Category", "GCP")]
+[Category("GCP")]
 public class PubSubBufferedConsumerTestsAsync : IDisposable
 {
     private readonly ContentType _contentType = new("text/plain");
@@ -45,7 +45,7 @@ public class PubSubBufferedConsumerTestsAsync : IDisposable
         });
     }
 
-    [Fact]
+    [Test]
     public async Task When_a_message_consumer_reads_multiple_messages_async()
     {
         var routingKey = new RoutingKey(_topicName);
@@ -84,7 +84,7 @@ public class PubSubBufferedConsumerTestsAsync : IDisposable
         {
             //retrieve  messages
             var message = await _channel.ReceiveAsync(TimeSpan.FromMilliseconds(10000));
-            Assert.NotEqual(MessageType.MT_NONE, message.Header.MessageType);
+            await Assert.That(message.Header.MessageType).IsNotEqualTo(MessageType.MT_NONE);
 
             await _channel.AcknowledgeAsync(message);
             await Task.Delay(1000);

@@ -1,13 +1,12 @@
-﻿using System.Linq;
+using System.Linq;
 using Paramore.Brighter.Observability;
-using Xunit;
 
 namespace Paramore.Brighter.InMemory.Tests.Consumer;
 
 public class InMemoryProducerRegistryFactoryTests 
 {
-    [Fact]
-    public void When_creating_an_inmemory_producer_registry()
+    [Test]
+    public async Task When_creating_an_inmemory_producer_registry()
     {
        // arrange
        var bus = new InternalBus(); 
@@ -18,7 +17,7 @@ public class InMemoryProducerRegistryFactoryTests
        var producerRegistry = inMemoryProducerRegistryFactory.Create();
 
        //assert
-       Assert.NotNull(producerRegistry);
-       Assert.Contains(producerRegistry.Producers, p => p.Publication.Topic == publication.Topic); 
+       await Assert.That(producerRegistry).IsNotNull();
+       await Assert.That(producerRegistry.Producers).Contains(p => p.Publication.Topic == publication.Topic);
     }
 }

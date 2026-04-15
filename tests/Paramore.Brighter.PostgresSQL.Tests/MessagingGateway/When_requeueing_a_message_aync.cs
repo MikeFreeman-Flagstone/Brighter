@@ -1,15 +1,14 @@
-﻿using System;
+using System;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.Postgres;
 using Paramore.Brighter.PostgresSQL.Tests.TestDoubles;
-using Xunit;
 
 namespace Paramore.Brighter.PostgresSQL.Tests.MessagingGateway;
 
-[Trait("Category", "PostgresSql")]
+[Category("PostgresSql")]
 public class PostgreSqlMessageConsumerRequeueTestsAsync : IDisposable
 {
     private readonly Message _message;
@@ -48,13 +47,13 @@ public class PostgreSqlMessageConsumerRequeueTestsAsync : IDisposable
         _channelFactory = new PostgresChannelFactory(new PostgresMessagingGatewayConnection(testHelper.Configuration));
     }
 
-    [Fact]
+    [Test]
     public async Task When_requeueing_a_message_async()
     {
         await _producerRegistry.LookupAsyncBy(_topic).SendAsync(_message);
         var channel = await _channelFactory.CreateAsyncChannelAsync(_subscription);
         var message = await channel.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
-        Assert.True(await channel.RequeueAsync(message, TimeSpan.FromMilliseconds(100)));
+        await Assert.That(await channel.RequeueAsync(message, TimeSpan.FromMilliseconds(100))).IsTrue();
 
         await Task.Delay(TimeSpan.FromMilliseconds(100));
         
@@ -63,7 +62,7 @@ public class PostgreSqlMessageConsumerRequeueTestsAsync : IDisposable
         //clear the queue
         await channel.AcknowledgeAsync(requeuedMessage);
 
-        Assert.Equal(message.Body.Value, requeuedMessage.Body.Value);
+        await Assert.That(requeuedMessage.Body.Value).IsEqualTo(message.Body.Value);
     }
         
     public void Dispose()

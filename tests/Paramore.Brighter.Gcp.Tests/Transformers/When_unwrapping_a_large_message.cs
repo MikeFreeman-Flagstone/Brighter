@@ -10,7 +10,7 @@ using Paramore.Brighter.Transforms.Transformers;
 
 namespace Paramore.Brighter.Gcp.Tests.Transformers;
 
-[Trait("Category", "GCS")]
+[Category("GCS")]
 public class LargeMessagePaylodUnwrapTests : IDisposable 
 {
     private readonly TransformPipelineBuilderAsync _pipelineBuilder;
@@ -48,7 +48,7 @@ public class LargeMessagePaylodUnwrapTests : IDisposable
         _pipelineBuilder = new TransformPipelineBuilderAsync(mapperRegistry, messageTransformerFactory, InstrumentationOptions.None);
     }
 
-    [Fact]
+    [Test]
     public async Task When_unwrapping_a_large_message()
     {
         //arrange
@@ -87,8 +87,8 @@ public class LargeMessagePaylodUnwrapTests : IDisposable
 
         //assert
         //contents should be from storage
-        Assert.Equal(contents, transformedMessage.Value); 
-        Assert.False(await _luggageStore.HasClaimAsync(id));
+        await Assert.That(transformedMessage.Value).IsEqualTo(contents);
+        await Assert.That(await _luggageStore.HasClaimAsync(id)).IsFalse();
     }
 
     public void Dispose()

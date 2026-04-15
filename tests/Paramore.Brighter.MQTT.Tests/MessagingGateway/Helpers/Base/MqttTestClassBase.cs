@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
@@ -8,7 +8,6 @@ using Paramore.Brighter.MessagingGateway.MQTT;
 using Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Server;
 using Paramore.Test.Helpers.Base;
 using Paramore.Test.Helpers.Loggers;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
 {
@@ -41,8 +40,8 @@ namespace Paramore.Brighter.MQTT.Tests.MessagingGateway.Helpers.Base
         /// This constructor sets up the necessary MQTT test server and configurations for messaging gateway tests.
         /// It also configures logging to integrate with the test output helper.
         /// </remarks>
-        protected MqttTestClassBase(string clientID, string topicPrefix, ITestOutputHelper testOutputHelper)
-        : base(testOutputHelper)
+        protected MqttTestClassBase(string clientID, string topicPrefix)
+        : base()
         {
             ApplicationLogging.LoggerFactory = LoggerFactory.Create(configure =>
             {

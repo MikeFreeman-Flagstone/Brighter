@@ -8,11 +8,10 @@ using Paramore.Brighter.AWS.Tests.Helpers;
 using Paramore.Brighter.AWS.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS;
-using Xunit;
 
 namespace Paramore.Brighter.AWS.Tests.MessagingGateway.Sqs.Standard.Proactor;
 
-[Trait("Category", "AWS")]
+[Category("AWS")]
 public class SqsMessageProducerResourcesAreTaggedAsyncTests : IAsyncDisposable, IDisposable
 {
     private readonly SqsMessageProducer _messageProducer;
@@ -59,7 +58,7 @@ public class SqsMessageProducerResourcesAreTaggedAsyncTests : IAsyncDisposable, 
             });
     }
 
-    [Fact]
+    [Test]
     public async Task When_posting_a_message_resources_are_tagged_async()
     {
         // arrange
@@ -72,8 +71,8 @@ public class SqsMessageProducerResourcesAreTaggedAsyncTests : IAsyncDisposable, 
             new ListQueueTagsRequest { QueueUrl = queueUrlResponse.QueueUrl });
 
         // assert - queue has Environment=Test tag
-        Assert.True(queueTagsResponse.Tags.ContainsKey("Environment"));
-        Assert.Equal("Test", queueTagsResponse.Tags["Environment"]);
+        await Assert.That(queueTagsResponse.Tags.ContainsKey("Environment")).IsTrue();
+        await Assert.That(queueTagsResponse.Tags["Environment"]).IsEqualTo("Test");
     }
 
     public void Dispose()

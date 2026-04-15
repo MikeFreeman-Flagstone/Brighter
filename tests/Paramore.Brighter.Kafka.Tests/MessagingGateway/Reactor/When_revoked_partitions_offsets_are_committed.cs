@@ -5,25 +5,21 @@ using System.Threading.Tasks;
 using Confluent.Kafka;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Trait("Fragile", "CI")]
-[Collection("Kafka")]   //Kafka doesn't like multiple consumers of a partition
+[Category("Kafka")]
+[Property("Fragile", "CI")]
+[NotInParallel("Kafka")]   //Kafka doesn't like multiple consumers of a partition
 public class KafkaMessageConsumerCommitOnRevoke : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly IAmAProducerRegistry _producerRegistry;
     private readonly string _groupId = Guid.NewGuid().ToString();
 
-    public KafkaMessageConsumerCommitOnRevoke(ITestOutputHelper output)
+    public KafkaMessageConsumerCommitOnRevoke()
     {
-        _output = output;
         _producerRegistry = new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
@@ -57,9 +53,9 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
     /// 3. The revoke handler on A should commit the outstanding offsets from the second batch
     /// 4. A new consumer C verifies it reads from the fully committed position (no replay)
     /// </summary>
-    [Theory]
-    [InlineData(PartitionAssignmentStrategy.RoundRobin)]
-    [InlineData(PartitionAssignmentStrategy.CooperativeSticky)]
+    [Test]
+    [Arguments(PartitionAssignmentStrategy.RoundRobin)]
+    [Arguments(PartitionAssignmentStrategy.CooperativeSticky)]
     public async Task When_a_partition_is_revoked_offsets_are_committed(
         PartitionAssignmentStrategy partitionAssignmentStrategy)
     {
@@ -101,7 +97,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             }
         }
 
-        _output.WriteLine($"Consumer A first batch: {firstBatchIds.Count} messages acknowledged and batch-committed");
+        Console.WriteLine($"Consumer A first batch: {firstBatchIds.Count} messages acknowledged and batch-committed");
 
         //wait for the background batch commit to complete
         await Task.Delay(3000);
@@ -118,11 +114,11 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             }
         }
 
-        _output.WriteLine($"Consumer A second batch: {secondBatchIds.Count} messages acknowledged but not batch-committed");
-        _output.WriteLine($"Consumer A stored offsets: {consumerA.StoredOffsets()}");
+        Console.WriteLine($"Consumer A second batch: {secondBatchIds.Count} messages acknowledged but not batch-committed");
+        Console.WriteLine($"Consumer A stored offsets: {consumerA.StoredOffsets()}");
 
         var allConsumedIds = firstBatchIds.Concat(secondBatchIds).ToHashSet();
-        _output.WriteLine($"Total unique messages consumed by A: {allConsumedIds.Count}");
+        Console.WriteLine($"Total unique messages consumed by A: {allConsumedIds.Count}");
 
         //Phase 3: Consumer B joins the group — triggers rebalance and revoke on A
         //The revoke handler on A should commit the outstanding offsets from the second batch
@@ -163,11 +159,11 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
                     if (allConsumedIds.Contains(msg.Id))
                     {
                         replayedIds.Add(msg.Id);
-                        _output.WriteLine($"Consumer C replayed message: {msg.Id}");
+                        Console.WriteLine($"Consumer C replayed message: {msg.Id}");
                     }
                     else
                     {
-                        _output.WriteLine($"Consumer C read new message: {msg.Id}");
+                        Console.WriteLine($"Consumer C read new message: {msg.Id}");
                     }
                 }
             }
@@ -175,9 +171,9 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
 
         //the second batch offsets should have been committed during revoke — no replays
         var secondBatchReplays = replayedIds.Where(id => secondBatchIds.Contains(id)).ToList();
-        _output.WriteLine($"Second batch messages replayed: {secondBatchReplays.Count} of {secondBatchIds.Count}");
+        Console.WriteLine($"Second batch messages replayed: {secondBatchReplays.Count} of {secondBatchIds.Count}");
 
-        Assert.Empty(secondBatchReplays);
+        await Assert.That(secondBatchReplays).IsEmpty();
     }
 
     private KafkaMessageConsumer CreateConsumer(int commitBatchSize,
@@ -221,7 +217,7 @@ public class KafkaMessageConsumerCommitOnRevoke : IDisposable
             }
             catch (ChannelFailureException cfx)
             {
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
         } while (maxTries <= 10);

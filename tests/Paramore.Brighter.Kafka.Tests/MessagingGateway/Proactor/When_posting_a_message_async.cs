@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Net.Mime;
 using System.Text.Json;
@@ -6,26 +6,22 @@ using System.Threading.Tasks;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Proactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")] //Kafka doesn't like multiple consumers of a partition
+[Category("Kafka")]
+[NotInParallel("Kafka")] //Kafka doesn't like multiple consumers of a partition
 public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable, IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly IAmAProducerRegistry _producerRegistry;
     private readonly IAmAMessageConsumerAsync _consumer;
     private readonly string _partitionKey = Guid.NewGuid().ToString();
 
-    public KafkaMessageProducerSendTestsAsync(ITestOutputHelper output)
+    public KafkaMessageProducerSendTestsAsync()
     {
         string groupId = Guid.NewGuid().ToString();
-        _output = output;
         _producerRegistry = new KafkaProducerRegistryFactory(
             new KafkaMessagingGatewayConfiguration
             {
@@ -59,8 +55,8 @@ public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable, IDisposable
             );
     }
 
-    //[Fact(Skip = "As it has to wait for the messages to flush, only tends to run well in debug")]
-    [Fact]
+    //[Test, Skip("As it has to wait for the messages to flush, only tends to run well in debug")]
+    [Test]
     public async Task When_posting_a_message()
     {
         //Let topic propagate in the broker
@@ -102,19 +98,19 @@ public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable, IDisposable
         //allow the message publication callback to run
         await Task.Delay(10000);
 
-        Assert.True(messagePublished);
+        await Assert.That(messagePublished).IsTrue();
 
         var receivedMessage = await GetMessageAsync();
 
         var receivedCommand = JsonSerializer.Deserialize<MyCommand>(receivedMessage.Body.Value, JsonSerialisationOptions.Options);
 
-        Assert.Equal(MessageType.MT_COMMAND, receivedMessage.Header.MessageType);
-        Assert.Equal(_partitionKey, receivedMessage.Header.PartitionKey);
-        Assert.Equal(message.Body.Bytes, receivedMessage.Body.Bytes);
-        Assert.Equal(message.Body.Value, receivedMessage.Body.Value);
-        Assert.Equal(message.Header.TimeStamp, receivedMessage.Header.TimeStamp, TimeSpan.FromSeconds(5));
-        Assert.Equal(command.Id, receivedCommand.Id);
-        Assert.Equal(command.Value, receivedCommand.Value);
+        await Assert.That(receivedMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
+        await Assert.That(receivedMessage.Header.PartitionKey).IsEqualTo(_partitionKey);
+        await Assert.That(receivedMessage.Body.Bytes).IsEqualTo(message.Body.Bytes);
+        await Assert.That(receivedMessage.Body.Value).IsEqualTo(message.Body.Value);
+        await Assert.That(receivedMessage.Header.TimeStamp).IsEqualTo(message.Header.TimeStamp).Within(TimeSpan.FromSeconds(5));
+        await Assert.That(receivedCommand.Id).IsEqualTo(command.Id);
+        await Assert.That(receivedCommand.Value).IsEqualTo(command.Value);
     }
 
     private async Task<Message> GetMessageAsync()
@@ -142,7 +138,7 @@ public class KafkaMessageProducerSendTestsAsync : IAsyncDisposable, IDisposable
             catch (ChannelFailureException cfx)
             {
                 //Lots of reasons to be here as Kafka propagates a topic, or the test cluster is still initializing
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 await Task.Delay(1000);
             }
         } while (maxTries <= 10);

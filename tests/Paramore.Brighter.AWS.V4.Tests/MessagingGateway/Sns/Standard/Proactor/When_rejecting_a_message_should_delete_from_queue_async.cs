@@ -6,14 +6,13 @@ using Paramore.Brighter.AWS.V4.Tests.Helpers;
 using Paramore.Brighter.AWS.V4.Tests.TestDoubles;
 using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.MessagingGateway.AWSSQS.V4;
-using Xunit;
 using System.Collections.Generic;
 using Amazon.SimpleNotificationService.Model;
 
 namespace Paramore.Brighter.AWS.V4.Tests.MessagingGateway.Sns.Standard.Proactor;
 
-[Trait("Category", "AWS")]
-[Trait("Fragile", "CI")]
+[Category("AWS")]
+[Property("Fragile", "CI")]
 public class SqsMessageConsumerRejectTestsAsync : IDisposable, IAsyncDisposable
 {
     private readonly Message _message;
@@ -56,7 +55,7 @@ public class SqsMessageConsumerRejectTestsAsync : IDisposable, IAsyncDisposable
         _messageProducer = new SnsMessageProducer(awsConnection, new SnsPublication { MakeChannels = OnMissingChannel.Create });
     }
 
-    [Fact]
+    [Test]
     public async Task When_rejecting_a_message_should_delete_from_queue_async()
     {
         //Arrange
@@ -69,7 +68,7 @@ public class SqsMessageConsumerRejectTestsAsync : IDisposable, IAsyncDisposable
         //Assert - message should be deleted, not requeued
         message = await _channel.ReceiveAsync(TimeSpan.FromMilliseconds(5000));
 
-        Assert.Equal(MessageType.MT_NONE, message.Header.MessageType);
+        await Assert.That(message.Header.MessageType).IsEqualTo(MessageType.MT_NONE);
     }
 
     public void Dispose()

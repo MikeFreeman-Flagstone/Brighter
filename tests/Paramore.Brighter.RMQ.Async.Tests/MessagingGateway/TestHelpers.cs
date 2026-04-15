@@ -1,4 +1,4 @@
-﻿#region Licence
+#region Licence
 
 /* The MIT License (MIT)
 Copyright © 2014 Ian Cooper <ian_hammond_cooper@yahoo.co.uk>
@@ -28,9 +28,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Paramore.Brighter.MessagingGateway.RMQ.Async;
 using RabbitMQ.Client;
-using Xunit;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
+[assembly: TUnit.Core.NotInParallel("RMQ")]
 namespace Paramore.Brighter.RMQ.Async.Tests.MessagingGateway;
 
 internal sealed class QueueFactory(RmqMessagingGatewayConnection connection, ChannelName channelName, RoutingKeys routingKeys, bool isDurable = false, QueueType queueType = QueueType.Classic)

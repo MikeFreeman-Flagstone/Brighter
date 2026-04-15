@@ -26,25 +26,21 @@ using System;
 using System.Threading.Tasks;
 using Paramore.Brighter.Kafka.Tests.TestDoubles;
 using Paramore.Brighter.MessagingGateway.Kafka;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Paramore.Brighter.Kafka.Tests.MessagingGateway.Reactor;
 
-[Trait("Category", "Kafka")]
-[Collection("Kafka")]
+[Category("Kafka")]
+[NotInParallel("Kafka")]
 public class KafkaMessageConsumerMakeChannelsTests : IDisposable
 {
-    private readonly ITestOutputHelper _output;
     private readonly string _queueName = Guid.NewGuid().ToString();
     private readonly string _topic = Guid.NewGuid().ToString();
     private readonly string _dlqTopic;
     private readonly KafkaMessageProducer _producer;
     private readonly string _partitionKey = Guid.NewGuid().ToString();
 
-    public KafkaMessageConsumerMakeChannelsTests(ITestOutputHelper output)
+    public KafkaMessageConsumerMakeChannelsTests()
     {
-        _output = output;
         _dlqTopic = $"{_topic}.dlq";
 
         // Create producer directly for the data topic
@@ -69,7 +65,7 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
         _producer.Init();
     }
 
-    [Fact]
+    [Test]
     public async Task When_creating_dlq_producer_with_make_channels_create_should_create_topic()
     {
         //Arrange - let topics propagate in the broker
@@ -94,20 +90,20 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
         using (var consumer = CreateConsumer(groupId, dlqRoutingKey, OnMissingChannel.Create))
         {
             receivedMessage = ConsumeMessage(consumer);
-            Assert.Equal(messageId, receivedMessage.Id);
+            await Assert.That(receivedMessage.Id).IsEqualTo(messageId);
 
-            _output.WriteLine($"About to reject message {messageId} - DLQ topic should be created automatically");
+            Console.WriteLine($"About to reject message {messageId} - DLQ topic should be created automatically");
 
             //reject with DeliveryError - DLQ producer will inherit MakeChannels.Create and create topic
             consumer.Reject(receivedMessage, new MessageRejectionReason(RejectionReason.DeliveryError, "Test MakeChannels inheritance"));
 
-            _output.WriteLine($"Message {messageId} rejected, waiting for DLQ propagation");
+            Console.WriteLine($"Message {messageId} rejected, waiting for DLQ propagation");
 
             //yield to allow DLQ message to be produced and topic to be created
             await Task.Delay(TimeSpan.FromMilliseconds(3000));
         }
 
-        _output.WriteLine("Creating DLQ consumer to verify topic was created");
+        Console.WriteLine("Creating DLQ consumer to verify topic was created");
 
         //yield to allow DLQ topic to propagate
         await Task.Delay(TimeSpan.FromMilliseconds(1000));
@@ -116,18 +112,18 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
         //If MakeChannels inheritance didn't work, the topic wouldn't exist and this would fail
         using (var dlqConsumer = CreateDLQConsumer(groupId))
         {
-            _output.WriteLine("Attempting to consume from DLQ - this proves topic was auto-created");
+            Console.WriteLine("Attempting to consume from DLQ - this proves topic was auto-created");
             var dlqMessage = ConsumeMessage(dlqConsumer);
 
-            Assert.NotNull(dlqMessage);
-            Assert.Equal(MessageType.MT_COMMAND, dlqMessage.Header.MessageType);
-            Assert.Equal(receivedMessage.Body.Value, dlqMessage.Body.Value);
+            await Assert.That(dlqMessage).IsNotNull();
+            await Assert.That(dlqMessage.Header.MessageType).IsEqualTo(MessageType.MT_COMMAND);
+            await Assert.That(dlqMessage.Body.Value).IsEqualTo(receivedMessage.Body.Value);
 
             //verify the DLQ topic was created and message was sent successfully
-            Assert.True(dlqMessage.Header.Bag.ContainsKey("OriginalTopic"));
-            Assert.Equal(_topic, dlqMessage.Header.Bag["OriginalTopic"]);
+            await Assert.That(dlqMessage.Header.Bag.ContainsKey("OriginalTopic")).IsTrue();
+            await Assert.That(dlqMessage.Header.Bag["OriginalTopic"]).IsEqualTo(_topic);
 
-            _output.WriteLine("DLQ topic was successfully created via MakeChannels.Create inheritance");
+            Console.WriteLine("DLQ topic was successfully created via MakeChannels.Create inheritance");
         }
     }
 
@@ -193,7 +189,7 @@ public class KafkaMessageConsumerMakeChannelsTests : IDisposable
             }
             catch (ChannelFailureException cfx)
             {
-                _output.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
+                Console.WriteLine($" Failed to read from topic:{_topic} because {cfx.Message} attempt: {maxTries}");
                 Task.Delay(1000).GetAwaiter().GetResult();
             }
         } while (maxTries <= 10);
