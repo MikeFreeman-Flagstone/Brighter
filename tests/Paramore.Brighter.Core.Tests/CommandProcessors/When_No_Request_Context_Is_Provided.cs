@@ -9,6 +9,7 @@ using Paramore.Brighter.Observability;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.CommandProcessors;
+[NotInParallel("ContextAware")]
 public class RequestContextFromFactoryTests
 {
     private readonly SpyContextFactory _requestContextFactory;

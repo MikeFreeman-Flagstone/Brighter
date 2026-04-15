@@ -16,6 +16,7 @@ using Polly.Registry;
 
 // ReSharper disable ExplicitCallerInfoArgument
 namespace Paramore.Brighter.Core.Tests.Observability.Archive;
+[NotInParallel("Observability")]
 public class AsyncExternalServiceBusArchiveObservabilityTests
 {
     private readonly List<Activity> _exportedActivities = new();
@@ -59,6 +60,7 @@ public class AsyncExternalServiceBusArchiveObservabilityTests
     [Arguments(InstrumentationOptions.All)]
     public async Task When_archiving_from_the_outbox(InstrumentationOptions instrumentationOptions)
     {
+        Activity.Current = null;
         var parentActivity = new ActivitySource("Paramore.Brighter.Tests").StartActivity("BrighterTracerSpanTests");
         var context = new RequestContext
         {

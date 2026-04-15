@@ -10,6 +10,7 @@ using Paramore.Brighter.Extensions.DependencyInjection;
 
 namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
 {
+    [NotInParallel("ExceptionPolicy")]
     public class CommandProcessorWithRetryPolicyTests
     {
         private readonly CommandProcessor _commandProcessor;

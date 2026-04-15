@@ -39,7 +39,7 @@ public class TraceStateTests
         //Act
         //Assert
         var entries = traceState.ToList();
-        await Assert.That(entries).HasCount().EqualTo(2);
+        await Assert.That(entries).Count().IsEqualTo(2);
         await Assert.That(entries[0].Key).IsEqualTo("key1");
         await Assert.That(entries[0].Value).IsEqualTo("value1");
         await Assert.That(entries[1].Key).IsEqualTo("key2");

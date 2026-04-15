@@ -10,6 +10,7 @@ using MyEvent = Paramore.Brighter.Core.Tests.Workflows.TestDoubles.MyEvent;
 using MyEventHandlerAsync = Paramore.Brighter.Core.Tests.Workflows.TestDoubles.MyEventHandlerAsync;
 
 namespace Paramore.Brighter.Core.Tests.Workflows;
+[NotInParallel("Workflows")]
 public class MediatorReplyStepFlowTests
 {
     private readonly Scheduler<WorkflowTestData> _scheduler;

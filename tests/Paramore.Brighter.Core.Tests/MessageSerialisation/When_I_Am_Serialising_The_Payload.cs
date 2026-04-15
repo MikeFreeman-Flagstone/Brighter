@@ -27,7 +27,7 @@ public class MessageValueSerializationTests
         //assert
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.UTF8);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.UTF8);
-        await Assert.That(serBody.Bytes).IsEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsEquivalentTo(desBody.Bytes);
         await Assert.That(serBody.Value).IsEqualTo(desBody.Value);
     }
 
@@ -48,7 +48,7 @@ public class MessageValueSerializationTests
         //assert
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.UTF8);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Base64);
-        await Assert.That(serBody.Bytes).IsEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsEquivalentTo(desBody.Bytes);
         await Assert.That(serBody.Value).IsEqualTo(desBody.ToCharacterEncodedString(CharacterEncoding.UTF8));
     }
 
@@ -68,7 +68,7 @@ public class MessageValueSerializationTests
         //assert
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Raw);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Raw);
-        await Assert.That(serBody.Bytes).IsEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsEquivalentTo(desBody.Bytes);
     }
 
     [Test]
@@ -89,7 +89,7 @@ public class MessageValueSerializationTests
         //assert
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Raw);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Base64);
-        await Assert.That(serBody.Bytes).IsEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsEquivalentTo(desBody.Bytes);
     }
 
     [Test]
@@ -110,7 +110,7 @@ public class MessageValueSerializationTests
         //assert
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Raw);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Base64);
-        await Assert.That(serBody.Bytes).IsEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsEquivalentTo(desBody.Bytes);
     }
 
     [Test]
@@ -142,7 +142,7 @@ public class MessageValueSerializationTests
         //assert
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Raw);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.Base64);
-        await Assert.That(serBody.Bytes).IsEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsEquivalentTo(desBody.Bytes);
         await Assert.That(retrievedSchemaId).IsEqualTo(id);
     }
 
@@ -173,7 +173,7 @@ public class MessageValueSerializationTests
         //assert
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.UTF8);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.UTF8);
-        await Assert.That(serBody.Bytes).IsEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsEquivalentTo(desBody.Bytes);
         await Assert.That(serBody.Value).IsEqualTo(desBody.Value);
         await Assert.That(retrievedSchemaId).IsEqualTo(id);
     }
@@ -206,6 +206,6 @@ public class MessageValueSerializationTests
         await Assert.That(serBody.CharacterEncoding).IsEqualTo(CharacterEncoding.UTF8);
         await Assert.That(desBody.CharacterEncoding).IsEqualTo(CharacterEncoding.UTF8);
         //Note the issue here, that the UTF conversion means that we do not get back the same bytes
-        await Assert.That(serBody.Bytes).IsNotEqualTo(desBody.Bytes);
+        await Assert.That(serBody.Bytes).IsNotEquivalentTo(desBody.Bytes);
     }
 }

@@ -17,6 +17,7 @@ using Polly.Registry;
 using Baggage = OpenTelemetry.Baggage;
 
 namespace Paramore.Brighter.Core.Tests.Observability.CommandProcessor.Clear;
+[NotInParallel("Observability")]
 public class AsyncMessageDispatchPropogateContextTests
 {
     private readonly List<Activity> _exportedActivities = [];

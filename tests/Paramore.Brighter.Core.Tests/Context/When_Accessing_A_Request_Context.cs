@@ -39,7 +39,7 @@ public class RequestContextTests
         context.Span = span;
         context.OriginatingMessage = message;
         //assert
-        await Assert.That("value").IsEqualTo(context.Bag["key"]);
+        await Assert.That(context.Bag["key"]).IsEqualTo("value");
         await Assert.That(context.Policies["key"]).IsNotNull();
         await Assert.That(context.Span?.Id).IsEqualTo(span?.Id);
         await Assert.That(context.OriginatingMessage).IsNotNull();

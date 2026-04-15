@@ -10,6 +10,7 @@ using Paramore.Brighter.JsonConverters;
 using Paramore.Brighter.Observability;
 
 namespace Paramore.Brighter.Core.Tests.Observability.Common;
+[NotInParallel("Observability")]
 public class BrighterTracerSpanTests
 {
     private readonly ICollection<Activity> _exportedActivities;

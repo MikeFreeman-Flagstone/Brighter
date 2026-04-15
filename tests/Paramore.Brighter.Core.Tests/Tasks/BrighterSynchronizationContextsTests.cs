@@ -22,11 +22,13 @@ public class BrighterSynchronizationContextsTests
     public async Task Run_AsyncVoid_BlocksUntilCompletion()
     {
         bool resumed = false;
+#pragma warning disable TUnit0031 // Intentionally testing async void behavior in BrighterAsyncContext
         BrighterAsyncContext.Run((Action)(async () =>
         {
             await Task.Yield();
             resumed = true;
         }));
+#pragma warning restore TUnit0031
         await Assert.That(resumed).IsTrue();
     }
 
@@ -34,11 +36,13 @@ public class BrighterSynchronizationContextsTests
     public async Task Run_AsyncVoid_BlocksUntilCompletion_RunsContinuation()
     {
         bool resumed = false;
+#pragma warning disable TUnit0031 // Intentionally testing async void behavior in BrighterAsyncContext
         BrighterAsyncContext.Run((Action)(async () =>
         {
             await Task.Delay(50);
             resumed = true;
         }));
+#pragma warning restore TUnit0031
         await Assert.That(resumed).IsTrue();
     }
 
@@ -48,11 +52,13 @@ public class BrighterSynchronizationContextsTests
         bool resumed = false;
         var result = BrighterAsyncContext.Run((Func<int>)(() =>
         {
+#pragma warning disable TUnit0031 // Intentionally testing async void behavior in BrighterAsyncContext
             Action asyncVoid = async () =>
             {
                 await Task.Yield();
                 resumed = true;
             };
+#pragma warning restore TUnit0031
             asyncVoid();
             return 13;
         }));

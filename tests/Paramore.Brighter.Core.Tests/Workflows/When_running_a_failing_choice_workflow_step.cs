@@ -7,6 +7,7 @@ using Paramore.Brighter.Mediator;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.Workflows;
+[NotInParallel("Workflows")]
 public class MediatorFailingChoiceFlowTests
 {
     private readonly Scheduler<WorkflowTestData> _scheduler;

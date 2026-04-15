@@ -16,6 +16,7 @@ using Paramore.Brighter.ServiceActivator;
 using Polly.Registry;
 
 namespace Paramore.Brighter.Core.Tests.Observability.MessageDispatch;
+[NotInParallel("Observability")]
 public class MessagePumpBrokenCircuitChannelFailureOberservabilityTests
 {
     private const string ChannelName = "myChannel";

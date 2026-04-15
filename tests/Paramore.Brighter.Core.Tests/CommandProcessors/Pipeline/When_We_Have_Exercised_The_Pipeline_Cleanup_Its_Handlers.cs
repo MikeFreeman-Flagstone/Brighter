@@ -7,14 +7,14 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
     public class PipelineCleanupTests
     {
         private readonly PipelineBuilder<MyCommand> _pipelineBuilder;
-        private static string s_released;
+        private string _released;
         public PipelineCleanupTests()
         {
-            s_released = string.Empty;
+            _released = string.Empty;
             var registry = new SubscriberRegistry();
             registry.Register<MyCommand, MyPreAndPostDecoratedHandler>();
             registry.Register<MyCommand, MyLoggingHandler<MyCommand>>();
-            var handlerFactory = new CheapHandlerFactorySync();
+            var handlerFactory = new CheapHandlerFactorySync(this);
             _pipelineBuilder = new PipelineBuilder<MyCommand>(registry, handlerFactory);
             _pipelineBuilder.Build(new MyCommand(), new RequestContext()).Any();
         }
@@ -25,10 +25,10 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
             _pipelineBuilder.Dispose();
             await Assert.That(MyPreAndPostDecoratedHandler.DisposeWasCalled).IsTrue();
             await Assert.That(MyLoggingHandler<MyCommand>.DisposeWasCalled).IsTrue();
-            await Assert.That(s_released).IsEqualTo("|MyValidationHandler`1|MyPreAndPostDecoratedHandler|MyLoggingHandler`1|MyLoggingHandler`1");
+            await Assert.That(_released).IsEqualTo("|MyValidationHandler`1|MyPreAndPostDecoratedHandler|MyLoggingHandler`1|MyLoggingHandler`1");
         }
 
-        internal sealed class CheapHandlerFactorySync : Paramore.Brighter.IAmAHandlerFactorySync, Paramore.Brighter.IAmAHandlerFactory
+        internal sealed class CheapHandlerFactorySync(PipelineCleanupTests owner) : Paramore.Brighter.IAmAHandlerFactorySync, Paramore.Brighter.IAmAHandlerFactory
         {
             public IHandleRequests Create(Type handlerType, IAmALifetime lifetime)
             {
@@ -54,7 +54,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
             {
                 var disposable = handler as IDisposable;
                 disposable?.Dispose();
-                s_released += "|" + handler.Name;
+                owner._released += "|" + handler.Name;
             }
         }
     }

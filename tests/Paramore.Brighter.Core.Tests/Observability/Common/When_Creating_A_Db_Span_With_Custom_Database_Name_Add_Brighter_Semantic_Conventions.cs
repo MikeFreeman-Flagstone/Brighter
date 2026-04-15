@@ -8,6 +8,7 @@ using OpenTelemetry.Trace;
 using Paramore.Brighter.Observability;
 
 namespace Paramore.Brighter.Core.Tests.Observability.Common;
+[NotInParallel("Observability")]
 public class BrighterSemanticConventionsDbSpanWithCustomNameTests
 {
     private const string DbStatement = "INSERT INTO outbox (id, topic, message_id, message_body, message_type, time_to_live, created_at_utc) VALUES (@id, @topic, @message_id, @message_body, @message_type, @time_to_live, @created_at_utc)";

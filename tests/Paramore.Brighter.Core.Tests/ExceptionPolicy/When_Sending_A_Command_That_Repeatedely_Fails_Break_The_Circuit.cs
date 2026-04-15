@@ -11,6 +11,7 @@ using Paramore.Brighter.Extensions.DependencyInjection;
 
 namespace Paramore.Brighter.Core.Tests.ExceptionPolicy
 {
+    [NotInParallel("ExceptionPolicy")]
     public class CommandProcessorWithCircuitBreakerTests
     {
         private readonly CommandProcessor _commandProcessor;

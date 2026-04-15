@@ -110,6 +110,7 @@ public class CommandProcessorPublishObservabilityTests
     public async Task When_Publishing_A_Request_With_Span_In_ActivityCurrent_Child_Spans_Are_Exported()
     {
         //arrange
+        Activity.Current = null;
         var parentActivity = new ActivitySource("Paramore.Brighter.Tests").StartActivity("BrighterTracerSpanTests");
         var @event = new MyEvent();
         var context = new RequestContext();
@@ -165,6 +166,7 @@ public class CommandProcessorPublishObservabilityTests
     public async Task When_Sending_A_Request_With_No_Context_Or_Span_In_ActivityCurrent_A_Root_Span_Is_Exported()
     {
         //arrange
+        Activity.Current = null;
         var @event = new MyEvent();
         var context = new RequestContext();
         //act

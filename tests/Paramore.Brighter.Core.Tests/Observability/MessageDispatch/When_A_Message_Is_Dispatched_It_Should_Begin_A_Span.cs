@@ -38,6 +38,7 @@ using Baggage = OpenTelemetry.Baggage;
 
 namespace Paramore.Brighter.Core.Tests.Observability.MessageDispatch
 {
+    [NotInParallel("Observability")]
     public class MessagePumpDispatchObservabilityTests
     {
         private const string ChannelName = "myChannel";

@@ -261,7 +261,8 @@ namespace Paramore.Brighter
 
             implicitHandler.Context = requestContext;
 
-            if (!s_preAttributesMemento.TryGetValue(implicitHandler.Name.ToString(),
+            var preCacheKey = GetPreAttributesCacheKey(implicitHandler.Name.ToString());
+            if (!s_preAttributesMemento.TryGetValue(preCacheKey,
                     out IReadOnlyList<RequestHandlerAttribute>? preAttributes))
             {
                 var orderedPreAttributes =
@@ -273,7 +274,7 @@ namespace Paramore.Brighter
                 AddGlobalInboxAttributes(ref orderedPreAttributes, implicitHandler);
 
                 preAttributes = orderedPreAttributes.ToList().AsReadOnly();
-                s_preAttributesMemento.TryAdd(implicitHandler.Name.ToString(), preAttributes);
+                s_preAttributesMemento.TryAdd(preCacheKey, preAttributes);
             }
 
             var firstInPipeline = PushOntoPipeline(preAttributes, implicitHandler, requestContext, instanceScope);
@@ -308,7 +309,8 @@ namespace Paramore.Brighter
             implicitHandler.Context = requestContext;
             implicitHandler.ContinueOnCapturedContext = continueOnCapturedContext;
 
-            if (!s_preAttributesMemento.TryGetValue(implicitHandler.Name.ToString(), out IReadOnlyList<RequestHandlerAttribute>? preAttributes))
+            var preCacheKey = GetPreAttributesCacheKey(implicitHandler.Name.ToString());
+            if (!s_preAttributesMemento.TryGetValue(preCacheKey, out IReadOnlyList<RequestHandlerAttribute>? preAttributes))
             {
                 var orderedPreAttributes =
                     implicitHandler.FindHandlerMethod()
@@ -319,7 +321,7 @@ namespace Paramore.Brighter
                 AddGlobalInboxAttributesAsync(ref orderedPreAttributes, implicitHandler);
 
                 preAttributes = orderedPreAttributes.ToList().AsReadOnly();
-                s_preAttributesMemento.TryAdd(implicitHandler.Name.ToString(), preAttributes);
+                s_preAttributesMemento.TryAdd(preCacheKey, preAttributes);
             }
 
             var firstInPipeline = PushOntoAsyncPipeline(preAttributes, implicitHandler, requestContext, instanceScope, continueOnCapturedContext);
@@ -451,6 +453,15 @@ namespace Paramore.Brighter
 
             preAttributes = attributeList.OrderByDescending(handler => handler.Step);
         }
+
+        /// <summary>
+        /// Builds a cache key for pre-attributes that accounts for inbox configuration.
+        /// The global inbox adds a dynamic <see cref="UseInboxAttribute"/> to the pipeline attributes,
+        /// so pipelines built with and without inbox configuration must be cached separately.
+        /// Post-attributes are not affected by inbox configuration and use the handler name directly.
+        /// </summary>
+        private string GetPreAttributesCacheKey(string handlerName)
+            => _inboxConfiguration != null ? $"{handlerName}:inbox" : handlerName;
 
         private IHandleRequests<TRequest> PushOntoPipeline(IEnumerable<RequestHandlerAttribute> attributes,
             IHandleRequests<TRequest> lastInPipeline, IRequestContext requestContext, IAmALifetime instanceScope)

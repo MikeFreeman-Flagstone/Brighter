@@ -74,7 +74,7 @@ namespace Paramore.Brighter.Core.Tests.MessageSerialisation
                 {
                     var expected = expectedBag[key];
                     var actual = deserializedHeader!.Bag[key];
-                    await Assert.That(actual).IsEquivalentTo(expected);
+                    await Assert.That(actual?.ToString()).IsEqualTo(expected?.ToString());
                 }
 
                 if (key == "myArrayKey")

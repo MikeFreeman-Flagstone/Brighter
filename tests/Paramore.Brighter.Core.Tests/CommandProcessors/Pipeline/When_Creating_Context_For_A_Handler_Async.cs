@@ -7,9 +7,9 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
 {
     public class PipelineForCommandAsyncTests
     {
-        private static PipelineBuilder<MyCommand> _chainBuilder;
-        private static IHandleRequestsAsync<MyCommand> _chainOfResponsibility;
-        private static RequestContext _requestContext;
+        private PipelineBuilder<MyCommand> _chainBuilder;
+        private IHandleRequestsAsync<MyCommand> _chainOfResponsibility;
+        private RequestContext _requestContext;
         private readonly IDictionary<string, string> _receivedMessages = new Dictionary<string, string>();
         public PipelineForCommandAsyncTests()
         {

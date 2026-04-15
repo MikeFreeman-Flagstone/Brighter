@@ -34,7 +34,7 @@ public class CloudEventsTransformerTests
         await Assert.That(cloudEvents.Header.ContentType!).IsEqualTo(_message.Header.ContentType);
         await Assert.That(cloudEvents.Header.DataSchema).IsEqualTo(_dataSchema);
         await Assert.That(cloudEvents.Header.Subject).IsEqualTo(_subject);
-        await Assert.That(cloudEvents.Body.Bytes).IsEqualTo(body.Bytes);
+        await Assert.That(cloudEvents.Body.Bytes).IsEquivalentTo(body.Bytes);
     }
 
     [Test]
@@ -100,7 +100,7 @@ public class CloudEventsTransformerTests
         await Assert.That(cloudEvents.Header.ContentType).IsEqualTo(_message.Header.ContentType);
         await Assert.That(cloudEvents.Header.DataSchema).IsEqualTo(_dataSchema);
         await Assert.That(cloudEvents.Header.Subject).IsEqualTo(_subject);
-        await Assert.That(cloudEvents.Body.Bytes).IsEqualTo(body.Bytes);
+        await Assert.That(cloudEvents.Body.Bytes).IsEquivalentTo(body.Bytes);
     }
 
     [Test]
@@ -213,7 +213,7 @@ public class CloudEventsTransformerTests
         await Assert.That(message.Header.ContentType).IsEqualTo(_message.Header.ContentType);
         await Assert.That(message.Header.DataSchema).IsEqualTo(_message.Header.DataSchema);
         await Assert.That(message.Header.Subject).IsEqualTo(_message.Header.Subject);
-        await Assert.That(message.Body.Bytes).IsEqualTo(_message.Body.Bytes);
+        await Assert.That(message.Body.Bytes).IsEquivalentTo(_message.Body.Bytes);
     }
 
     [Test]
@@ -232,7 +232,7 @@ public class CloudEventsTransformerTests
         await Assert.That(message.Header.Type).IsEqualTo(CloudEventsType.Empty);
         await Assert.That(message.Header.DataSchema).IsEqualTo(_dataSchema);
         await Assert.That(message.Header.Subject).IsEqualTo(_subject);
-        await Assert.That(message.Body.Bytes).IsEqualTo(_message.Body.Bytes);
+        await Assert.That(message.Body.Bytes).IsEquivalentTo(_message.Body.Bytes);
     }
 
     [Test]
@@ -248,7 +248,7 @@ public class CloudEventsTransformerTests
         await Assert.That(message.Header.ContentType).IsEqualTo(_message.Header.ContentType);
         await Assert.That(message.Header.DataSchema).IsEqualTo(_message.Header.DataSchema);
         await Assert.That(message.Header.Subject).IsEqualTo(_message.Header.Subject);
-        await Assert.That(message.Body.Bytes).IsEqualTo(_message.Body.Bytes);
+        await Assert.That(message.Body.Bytes).IsEquivalentTo(_message.Body.Bytes);
     }
 
     [Test]
@@ -263,7 +263,7 @@ public class CloudEventsTransformerTests
         await Assert.That(message.Header.ContentType).IsEqualTo(_message.Header.ContentType);
         await Assert.That(message.Header.DataSchema).IsEqualTo(_message.Header.DataSchema);
         await Assert.That(message.Header.Subject).IsEqualTo(_message.Header.Subject);
-        await Assert.That(message.Body.Bytes).IsEqualTo(_message.Body.Bytes);
+        await Assert.That(message.Body.Bytes).IsEquivalentTo(_message.Body.Bytes);
     }
 
     [Test]
@@ -280,7 +280,7 @@ public class CloudEventsTransformerTests
         await Assert.That(unwrap.Header.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Application.Json) { CharSet = CharacterEncoding.UTF8.FromCharacterEncoding() });
         await Assert.That(unwrap.Header.DataSchema).IsEqualTo(_message.Header.DataSchema);
         await Assert.That(unwrap.Header.Subject).IsEqualTo(_message.Header.Subject);
-        await Assert.That(unwrap.Body.Bytes).IsEqualTo([]);
+        await Assert.That(unwrap.Body.Bytes).IsEquivalentTo(Array.Empty<byte>());
     }
 
     [Test]
@@ -297,7 +297,7 @@ public class CloudEventsTransformerTests
         await Assert.That(unwrap.Header.ContentType).IsEqualTo(new ContentType(MediaTypeNames.Text.Plain));
         await Assert.That(unwrap.Header.DataSchema).IsEqualTo(_message.Header.DataSchema);
         await Assert.That(unwrap.Header.Subject).IsEqualTo(_message.Header.Subject);
-        await Assert.That(unwrap.Body.Bytes).IsEqualTo(body.Bytes);
+        await Assert.That(unwrap.Body.Bytes).IsEquivalentTo(body.Bytes);
         await Assert.That(unwrap.Header.Bag).HasSingleItem();
         await Assert.That(unwrap.Header.Bag["test"]).IsEqualTo("test-header");
     }

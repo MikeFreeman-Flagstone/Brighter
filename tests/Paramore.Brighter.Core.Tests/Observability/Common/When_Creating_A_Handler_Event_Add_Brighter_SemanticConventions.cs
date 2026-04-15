@@ -7,6 +7,7 @@ using OpenTelemetry.Trace;
 using Paramore.Brighter.Observability;
 
 namespace Paramore.Brighter.Core.Tests.Observability.Common;
+[NotInParallel("Observability")]
 public class BrighterSemanticConventionsEventTests
 {
     private readonly ICollection<Activity> _exportedActivities;
