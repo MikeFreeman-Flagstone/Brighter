@@ -184,6 +184,15 @@ namespace Paramore.Brighter
             return transforms;
         }
 
+        /// <summary>
+        /// Clears any cached async transform pipeline definitions.
+        /// </summary>
+        public static void ClearPipelineCache()
+        {
+            s_wrapTransformsMemento.Clear();
+            s_unWrapTransformsMemento.Clear();
+        }
+
         private IAmAMessageMapperAsync<TRequest> FindMessageMapper<TRequest>() where TRequest : class, IRequest
         {
             var messageMapper = _mapperRegistryAsync.GetAsync<TRequest>();

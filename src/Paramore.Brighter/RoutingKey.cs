@@ -92,7 +92,7 @@ namespace Paramore.Brighter
         /// <returns>The <see cref="string"/> result of the conversion.</returns>
         public static implicit operator string(RoutingKey rhs)
         {
-            return rhs?.ToString()!;
+            return rhs.ToString();
         }
 
         /// <summary>

@@ -221,6 +221,15 @@ namespace Paramore.Brighter
             return new TransformPipelineDescription(mapperType, isDefault, wrapTransforms, unwrapTransforms);
         }
 
+        /// <summary>
+        /// Clears any cached transform pipeline definitions.
+        /// </summary>
+        public static void ClearPipelineCache()
+        {
+            s_wrapTransformsMemento.Clear();
+            s_unWrapTransformsMemento.Clear();
+        }
+
         private IAmAMessageMapper<TRequest> FindMessageMapper<TRequest>() where TRequest : class, IRequest
         {
             var messageMapper = _mapperRegistry.Get<TRequest>();
