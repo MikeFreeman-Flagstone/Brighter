@@ -13,10 +13,10 @@ using Quartz;
 
 namespace ParamoreBrighter.Quartz.Tests;
 
-[NotInParallel("Scheduler")]
-public class QuartzSchedulerRequestTests
+public class QuartzSchedulerRequestTests : IDisposable
 {
     private readonly QuartzSchedulerFactory _scheduler;
+    private readonly IScheduler _quartzScheduler;
     private readonly IAmACommandProcessor _processor;
     private readonly InMemoryOutbox _outbox;
     private readonly InternalBus _internalBus = new();
@@ -76,10 +76,10 @@ public class QuartzSchedulerRequestTests
             .UseJobFactory<BrighterResolver>()
             .Build();
 
-        var scheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
-        scheduler.Start().GetAwaiter().GetResult();
+        _quartzScheduler = schedulerFactory.GetScheduler().GetAwaiter().GetResult();
+        _quartzScheduler.Start().GetAwaiter().GetResult();
 
-        _scheduler = new QuartzSchedulerFactory(scheduler);
+        _scheduler = new QuartzSchedulerFactory(_quartzScheduler);
 
         _processor = new CommandProcessor(
             subscriberRegistry,
@@ -91,7 +91,7 @@ public class QuartzSchedulerRequestTests
             _scheduler
         );
 
-        BrighterResolver.Processor = _processor;
+        _quartzScheduler.Context.Put(BrighterResolver.ProcessorContextKey, _processor);
     }
 
     #region Scheduler
@@ -420,4 +420,9 @@ public class QuartzSchedulerRequestTests
     }
 
     #endregion
+
+    public void Dispose()
+    {
+        _quartzScheduler.Shutdown(waitForJobsToComplete: true).GetAwaiter().GetResult();
+    }
 }

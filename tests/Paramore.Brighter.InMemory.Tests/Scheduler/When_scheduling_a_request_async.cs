@@ -16,7 +16,6 @@ using MyEventHandlerAsync = Paramore.Brighter.InMemory.Tests.TestDoubles.MyEvent
 namespace Paramore.Brighter.InMemory.Tests.Scheduler;
 
 [Category("InMemory")]
-[NotInParallel("CommandProcess")]
 public class InMemorySchedulerRequestAsyncTests
 {
     private readonly InMemorySchedulerFactory _scheduler;

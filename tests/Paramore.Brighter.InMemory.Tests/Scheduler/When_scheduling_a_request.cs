@@ -14,7 +14,6 @@ using Polly.Registry;
 namespace Paramore.Brighter.InMemory.Tests.Scheduler;
 
 [Category("InMemory")]
-[NotInParallel("CommandProcess")]
 public class InMemorySchedulerRequestTests
 {
     private readonly InMemorySchedulerFactory _scheduler;

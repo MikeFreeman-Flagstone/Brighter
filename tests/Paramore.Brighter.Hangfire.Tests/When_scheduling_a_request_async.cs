@@ -13,11 +13,11 @@ using MyEventHandlerAsync = Paramore.Brighter.Hangfire.Tests.TestDoubles.MyEvent
 
 namespace Paramore.Brighter.Hangfire.Tests;
 
-[NotInParallel("Scheduler")]
 public class HangfireSchedulerRequestAsyncTests : IDisposable
 {
     private readonly HangfireMessageSchedulerFactory _scheduler;
     private readonly BackgroundJobServer _server;
+    private readonly JobStorage _storage;
     private readonly IAmACommandProcessor _processor;
     private readonly InMemoryOutbox _outbox;
     private readonly InternalBus _internalBus = new();
@@ -79,17 +79,6 @@ public class HangfireSchedulerRequestAsyncTests : IDisposable
             _outbox
         );
         
-        GlobalConfiguration.Configuration
-            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-            .UseSimpleAssemblyNameTypeSerializer()
-            .UseRecommendedSerializerSettings()
-            .UseInMemoryStorage(new InMemoryStorageOptions { IdType = InMemoryStorageIdType.Guid })
-            .UseActivator(new BrighterActivator());
-
-        _server = new BackgroundJobServer(new BackgroundJobServerOptions
-        {
-            WorkerCount = 1, SchedulePollingInterval = TimeSpan.FromSeconds(1), Activator = new BrighterActivator(),
-        });
         _scheduler = new HangfireMessageSchedulerFactory();
 
         _processor = new CommandProcessor(
@@ -102,7 +91,18 @@ public class HangfireSchedulerRequestAsyncTests : IDisposable
             _scheduler
         );
 
-        BrighterActivator.Processor = _processor;
+        GlobalConfiguration.Configuration
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings();
+
+        _storage = new InMemoryStorage(new InMemoryStorageOptions { IdType = InMemoryStorageIdType.Guid });
+        var activator = new BrighterActivator(_processor);
+        _server = new BackgroundJobServer(new BackgroundJobServerOptions
+        {
+            WorkerCount = 1, SchedulePollingInterval = TimeSpan.FromSeconds(1), Activator = activator,
+        }, _storage);
+        _scheduler.Client = new BackgroundJobClient(_storage);
     }
 
     #region Scheduler

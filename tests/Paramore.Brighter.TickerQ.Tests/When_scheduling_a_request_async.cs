@@ -5,15 +5,13 @@ using Paramore.Brighter.TickerQ.Tests.TestDoubles.Fixtures;
 
 namespace Paramore.Brighter.TickerQ.Tests
 {
-    [NotInParallel("Scheduler")]
-    [ClassDataSource<TickerQRequestAsyncTestFixture>(Shared = SharedType.PerClass)]
     public class TickerQSchedulerRequestAsyncTests : IDisposable
     {
         private readonly TickerQRequestAsyncTestFixture _fixture;
 
-        public TickerQSchedulerRequestAsyncTests(TickerQRequestAsyncTestFixture tickerQTestFixture)
+        public TickerQSchedulerRequestAsyncTests()
         {
-            _fixture = tickerQTestFixture;
+            _fixture = new TickerQRequestAsyncTestFixture();
         }
 
         #region Scheduler
