@@ -132,7 +132,7 @@ public class SnsReDrivePolicySDlqTestsAsync : IAsyncDisposable
     {
         await _sender.SendAsync(_message);
 
-        var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+        var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         await Task.Delay(5000);
 
         var quitMessage = MessageFactory.CreateQuitMessage(_subscription.RoutingKey);

@@ -122,7 +122,7 @@ public class RMQMessageConsumerRetryDLQTests : IDisposable
         //then propagate to the DLQ
             
         //start a message pump, let it create infrastructure 
-        var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+        var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         await Task.Delay(20000);
 
         //put something on an SNS topic, which will be delivered to our SQS queue

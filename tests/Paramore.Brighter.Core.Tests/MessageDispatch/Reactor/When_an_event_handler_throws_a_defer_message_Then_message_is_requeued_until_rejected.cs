@@ -62,7 +62,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         [Test]
         public async Task When_an_event_handler_throws_a_defer_message_Then_message_is_requeued_until_rejected()
         {
-            var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             //allow requeue to run
             await Task.Delay(1000);
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages

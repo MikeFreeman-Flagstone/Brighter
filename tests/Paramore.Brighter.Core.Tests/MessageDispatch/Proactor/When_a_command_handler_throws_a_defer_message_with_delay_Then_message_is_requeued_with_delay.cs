@@ -59,7 +59,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             var msg = await new TransformPipelineBuilderAsync(messageMapperRegistry, null, InstrumentationOptions.All).BuildWrapPipeline<MyCommand>().WrapAsync(new MyCommand(), new RequestContext(), new Publication { Topic = _routingKey });
             bus.Enqueue(msg);
             //Act
-            var task = Task.Factory.StartNew(() => messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             await Task.Delay(1000);
             timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
             var quitMessage = MessageFactory.CreateQuitMessage(_routingKey);

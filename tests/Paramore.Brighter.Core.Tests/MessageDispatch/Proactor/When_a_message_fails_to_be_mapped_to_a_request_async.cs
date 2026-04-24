@@ -35,7 +35,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         [Test]
         public async Task When_A_Message_Fails_To_Be_Mapped_To_A_Request_Should_Ack()
         {
-            var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
             _channel.Stop(_routingKey);
             await Task.WhenAll(task);

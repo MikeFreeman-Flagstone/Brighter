@@ -44,7 +44,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         public async Task When_A_Handler_Throws_DontAck_Action_Should_Not_Acknowledge_Async()
         {
             // Act: run the pump in the background
-            var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             // Wait for the handler to be invoked (first delivery)
             await Assert.That(await _commandProcessor.WaitForHandleAsync()).IsTrue();
             await Assert.That(_commandProcessor.SendCount).IsEqualTo(1);

@@ -43,7 +43,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         [Test]
         public async Task When_An_Unacceptable_Message_Limit_Is_Reached()
         {
-            var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             await Task.WhenAll(task);
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
             await Assert.That(_bus.Stream(_routingKey)).IsEmpty();

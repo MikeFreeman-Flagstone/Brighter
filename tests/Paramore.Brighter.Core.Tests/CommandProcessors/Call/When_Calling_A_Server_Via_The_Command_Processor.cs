@@ -62,7 +62,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Call
                 TimeOut = TimeSpan.FromMilliseconds(5000)
             };
             //RunAsync the pump on a new thread
-            Task.Factory.StartNew(() => messagePump.Run());
+            Task.Factory.StartNew(() => messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             _commandProcessor.Call<MyRequest, MyResponse>(_myRequest, timeOut: TimeSpan.FromMilliseconds(500));
             MyResponseHandler.ShouldReceive(new MyResponse(_myRequest.ReplyAddress) { Id = _myRequest.Id });
             channel.Stop(_routingKey);

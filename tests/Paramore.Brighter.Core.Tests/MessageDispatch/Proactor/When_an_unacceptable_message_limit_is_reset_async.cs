@@ -59,7 +59,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             //will trigger reset of unacceptable message count as window has passed
             _channel.Enqueue(_unacceptableMessage3);
             _channel.Enqueue(_unacceptableMessage4);
-            var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             _channel.Stop(_routingKey);
             await Task.WhenAll(task);
             await Assert.That(_bus.Stream(_routingKey)).IsEmpty();

@@ -146,7 +146,7 @@ public class SnsReDrivePolicySDlqTests : IAsyncDisposable
         await _sender.SendAsync(_message);
 
         //start a message pump, let it process messages
-        var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+        var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         await Task.Delay(5000);
 
         //send a quit message to the pump to terminate it 

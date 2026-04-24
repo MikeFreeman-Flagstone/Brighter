@@ -50,7 +50,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         {
             using (TestCorrelator.CreateContext())
             {
-                var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+                var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
                 await Task.Delay(1000);
                 _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
                 var quitMessage = new Message(new MessageHeader(string.Empty, RoutingKey.Empty, MessageType.MT_QUIT), new MessageBody(""));

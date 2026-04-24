@@ -40,7 +40,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
         [Test]
         public async Task When_A_Requeue_Count_Threshold_For_Commands_Has_Been_Reached()
         {
-            var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             await Task.Delay(1000);
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
             var quitMessage = MessageFactory.CreateQuitMessage(new RoutingKey("MyTopic"));

@@ -45,7 +45,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         public async Task When_A_Handler_Throws_DontAck_Action_Should_Nack_The_Message()
         {
             // Act: run pump in background
-            var task = Task.Factory.StartNew(() => _messagePump.Run(), TaskCreationOptions.LongRunning);
+            var task = Task.Factory.StartNew(() => _messagePump.Run(), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             // Wait for handler to process the message (DontAckAction thrown)
             var handled = await _commandProcessor.WaitForHandleAsync(5000);
             await Assert.That(handled).IsTrue();
