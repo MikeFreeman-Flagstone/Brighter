@@ -57,7 +57,7 @@ jobs:
           restore-keys: |
             Linux-nuget-
       - name: Build
-        run: dotnet build --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+        run: dotnet build --configuration Release
       - name: Enable Automated Test Artifact Uploads
         uses: actions/github-script@v9
         with:
