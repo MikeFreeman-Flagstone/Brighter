@@ -38,7 +38,8 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         [Test]
         public async Task When_A_Message_Dispatcher_Is_Asked_To_Connect_A_Channel_And_Handler()
         {
-            await Task.Delay(1000);
+            await Assert.That(() => _bus.Stream(_routingKey).Any())
+                .Eventually(src => src.IsFalse(), TimeSpan.FromSeconds(10));
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
             await _dispatcher.End();
             await Assert.That(_bus.Stream(_routingKey)).IsEmpty();

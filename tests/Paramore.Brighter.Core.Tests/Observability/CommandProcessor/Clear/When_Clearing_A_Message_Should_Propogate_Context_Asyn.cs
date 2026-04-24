@@ -76,7 +76,8 @@ public class AsyncMessageDispatchPropogateContextTests
         //reset the parent span as deposit and clear are siblings
         context.Span = parentActivity;
         await _commandProcessor.ClearOutboxAsync([messageId], context);
-        await Task.Delay(3000); //allow bulk clear to run -- can make test fragile
+        await Assert.That(() => _internalBus.Stream(_routingKey).Any(m => m.Id == messageId))
+            .Eventually(src => src.IsTrue(), TimeSpan.FromSeconds(10));
         parentActivity?.Stop();
         _traceProvider.ForceFlush();
         //assert 
