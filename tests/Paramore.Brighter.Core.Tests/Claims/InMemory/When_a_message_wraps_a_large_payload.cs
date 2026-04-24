@@ -16,7 +16,7 @@ public class ClaimCheckLargePayloadTests
     {
         //arrange
         _store = new InMemoryStorageProvider();
-        _transformer = new ClaimCheckTransformer(_store, new InMemoryStorageProvider());
+        _transformer = new ClaimCheckTransformer(_store, _store);
         _transformer.InitializeWrapFromAttributeParams(5);
         _body = DataGenerator.CreateString(6000);
         _message = new Message(new MessageHeader(Guid.NewGuid().ToString(), _topic, MessageType.MT_EVENT, timeStamp: DateTime.UtcNow), new MessageBody(_body));

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Paramore.Brighter.Core.Tests.CommandProcessors.TestDoubles;
 
@@ -7,6 +8,7 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
     public class PipelineCleanupTests
     {
         private readonly PipelineBuilder<MyCommand> _pipelineBuilder;
+        private readonly CheapHandlerFactorySync _handlerFactory;
         private string _released;
         public PipelineCleanupTests()
         {
@@ -14,8 +16,8 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
             var registry = new SubscriberRegistry();
             registry.Register<MyCommand, MyPreAndPostDecoratedHandler>();
             registry.Register<MyCommand, MyLoggingHandler<MyCommand>>();
-            var handlerFactory = new CheapHandlerFactorySync(this);
-            _pipelineBuilder = new PipelineBuilder<MyCommand>(registry, handlerFactory);
+            _handlerFactory = new CheapHandlerFactorySync(this);
+            _pipelineBuilder = new PipelineBuilder<MyCommand>(registry, _handlerFactory);
             _pipelineBuilder.Build(new MyCommand(), new RequestContext()).Any();
         }
 
@@ -23,13 +25,17 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
         public async Task When_We_Have_Exercised_The_Pipeline_Cleanup_Its_Handlers()
         {
             _pipelineBuilder.Dispose();
-            await Assert.That(MyPreAndPostDecoratedHandler.DisposeWasCalled).IsTrue();
-            await Assert.That(MyLoggingHandler<MyCommand>.DisposeWasCalled).IsTrue();
+            await Assert.That(_handlerFactory.DisposedHandlerTypes).Contains(typeof(MyPreAndPostDecoratedHandler));
+            await Assert.That(_handlerFactory.DisposedHandlerTypes).Contains(typeof(MyLoggingHandler<MyCommand>));
             await Assert.That(_released).IsEqualTo("|MyValidationHandler`1|MyPreAndPostDecoratedHandler|MyLoggingHandler`1|MyLoggingHandler`1");
         }
 
         internal sealed class CheapHandlerFactorySync(PipelineCleanupTests owner) : Paramore.Brighter.IAmAHandlerFactorySync, Paramore.Brighter.IAmAHandlerFactory
         {
+            private readonly List<Type> _disposedHandlerTypes = new();
+
+            public IReadOnlyList<Type> DisposedHandlerTypes => _disposedHandlerTypes;
+
             public IHandleRequests Create(Type handlerType, IAmALifetime lifetime)
             {
                 if (handlerType == typeof(MyPreAndPostDecoratedHandler))
@@ -52,8 +58,11 @@ namespace Paramore.Brighter.Core.Tests.CommandProcessors.Pipeline
 
             public void Release(IHandleRequests handler, IAmALifetime lifetime)
             {
-                var disposable = handler as IDisposable;
-                disposable?.Dispose();
+                if (handler is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                    _disposedHandlerTypes.Add(handler.GetType());
+                }
                 owner._released += "|" + handler.Name;
             }
         }

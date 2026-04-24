@@ -9,6 +9,7 @@ using Paramore.Brighter.ServiceActivator;
 
 namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
 {
+    [NotInParallel("MessageDispatcher")]
     public class MessageDispatcherMultiplePerformerTests
     {
         private const string Topic = "myTopic";
