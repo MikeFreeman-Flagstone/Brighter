@@ -57,7 +57,7 @@ jobs:
           restore-keys: |
             Linux-nuget-
       - name: Build
-        run: dotnet build --configuration Release
+        run: dotnet build --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
       - name: Enable Automated Test Artifact Uploads
         uses: actions/github-script@v9
         with:
@@ -66,9 +66,17 @@ jobs:
             core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
       - name: Core Tests
         run: |
-          dotnet test --project tests/Paramore.Brighter.Core.Tests/Paramore.Brighter.Core.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" -c Release --no-restore --no-build --verbosity d
-          dotnet test --project tests/Paramore.Brighter.Extensions.Tests/Paramore.Brighter.Extensions.Tests.csproj -c Release --no-restore --no-build --verbosity d
-          dotnet test --project tests/Paramore.Brighter.Transforms.Adaptors.Tests/Paramore.Brighter.Transforms.Adaptors.Tests.csproj -c Release --no-restore --no-build --verbosity d
+          dotnet test --project tests/Paramore.Brighter.Core.Tests/Paramore.Brighter.Core.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" -c Release --no-restore --no-build --verbosity d --hangdump --hangdump-timeout 15m --hangdump-type Mini
+          dotnet test --project tests/Paramore.Brighter.Extensions.Tests/Paramore.Brighter.Extensions.Tests.csproj -c Release --no-restore --no-build --verbosity d --hangdump --hangdump-timeout 15m --hangdump-type Mini
+          dotnet test --project tests/Paramore.Brighter.Transforms.Adaptors.Tests/Paramore.Brighter.Transforms.Adaptors.Tests.csproj -c Release --no-restore --no-build --verbosity d --hangdump --hangdump-timeout 15m --hangdump-type Mini
+
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
       - name: Upload packages as artifacts
         uses: actions/upload-artifact@v7
@@ -110,7 +118,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: In Memory Transport Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.InMemory.Tests/Paramore.Brighter.InMemory.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release  
+        run: dotnet test --project ./tests/Paramore.Brighter.InMemory.Tests/Paramore.Brighter.InMemory.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   hangfire:
     runs-on: ubuntu-latest
@@ -128,7 +143,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Hangfire Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.Hangfire.Tests/Paramore.Brighter.Hangfire.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.Hangfire.Tests/Paramore.Brighter.Hangfire.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   quartz:
     runs-on: ubuntu-latest
@@ -146,7 +168,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Quartz Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.Quartz.Tests/Paramore.Brighter.Quartz.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.Quartz.Tests/Paramore.Brighter.Quartz.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   tickerq:
     runs-on: ubuntu-latest
@@ -164,7 +193,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: TickerQ Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.TickerQ.Tests/Paramore.Brighter.TickerQ.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.TickerQ.Tests/Paramore.Brighter.TickerQ.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   redis-ci:
     runs-on: ubuntu-latest
@@ -196,7 +232,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Redis Transport Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.Redis.Tests/Paramore.Brighter.Redis.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.Redis.Tests/Paramore.Brighter.Redis.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   mqtt-ci:
     runs-on: ubuntu-latest
@@ -221,7 +264,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: MQTT Transport Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.MQTT.Tests/Paramore.Brighter.MQTT.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.MQTT.Tests/Paramore.Brighter.MQTT.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   rabbitmq-ci:
     runs-on: ubuntu-latest
@@ -251,9 +301,16 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: RMQ Async Transport Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Async.Tests/Paramore.Brighter.RMQ.Async.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]&/*/*/*/*[Requires!=Docker-mTLS]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Async.Tests/Paramore.Brighter.RMQ.Async.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]&/*/*/*/*[Requires!=Docker-mTLS]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
       - name: RMQ Sync Transport Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Sync.Tests/Paramore.Brighter.RMQ.Sync.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]&/*/*/*/*[Requires!=Docker-mTLS]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Sync.Tests/Paramore.Brighter.RMQ.Sync.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]&/*/*/*/*[Requires!=Docker-mTLS]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   kafka-ci:
     runs-on: ubuntu-latest
@@ -328,7 +385,14 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Kafka Transport Tests
-      run: dotnet test --project ./tests/Paramore.Brighter.Kafka.Tests/Paramore.Brighter.Kafka.Tests.csproj --treenode-filter "/*/*/*/*[Category!=Confluent]&/*/*/*/*[Fragile!=CI]" --configuration Release
+      run: dotnet test --project ./tests/Paramore.Brighter.Kafka.Tests/Paramore.Brighter.Kafka.Tests.csproj --treenode-filter "/*/*/*/*[Category!=Confluent]&/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+    - name: Upload hang dumps
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: hangdumps-${{ github.job }}
+        path: "**/*.dmp"
+        if-no-files-found: ignore
 
   postgres-ci:
     runs-on: ubuntu-latest
@@ -359,7 +423,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Postgres Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.PostgresSQL.Tests/Paramore.Brighter.PostgresSQL.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.PostgresSQL.Tests/Paramore.Brighter.PostgresSQL.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   sqlserver-ci:
     runs-on: ubuntu-latest
@@ -385,7 +456,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: MSSQL Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.MSSQL.Tests/Paramore.Brighter.MSSQL.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.MSSQL.Tests/Paramore.Brighter.MSSQL.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   mysql-ci:
     runs-on: ubuntu-latest
@@ -420,7 +498,14 @@ jobs:
             sleep 1
           done
       - name: MySQL Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.MySQL.Tests/Paramore.Brighter.MySQL.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.MySQL.Tests/Paramore.Brighter.MySQL.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   dynamo-ci:
     runs-on: ubuntu-latest
@@ -445,8 +530,15 @@ jobs:
         run: dotnet restore
       - name: DynamoDB Tests
         run: |
-          dotnet test --project ./tests/Paramore.Brighter.DynamoDB.Tests/Paramore.Brighter.DynamoDB.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
-          dotnet test --project ./tests/Paramore.Brighter.DynamoDB.V4.Tests/Paramore.Brighter.DynamoDB.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+          dotnet test --project ./tests/Paramore.Brighter.DynamoDB.Tests/Paramore.Brighter.DynamoDB.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+          dotnet test --project ./tests/Paramore.Brighter.DynamoDB.V4.Tests/Paramore.Brighter.DynamoDB.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   localstack-ci:
     runs-on: ubuntu-latest
@@ -483,8 +575,15 @@ jobs:
             Linux-nuget-
       - name: AWS Tests
         run: |
-          dotnet test --project ./tests/Paramore.Brighter.AWS.Tests/Paramore.Brighter.AWS.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
-          dotnet test --project ./tests/Paramore.Brighter.AWS.V4.Tests/Paramore.Brighter.AWS.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+          dotnet test --project ./tests/Paramore.Brighter.AWS.Tests/Paramore.Brighter.AWS.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+          dotnet test --project ./tests/Paramore.Brighter.AWS.V4.Tests/Paramore.Brighter.AWS.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   aws-ci:
     runs-on: ubuntu-latest
@@ -517,8 +616,15 @@ jobs:
           aws-region: eu-west-1
       - name: AWS SNS, SQS and S3 Tests
         run: |
-          dotnet test --project ./tests/Paramore.Brighter.AWS.Tests/Paramore.Brighter.AWS.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
-          dotnet test --project ./tests/Paramore.Brighter.AWS.V4.Tests/Paramore.Brighter.AWS.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+          dotnet test --project ./tests/Paramore.Brighter.AWS.Tests/Paramore.Brighter.AWS.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+          dotnet test --project ./tests/Paramore.Brighter.AWS.V4.Tests/Paramore.Brighter.AWS.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
       - name: Cleanup orphaned test resources
         if: always()
         run: |
@@ -557,8 +663,15 @@ jobs:
           aws-region: eu-west-1
       - name: Scheduler Tests
         run: |
-          dotnet test --project ./tests/Paramore.Brighter.AWSScheduler.Tests/Paramore.Brighter.AWSScheduler.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
-          dotnet test --project ./tests/Paramore.Brighter.AWSScheduler.V4.Tests/Paramore.Brighter.AWSScheduler.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+          dotnet test --project ./tests/Paramore.Brighter.AWSScheduler.Tests/Paramore.Brighter.AWSScheduler.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+          dotnet test --project ./tests/Paramore.Brighter.AWSScheduler.V4.Tests/Paramore.Brighter.AWSScheduler.V4.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
       - name: Cleanup orphaned test resources
         if: always()
         run: |
@@ -582,7 +695,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Sqlite Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.Sqlite.Tests/Paramore.Brighter.Sqlite.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.Sqlite.Tests/Paramore.Brighter.Sqlite.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   azure-ci:
     runs-on: ubuntu-latest
@@ -604,7 +724,14 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: Azure Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.AzureServiceBus.Tests/Paramore.Brighter.AzureServiceBus.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+        run: dotnet test --project ./tests/Paramore.Brighter.AzureServiceBus.Tests/Paramore.Brighter.AzureServiceBus.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
 
   mongodb-ci:
     runs-on: ubuntu-latest
@@ -636,8 +763,15 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: MongoDB Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.MongoDb.Tests/Paramore.Brighter.MongoDb.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
-    
+        run: dotnet test --project ./tests/Paramore.Brighter.MongoDb.Tests/Paramore.Brighter.MongoDb.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
+
   gcp-ci:
     runs-on: ubuntu-latest
     timeout-minutes: 8
@@ -673,8 +807,15 @@ jobs:
         run: dotnet restore
         
       - name: GCP Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --treenode-filter "/*/*/*/*[Category!=Spanner]&[Fragile!=CI]" --configuration Release
-        
+        run: dotnet test --project ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --treenode-filter "/*/*/*/*[Category!=Spanner]&[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      - name: Upload hang dumps
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: hangdumps-${{ github.job }}
+          path: "**/*.dmp"
+          if-no-files-found: ignore
+
 #  TODO: Rafael Andrade is working on how to run RocketMQ on GHA
 #  rocketmq-ci:
 #    runs-on: ubuntu-latest
@@ -737,4 +878,4 @@ jobs:
 #        run: dotnet restore
 #        
 #      - name: RocketMQ Tests
-#        run: dotnet test --project ./tests/Paramore.Brighter.RocketMQ.Tests/Paramore.Brighter.RocketMQ.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release
+#        run: dotnet test --project ./tests/Paramore.Brighter.RocketMQ.Tests/Paramore.Brighter.RocketMQ.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
