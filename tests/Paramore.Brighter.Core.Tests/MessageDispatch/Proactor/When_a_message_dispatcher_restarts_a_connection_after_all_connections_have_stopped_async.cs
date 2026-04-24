@@ -57,7 +57,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             var @event = new MyEvent();
             var message = await new MyEventMessageMapperAsync().MapToMessageAsync(@event, _publication);
             _bus.Enqueue(message);
-            await Task.Delay(1000);
+            await Task.Delay(2000);
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
             await Assert.That(_bus.Stream(_routingKey)).IsEmpty();
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_RUNNING);
