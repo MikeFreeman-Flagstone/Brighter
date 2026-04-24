@@ -301,9 +301,9 @@ jobs:
       - name: Install dependencies
         run: dotnet restore
       - name: RMQ Async Transport Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Async.Tests/Paramore.Brighter.RMQ.Async.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]&/*/*/*/*[Requires!=Docker-mTLS]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Async.Tests/Paramore.Brighter.RMQ.Async.Tests.csproj --treenode-filter "/*/*/*/*[(Fragile!=CI)&(Requires!=Docker-mTLS)]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
       - name: RMQ Sync Transport Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Sync.Tests/Paramore.Brighter.RMQ.Sync.Tests.csproj --treenode-filter "/*/*/*/*[Fragile!=CI]&/*/*/*/*[Requires!=Docker-mTLS]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+        run: dotnet test --project ./tests/Paramore.Brighter.RMQ.Sync.Tests/Paramore.Brighter.RMQ.Sync.Tests.csproj --treenode-filter "/*/*/*/*[(Fragile!=CI)&(Requires!=Docker-mTLS)]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
       - name: Upload hang dumps
         if: always()
         uses: actions/upload-artifact@v7
@@ -385,7 +385,7 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
     - name: Kafka Transport Tests
-      run: dotnet test --project ./tests/Paramore.Brighter.Kafka.Tests/Paramore.Brighter.Kafka.Tests.csproj --treenode-filter "/*/*/*/*[Category!=Confluent]&/*/*/*/*[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+      run: dotnet test --project ./tests/Paramore.Brighter.Kafka.Tests/Paramore.Brighter.Kafka.Tests.csproj --treenode-filter "/*/*/*/*[(Category!=Confluent)&(Fragile!=CI)]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
     - name: Upload hang dumps
       if: always()
       uses: actions/upload-artifact@v7
@@ -807,7 +807,7 @@ jobs:
         run: dotnet restore
         
       - name: GCP Tests
-        run: dotnet test --project ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --treenode-filter "/*/*/*/*[Category!=Spanner]&[Fragile!=CI]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
+        run: dotnet test --project ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --treenode-filter "/*/*/*/*[(Category!=Spanner)&(Fragile!=CI)]" --configuration Release --hangdump --hangdump-timeout 15m --hangdump-type Mini
       - name: Upload hang dumps
         if: always()
         uses: actions/upload-artifact@v7
