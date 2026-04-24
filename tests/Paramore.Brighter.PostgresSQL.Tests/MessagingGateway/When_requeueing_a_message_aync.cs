@@ -56,14 +56,25 @@ public class PostgreSqlMessageConsumerRequeueTestsAsync : IDisposable
     [Test]
     public async Task When_requeueing_a_message_async()
     {
-        var channel = await _channelFactory.CreateAsyncChannelAsync(_subscription);
         await _producerRegistry.LookupAsyncBy(_topic).SendAsync(_message);
-        var message = await channel.ReceiveAsync(TimeSpan.FromMilliseconds(5000));
+        var channel = await _channelFactory.CreateAsyncChannelAsync(_subscription);
+
+        Message message = Message.Empty;
+        for (var attempt = 0; attempt < 10 && message.IsEmpty; attempt++)
+        {
+            message = await channel.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        }
+
+        await Assert.That(message.IsEmpty).IsFalse();
         await Assert.That(await channel.RequeueAsync(message, TimeSpan.FromMilliseconds(100))).IsTrue();
 
         await Task.Delay(TimeSpan.FromMilliseconds(200));
 
-        var requeuedMessage = await channel.ReceiveAsync(TimeSpan.FromMilliseconds(2000));
+        Message requeuedMessage = Message.Empty;
+        for (var attempt = 0; attempt < 10 && requeuedMessage.IsEmpty; attempt++)
+        {
+            requeuedMessage = await channel.ReceiveAsync(TimeSpan.FromMilliseconds(1000));
+        }
 
         //clear the queue
         await channel.AcknowledgeAsync(requeuedMessage);

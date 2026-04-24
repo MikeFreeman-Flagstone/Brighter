@@ -14,6 +14,8 @@ using MyEventHandlerAsync = ParamoreBrighter.Quartz.Tests.TestDoubles.MyEventHan
 
 namespace ParamoreBrighter.Quartz.Tests;
 
+// Scheduler tests rely on timing; serialize to avoid CI CPU starvation (equivalent to xUnit [Collection("Scheduler")])
+[NotInParallel("QuartzScheduler")]
 public class QuartzSchedulerRequestAsyncTests
 {
     private QuartzSchedulerFactory _scheduler;

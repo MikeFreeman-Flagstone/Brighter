@@ -13,6 +13,8 @@ using Quartz;
 
 namespace ParamoreBrighter.Quartz.Tests;
 
+// Scheduler tests rely on timing; serialize to avoid CI CPU starvation (equivalent to xUnit [Collection("Scheduler")])
+[NotInParallel("QuartzScheduler")]
 public class QuartzSchedulerRequestTests
 {
     private QuartzSchedulerFactory _scheduler;

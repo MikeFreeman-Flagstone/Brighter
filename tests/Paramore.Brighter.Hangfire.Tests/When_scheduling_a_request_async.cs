@@ -13,6 +13,8 @@ using MyEventHandlerAsync = Paramore.Brighter.Hangfire.Tests.TestDoubles.MyEvent
 
 namespace Paramore.Brighter.Hangfire.Tests;
 
+// Scheduler tests rely on timing; serialize to avoid CI CPU starvation (equivalent to xUnit [Collection("Scheduler")])
+[NotInParallel("HangfireScheduler")]
 public class HangfireSchedulerRequestAsyncTests : IDisposable
 {
     private readonly HangfireMessageSchedulerFactory _scheduler;
