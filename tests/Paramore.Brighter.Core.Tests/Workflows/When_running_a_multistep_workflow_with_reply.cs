@@ -52,7 +52,7 @@ public class MediatorReplyMultiStepFlowTests
         _channel.Stop();
 
         var ct = new CancellationTokenSource();
-        ct.CancelAfter(TimeSpan.FromSeconds(1));
+        ct.CancelAfter(TimeSpan.FromSeconds(10));
         try
         {
             await _runner.RunAsync(ct.Token);

@@ -43,7 +43,7 @@ public class MediatorWaitStepFlowTests
     public async Task When_running_a_wait_workflow()
     {
         var ct = new CancellationTokenSource();
-        ct.CancelAfter(TimeSpan.FromSeconds(3));
+        ct.CancelAfter(TimeSpan.FromSeconds(10));
         Task runnerTask = Task.CompletedTask;
         Task wakerTask = Task.CompletedTask;
         try

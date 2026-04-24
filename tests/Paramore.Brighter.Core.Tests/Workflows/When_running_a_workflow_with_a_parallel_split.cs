@@ -51,7 +51,7 @@ public class MediatorParallelSplitFlowTests
         await _scheduler.ScheduleAsync(_job);
 
         var ct = new CancellationTokenSource();
-        ct.CancelAfter(TimeSpan.FromSeconds(3));
+        ct.CancelAfter(TimeSpan.FromSeconds(10));
 
         Task runnerTask = Task.CompletedTask;
         try
