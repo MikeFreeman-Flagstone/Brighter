@@ -184,8 +184,8 @@ public class RmqMutualTlsObservabilityTests : IDisposable
             await Assert.That(message.Header.Baggage).IsNotNull();
 
             // Verify TraceState contains expected values
-            await Assert.That(message.Header.TraceState).Contains("brighter=00f067aa0ba902b7");
-            await Assert.That(message.Header.TraceState).Contains("congo=t61rcWkgMzE");
+            await Assert.That(message.Header.TraceState?.Value).Contains("brighter=00f067aa0ba902b7");
+            await Assert.That(message.Header.TraceState?.Value).Contains("congo=t61rcWkgMzE");
 
             // Verify Baggage contains expected values (baggage values may be URL-encoded)
             var baggageString = message.Header.Baggage.ToString();
@@ -388,7 +388,7 @@ public class RmqMutualTlsObservabilityTests : IDisposable
             await Assert.That(message.Header.Baggage).IsNotNull();
 
             // Verify TraceState
-            await Assert.That(message.Header.TraceState).Contains("brighter=00f067aa0ba902b7");
+            await Assert.That(message.Header.TraceState?.Value).Contains("brighter=00f067aa0ba902b7");
 
             // Verify Baggage (baggage values may be URL-encoded)
             var baggageString = message.Header.Baggage.ToString();

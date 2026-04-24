@@ -28,7 +28,7 @@ public class RedisGoodMessageParsingTests
 
         // Assert new Cloud Events properties
         await Assert.That(message.Header.Source).IsEqualTo(new Uri("http://goparamore.io"));
-        await Assert.That(message.Header.Type).IsEqualTo("goparamore.io.Paramore.Brighter.Message");
+        await Assert.That(message.Header.Type?.Value).IsEqualTo("goparamore.io.Paramore.Brighter.Message");
         await Assert.That(message.Header.DataSchema).IsEqualTo(new Uri("http://schema.example.com/test"));
         await Assert.That(message.Header.Subject).IsEqualTo("test-subject");
         
