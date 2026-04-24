@@ -28,16 +28,16 @@ public class MassTransitTransformTest
             JsonSerializer.Deserialize<MassTransitMessageEnvelop<JsonElement>>(wrap.Body.Bytes,
                 JsonSerialisationOptions.Options);
         await Assert.That(envelop).IsNotNull();
-        await Assert.That(envelop.ConversationId).IsNull();
+        await Assert.That(envelop.ConversationId is null).IsTrue();
         await Assert.That(envelop.DestinationAddress).IsNull();
         await Assert.That(envelop.FaultAddress).IsNull();
         await Assert.That(envelop.MessageType).IsNull();
-        await Assert.That(envelop.RequestId).IsNull();
+        await Assert.That(envelop.RequestId is null).IsTrue();
         await Assert.That(envelop.ResponseAddress).IsNull();
         await Assert.That(envelop.SourceAddress).IsNull();
         await Assert.That(envelop.ExpirationTime).IsNull();
-        await Assert.That(envelop.MessageId).IsEqualTo(message.Header.MessageId);
-        await Assert.That(envelop.CorrelationId).IsEqualTo(message.Header.CorrelationId);
+        await Assert.That(envelop.MessageId?.Value).IsEqualTo(message.Header.MessageId.Value);
+        await Assert.That(envelop.CorrelationId?.Value).IsEqualTo(message.Header.CorrelationId.Value);
         await Assert.That(envelop.SentTime).IsEqualTo(message.Header.TimeStamp.DateTime);
     }
     
@@ -88,7 +88,7 @@ public class MassTransitTransformTest
         await Assert.That(envelop.ConversationId?.Value).IsEqualTo(conversationId);
         await Assert.That(envelop.DestinationAddress?.ToString()).IsEqualTo(destinationAddress);
         await Assert.That(envelop.FaultAddress?.ToString()).IsEqualTo(faultAddress);
-        await Assert.That(envelop.MessageType).IsEqualTo(messageType);
+        await Assert.That(envelop.MessageType).IsEquivalentTo(messageType);
         await Assert.That(envelop.RequestId?.Value).IsEqualTo(requestId);
         await Assert.That(envelop.ResponseAddress?.ToString()).IsEqualTo(responseAddress);
         await Assert.That(envelop.SourceAddress?.ToString()).IsEqualTo(sourceAddress);
@@ -142,7 +142,7 @@ public class MassTransitTransformTest
         await Assert.That(envelop.ConversationId?.Value).IsEqualTo(conversationId);
         await Assert.That(envelop.DestinationAddress?.ToString()).IsEqualTo(destinationAddress);
         await Assert.That(envelop.FaultAddress?.ToString()).IsEqualTo(faultAddress);
-        await Assert.That(envelop.MessageType).IsEqualTo(messageType);
+        await Assert.That(envelop.MessageType).IsEquivalentTo(messageType);
         await Assert.That(envelop.RequestId?.Value).IsEqualTo(requestId);
         await Assert.That(envelop.ResponseAddress?.ToString()).IsEqualTo(responseAddress);
         await Assert.That(envelop.SourceAddress?.ToString()).IsEqualTo(sourceAddress);
@@ -200,7 +200,7 @@ public class MassTransitTransformTest
         await Assert.That(envelop.ConversationId?.Value).IsEqualTo(conversationId);
         await Assert.That(envelop.DestinationAddress?.ToString()).IsEqualTo(destinationAddress);
         await Assert.That(envelop.FaultAddress?.ToString()).IsEqualTo(faultAddress);
-        await Assert.That(envelop.MessageType).IsEqualTo(messageType);
+        await Assert.That(envelop.MessageType).IsEquivalentTo(messageType);
         await Assert.That(envelop.RequestId?.Value).IsEqualTo(requestId);
         await Assert.That(envelop.ResponseAddress?.ToString()).IsEqualTo(responseAddress);
         await Assert.That(envelop.SourceAddress?.ToString()).IsEqualTo(sourceAddress);
