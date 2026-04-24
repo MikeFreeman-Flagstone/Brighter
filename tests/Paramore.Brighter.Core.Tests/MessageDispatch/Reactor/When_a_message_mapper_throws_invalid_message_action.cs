@@ -57,4 +57,11 @@ public class MessageDispatchInvalidMessageActionTests
         var rejectionReason = $"Message rejected reason: {RejectionReason.Unacceptable} Description: Failed to deserialize message";
         await Assert.That(message.Header.Bag[Message.RejectionReasonHeaderName]).IsEqualTo(rejectionReason);
     }
+
+    [After(Test)]
+    public async Task Dispose()
+    {
+        if (_dispatcher?.State == DispatcherState.DS_RUNNING)
+            await _dispatcher.End();
+    }
 }

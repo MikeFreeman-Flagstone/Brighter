@@ -51,5 +51,12 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Proactor
             await Assert.That(_bus.Stream(new RoutingKey(Topic))).IsEmpty();
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_STOPPED);
         }
+
+        [After(Test)]
+        public async Task Dispose()
+        {
+            if (_dispatcher?.State == DispatcherState.DS_RUNNING)
+                await _dispatcher.End();
+        }
     }
 }
