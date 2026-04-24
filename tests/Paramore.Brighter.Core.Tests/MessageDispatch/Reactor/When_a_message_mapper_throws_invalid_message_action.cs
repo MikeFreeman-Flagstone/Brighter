@@ -45,11 +45,8 @@ public class MessageDispatchInvalidMessageActionTests
     {
         // Wait for the message to be processed (moved to invalid message topic) before stopping
         // Without this, End() can enqueue a QUIT message that the pump reads before the data message
-        var deadline = DateTime.UtcNow.AddSeconds(5);
-        while (!_bus.Stream(_invalidMessageRoutingKey).Any() && DateTime.UtcNow < deadline)
-        {
-            await Task.Delay(50);
-        }
+        await Assert.That(() => _bus.Stream(_invalidMessageRoutingKey).Any())
+            .Eventually(src => src.IsTrue(), TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(250));
 
         await _dispatcher.End();
         await Assert.That(_bus.Stream(_routingKey)).IsEmpty();

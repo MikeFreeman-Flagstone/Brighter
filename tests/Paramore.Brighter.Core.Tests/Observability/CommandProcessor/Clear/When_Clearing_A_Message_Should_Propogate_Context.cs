@@ -73,7 +73,8 @@ public class MessageDispatchPropogateContextTests
         Baggage.SetBaggage("key2", "value2");
         context.Span = parentActivity;
         _commandProcessor.ClearOutbox([messageId], context);
-        await Task.Delay(3000); //allow bulk clear to run -- can make test fragile
+        await Assert.That(() => _internalBus.Stream(_routingKey).Any(m => m.Id == messageId))
+            .Eventually(src => src.IsTrue(), TimeSpan.FromSeconds(10), TimeSpan.FromMilliseconds(250));
         parentActivity?.Stop();
         _traceProvider.ForceFlush();
         //assert 
