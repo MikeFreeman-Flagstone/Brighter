@@ -23,7 +23,6 @@ THE SOFTWARE. */
 #endregion
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Time.Testing;
 
@@ -107,29 +106,4 @@ public class AsyncInMemoryMessageConsumerDisposeTests
         await Assert.That(async () => await consumer.DisposeAsync()).ThrowsNothing();
     }
 
-    /// <summary>
-    /// A simple spy scheduler for testing.
-    /// </summary>
-    private sealed class SpyScheduler : IAmAMessageSchedulerSync, IAmAMessageSchedulerAsync
-    {
-        public string Schedule(Message message, DateTimeOffset at) => Guid.NewGuid().ToString();
-        public string Schedule(Message message, TimeSpan delay) => Guid.NewGuid().ToString();
-        public bool ReScheduler(string schedulerId, DateTimeOffset at) => true;
-        public bool ReScheduler(string schedulerId, TimeSpan delay) => true;
-        public void Cancel(string id) { }
-
-        public Task<string> ScheduleAsync(Message message, DateTimeOffset at, CancellationToken cancellationToken = default)
-            => Task.FromResult(Schedule(message, at));
-
-        public Task<string> ScheduleAsync(Message message, TimeSpan delay, CancellationToken cancellationToken = default)
-            => Task.FromResult(Schedule(message, delay));
-
-        public Task<bool> ReSchedulerAsync(string schedulerId, DateTimeOffset at, CancellationToken cancellationToken = default)
-            => Task.FromResult(true);
-
-        public Task<bool> ReSchedulerAsync(string schedulerId, TimeSpan delay, CancellationToken cancellationToken = default)
-            => Task.FromResult(true);
-
-        public Task CancelAsync(string id, CancellationToken cancellationToken = default) => Task.CompletedTask;
-    }
 }
