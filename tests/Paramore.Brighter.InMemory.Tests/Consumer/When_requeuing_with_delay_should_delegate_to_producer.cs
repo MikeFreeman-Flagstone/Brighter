@@ -24,6 +24,8 @@ THE SOFTWARE. */
 
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Paramore.Brighter.InMemory.Tests.Consumer;
@@ -97,7 +99,7 @@ public class InMemoryConsumerRequeueWithDelayProducerTests
     /// <summary>
     /// A spy scheduler that records calls to Schedule for verification.
     /// </summary>
-    private sealed class SpyScheduler : IAmAMessageSchedulerSync
+    private sealed class SpyScheduler : IAmAMessageSchedulerSync, IAmAMessageSchedulerAsync
     {
         public bool ScheduleCalled { get; private set; }
         public Message? ScheduledMessage { get; private set; }
@@ -123,5 +125,19 @@ public class InMemoryConsumerRequeueWithDelayProducerTests
         public bool ReScheduler(string schedulerId, TimeSpan delay) => true;
 
         public void Cancel(string id) { }
+
+        public Task<string> ScheduleAsync(Message message, DateTimeOffset at, CancellationToken cancellationToken = default)
+            => Task.FromResult(Schedule(message, at));
+
+        public Task<string> ScheduleAsync(Message message, TimeSpan delay, CancellationToken cancellationToken = default)
+            => Task.FromResult(Schedule(message, delay));
+
+        public Task<bool> ReSchedulerAsync(string schedulerId, DateTimeOffset at, CancellationToken cancellationToken = default)
+            => Task.FromResult(true);
+
+        public Task<bool> ReSchedulerAsync(string schedulerId, TimeSpan delay, CancellationToken cancellationToken = default)
+            => Task.FromResult(true);
+
+        public Task CancelAsync(string id, CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 }
