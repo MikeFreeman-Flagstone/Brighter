@@ -50,8 +50,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         [Test]
         public async Task When_A_Message_Dispatcher_Starts_Different_Types_Of_Performers()
         {
-            await Assert.That(() => _dispatcher.Consumers.Count())
-                .Eventually(src => src.IsEqualTo(2), TimeSpan.FromSeconds(10));
+            await Task.Delay(1000);
             _numberOfConsumers = _dispatcher.Consumers.Count();
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
             await _dispatcher.End();

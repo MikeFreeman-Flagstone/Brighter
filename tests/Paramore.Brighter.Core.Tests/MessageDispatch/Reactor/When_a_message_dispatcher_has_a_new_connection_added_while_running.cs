@@ -44,8 +44,8 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
             var @event = new MyEvent();
             var message = new MyEventMessageMapper().MapToMessage(@event, new Publication { Topic = _routingKeyTwo });
             _bus.Enqueue(message);
-            await Assert.That(() => _bus.Stream(_routingKey).Any())
-                .Eventually(src => src.IsFalse(), TimeSpan.FromSeconds(10));
+            await Task.Delay(1000);
+            await Assert.That(_bus.Stream(_routingKey)).IsEmpty();
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_RUNNING);
             await Assert.That(_dispatcher.Consumers.Count()).IsEqualTo(2);
             await Assert.That(_dispatcher.Subscriptions.Count()).IsEqualTo(2);

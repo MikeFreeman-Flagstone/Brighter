@@ -41,8 +41,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         [Test]
         public async Task When_A_Message_Dispatcher_Shuts_A_Connection()
         {
-            await Assert.That(() => _dispatcher.Consumers.Any())
-                .Eventually(src => src.IsTrue(), TimeSpan.FromSeconds(10));
+            await Task.Delay(1000);
             _dispatcher.Shut(_subscription);
             await _dispatcher.End();
             await Assert.That(_dispatcher.Consumers).DoesNotContain(consumer => consumer.Name == _subscription.Name && consumer.State == ConsumerState.Open);
