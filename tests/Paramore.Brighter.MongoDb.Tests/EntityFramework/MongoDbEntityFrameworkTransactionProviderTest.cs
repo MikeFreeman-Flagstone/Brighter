@@ -1,5 +1,6 @@
 using System;
 using System.Data.Common;
+using System.Threading;
 using FakeItEasy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -131,7 +132,7 @@ public class MongoDbEntityFrameworkTransactionProviderTest
         await provider.RollbackAsync();
 
         // Assert
-        A.CallTo(() => mockTransaction.Rollback()).MustHaveHappenedOnceExactly();
+        A.CallTo(() => mockTransaction.RollbackAsync(A<CancellationToken>._)).MustHaveHappenedOnceExactly();
     }
 
     [Test]

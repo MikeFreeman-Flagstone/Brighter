@@ -70,10 +70,10 @@ public class RocketSubscriptionDlqRoutingKeyTests
         // Assert
         await Assert.That(subscription).IsAssignableTo<IUseBrighterDeadLetterSupport>();
         var dlqSupport = (IUseBrighterDeadLetterSupport)subscription;
-        await Assert.That(dlqSupport.DeadLetterRoutingKey).IsNull();
+        await Assert.That(dlqSupport.DeadLetterRoutingKey is null).IsTrue();
 
         await Assert.That(subscription).IsAssignableTo<IUseBrighterInvalidMessageSupport>();
         var invalidSupport = (IUseBrighterInvalidMessageSupport)subscription;
-        await Assert.That(invalidSupport.InvalidMessageRoutingKey).IsNull();
+        await Assert.That(invalidSupport.InvalidMessageRoutingKey is null).IsTrue();
     }
 }

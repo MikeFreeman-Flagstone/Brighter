@@ -6,6 +6,8 @@ using Paramore.Brighter.TickerQ.Tests.TestDoubles.Fixtures;
 
 namespace Paramore.Brighter.TickerQ.Tests;
 
+    // TickerQ uses a process-global TickerFunctionProvider; running tests in parallel causes cross-fixture job dispatch.
+    [NotInParallel("TickerQScheduler")]
     public class TickerQSchedulerMessageTests : IDisposable
 {
     private readonly TickerQMessageTestFixture _fixture;

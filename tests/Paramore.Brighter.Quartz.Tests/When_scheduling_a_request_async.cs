@@ -84,7 +84,11 @@ public class QuartzSchedulerRequestAsyncTests
             _outbox
         );
 
-        _schedulerFactory = SchedulerBuilder.Create(new NameValueCollection())
+        _schedulerFactory = SchedulerBuilder.Create(new NameValueCollection
+            {
+                ["quartz.scheduler.instanceName"] = $"QuartzScheduler-{Guid.NewGuid():N}",
+                ["quartz.scheduler.instanceId"] = Guid.NewGuid().ToString("N"),
+            })
             .UseDefaultThreadPool(x => x.MaxConcurrency = 5)
             .UseJobFactory<BrighterResolver>()
             .Build();
