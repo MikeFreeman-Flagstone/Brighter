@@ -156,23 +156,25 @@ public class BrighterSynchronizationContextsTests
     public async Task Run_Delegate_Via_Run_Thread_Runs()
     {
         var runner = new EventRunner();
-        runner.OnMessagePublished += MessagePublishedHandler;
-        s_runnerCalled = false;
-        BrighterAsyncContext.Run(async () =>
-        {
-            await runner.PublishAsync(runner.Report);
-        });
-        //let callback run on thread pool
-        await Task.Delay(1000);
-        await Assert.That(s_runnerCalled).IsTrue();
-        runner.OnMessagePublished -= MessagePublishedHandler;
-    }
+        var handlerInvoked = new TaskCompletionSource<int>(TaskCreationOptions.RunContinuationsAsynchronously);
 
-    private static bool s_runnerCalled = false;
-    static void MessagePublishedHandler(bool called, int value)
-    {
-        if (value != 17) throw new InvalidOperationException($"Expected value 17, but got {value}");
-        s_runnerCalled = true;
+        void Handler(bool called, int value) => handlerInvoked.TrySetResult(value);
+        runner.OnMessagePublished += Handler;
+
+        try
+        {
+            BrighterAsyncContext.Run(async () =>
+            {
+                await runner.PublishAsync(runner.Report);
+            });
+
+            var observedValue = await handlerInvoked.Task.WaitAsync(TimeSpan.FromSeconds(10));
+            await Assert.That(observedValue).IsEqualTo(17);
+        }
+        finally
+        {
+            runner.OnMessagePublished -= Handler;
+        }
     }
 
     internal sealed class EventRunner
