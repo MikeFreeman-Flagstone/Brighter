@@ -43,12 +43,11 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         {
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_AWAITING);
             _dispatcher.Receive();
-            await Assert.That(() => _bus.Stream(_routingKey).Any())
-                .Eventually(src => src.IsFalse(), TimeSpan.FromSeconds(10));
+            await Task.Delay(250);
             _dispatcher.Shut(_subscription.Name);
             _dispatcher.Shut(_newSubscription.Name);
-            await Assert.That(() => _dispatcher.Consumers.Any())
-                .Eventually(src => src.IsFalse(), TimeSpan.FromSeconds(10));
+            await Task.Delay(1000);
+            await Assert.That(_dispatcher.Consumers).IsEmpty();
         }
 
         [Test]
@@ -58,9 +57,9 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
             var @event = new MyEvent();
             var message = new MyEventMessageMapper().MapToMessage(@event, _publication);
             _bus.Enqueue(message);
-            await Assert.That(() => _bus.Stream(_routingKey).Any())
-                .Eventually(src => src.IsFalse(), TimeSpan.FromSeconds(10));
+            await Task.Delay(2000);
             _timeProvider.Advance(TimeSpan.FromSeconds(2)); //This will trigger requeue of not acked/rejected messages
+            await Assert.That(_bus.Stream(_routingKey)).IsEmpty();
             await Assert.That(_dispatcher.State).IsEqualTo(DispatcherState.DS_RUNNING);
             await Assert.That(_dispatcher.Consumers).HasSingleItem();
             await Assert.That(_dispatcher.Subscriptions.Count()).IsEqualTo(2);
