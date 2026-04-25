@@ -1,4 +1,5 @@
-﻿using System.Threading.Channels;
+﻿using System;
+using System.Threading.Channels;
 using Google.Cloud.PubSub.V1;
 
 namespace Paramore.Brighter.MessagingGateway.GcpPubSub;
@@ -11,17 +12,12 @@ public class GcpStreamConsumer(SubscriberClient client)
 {
     private int _handlers;
     
-    private readonly Channel<GcpStreamMessage> _channel =
-        System.Threading.Channels.Channel.CreateUnbounded<GcpStreamMessage>(new UnboundedChannelOptions
-        {
-            SingleWriter = false,
-            SingleReader = false,
-        });
+    private Channel<GcpStreamMessage>? _channel;
     
     /// <summary>
     /// Gets the channel reader used by message consumers to asynchronously read received Pub/Sub messages.
     /// </summary>
-    public ChannelReader<GcpStreamMessage> Reader => _channel.Reader;
+    public ChannelReader<GcpStreamMessage> Reader => _channel!.Reader;
     
     /// <summary>
     /// Starts the Pub/Sub streaming client if it is the first call, and begins reading messages into the channel.
@@ -33,6 +29,12 @@ public class GcpStreamConsumer(SubscriberClient client)
         {
             return;
         }
+        
+        _channel = System.Threading.Channels.Channel.CreateUnbounded<GcpStreamMessage>(new UnboundedChannelOptions
+        {
+            SingleWriter = false,
+            SingleReader = false,
+        });
         
         client.StartAsync(new BrighterStreamHandler(_channel.Writer));
     }
@@ -46,7 +48,16 @@ public class GcpStreamConsumer(SubscriberClient client)
         var decrement = Interlocked.Decrement(ref _handlers);
         if (decrement == 0)
         {
-            await client.StopAsync(CancellationToken.None);
+            _channel?.Writer.Complete();
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            try
+            {
+                await client.StopAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected if handlers don't complete within timeout
+            }
             await client.DisposeAsync();
         }
     }
