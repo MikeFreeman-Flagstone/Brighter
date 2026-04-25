@@ -229,7 +229,8 @@ public abstract class GcpPubSubMessageGateway(GcpMessagingGatewayConnection conn
                 ackDeadlineSeconds: pubSubSubscription.DeadLetter.AckDeadlineSeconds,
                 makeChannels: OnMissingChannel.Create,
                 messagePumpType: MessagePumpType.Proactor,
-                requestType: pubSubSubscription.RequestType));
+                requestType: pubSubSubscription.RequestType,
+                enableMessageOrdering: pubSubSubscription.EnableMessageOrdering));
 
             // Set up the necessary IAM role for the main subscription to publish to the DLQ topic
             await UpdateIAmRoleForDeadLetterAsync(projectId, pubSubSubscription);
