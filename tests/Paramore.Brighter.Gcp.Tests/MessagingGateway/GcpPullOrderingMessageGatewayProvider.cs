@@ -222,7 +222,10 @@ public class GcpPullOrderingMessageGatewayProvider
         IEnumerable<Message> messages
     )
     {
-        channel?.Dispose();
+        if (channel != null)
+        {
+            await channel.DisposeAsync();
+        }
 
         if (producer != null)
         {
