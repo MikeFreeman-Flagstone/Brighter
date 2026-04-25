@@ -53,12 +53,12 @@ public class GcpStreamConsumer(SubscriberClient client)
             try
             {
                 await client.StopAsync(cts.Token);
+                await client.DisposeAsync();
             }
             catch (OperationCanceledException)
             {
                 // Expected if handlers don't complete within timeout
             }
-            await client.DisposeAsync();
         }
     }
 }
