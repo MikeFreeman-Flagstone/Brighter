@@ -655,43 +655,43 @@ jobs:
   #     - name: MongoDB Tests
   #       run: dotnet test ./tests/Paramore.Brighter.MongoDb.Tests/Paramore.Brighter.MongoDb.Tests.csproj --filter "Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame -v n
   #
-  # gcp-ci:
-  #   runs-on: ubuntu-latest
-  #   timeout-minutes: 20
-  #   needs: [build]
-  #   if: |
-  #     (github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master')) ||
-  #     (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #       with: 
-  #         fetch-depth: 0 # Required to fetch the Git tags
-  #         filter: tree:0
-  #         show-progress: false 
-  #
-  #     - name: Google Cloud auth
-  #       uses: google-github-actions/auth@v3
-  #       with:
-  #         credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
-  #
-  #     - name: Set up Cloud SDK
-  #       uses: google-github-actions/setup-gcloud@v3
-  #       with:
-  #         version: '>= 363.0.0'
-  #
-  #     - name: Setup dotnet
-  #       uses: actions/setup-dotnet@v5
-  #       with:
-  #         dotnet-version: |
-  #           9.0.x
-  #           10.0.x
-  #
-  #     - name: Install dependencies
-  #       run: dotnet restore
-  #
-  #     - name: GCP Tests
-  #       run: dotnet test ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --filter "Category!=Spanner&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame -v n
-  #
+  gcp-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+  #  needs: [build]
+    if: |
+      (github.event_name == 'push' && (github.ref_name == 'main' || github.ref_name == 'master')) ||
+      (github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork)
+    steps:
+      - uses: actions/checkout@v6
+        with: 
+          fetch-depth: 0 # Required to fetch the Git tags
+          filter: tree:0
+          show-progress: false 
+
+      - name: Google Cloud auth
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          version: '>= 363.0.0'
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            9.0.x
+            10.0.x
+
+      - name: Install dependencies
+        run: dotnet restore
+
+      - name: GCP Tests
+        run: dotnet test ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --filter "Category!=Spanner&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame -v n
+
 #  TODO: Rafael Andrade is working on how to run RocketMQ on GHA
 #  rocketmq-ci:
 #    runs-on: ubuntu-latest

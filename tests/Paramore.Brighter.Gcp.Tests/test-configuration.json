@@ -13,7 +13,7 @@
       "HasSupportToPartitionKey": false,
       "HasSupportToValidateBrokerExistence": true,
       "HasSupportToRequeue": true,
-      "ReceiveMessageTimeoutInMilliseconds": 5000
+      "ReceiveMessageTimeoutInMilliseconds": 2000
     },
     "PullOrdering": {
       "Publication": "Paramore.Brighter.MessagingGateway.GcpPubSub.GcpPublication",
@@ -28,7 +28,7 @@
       "HasSupportToPartitionKey": true,
       "HasSupportToValidateBrokerExistence": true,
       "HasSupportToRequeue": true,
-      "ReceiveMessageTimeoutInMilliseconds": 5000
+      "ReceiveMessageTimeoutInMilliseconds": 2000
     },
     "Stream": {
       "Publication": "Paramore.Brighter.MessagingGateway.GcpPubSub.GcpPublication",
@@ -42,7 +42,7 @@
       "HasSupportToPartitionKey": false,
       "HasSupportToValidateBrokerExistence": true,
       "HasSupportToRequeue": true,
-      "ReceiveMessageTimeoutInMilliseconds": 5000
+      "ReceiveMessageTimeoutInMilliseconds": 2000
     },
     "StreamOrdering": {
       "Publication": "Paramore.Brighter.MessagingGateway.GcpPubSub.GcpPublication",
@@ -57,7 +57,7 @@
       "HasSupportToPartitionKey": true,
       "HasSupportToValidateBrokerExistence": true,
       "HasSupportToRequeue": true,
-      "ReceiveMessageTimeoutInMilliseconds": 5000
+      "ReceiveMessageTimeoutInMilliseconds": 2000
     }
   },
   "Outboxes": {

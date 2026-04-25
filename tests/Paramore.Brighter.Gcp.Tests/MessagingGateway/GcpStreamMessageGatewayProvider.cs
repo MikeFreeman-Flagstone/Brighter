@@ -243,10 +243,10 @@ public class GcpStreamMessageGatewayProvider
         );
         try
         {
-            for (var i = 0; i < 10; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var message = await dlqChannel.ReceiveAsync(
-                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(2),
                     cancellationToken
                 );
                 if (message.Header.MessageType != MessageType.MT_NONE)
@@ -255,7 +255,7 @@ public class GcpStreamMessageGatewayProvider
                     return message;
                 }
 
-                await Task.Delay(1000, cancellationToken);
+                await Task.Delay(200, cancellationToken);
             }
 
             return new Message();
@@ -280,16 +280,16 @@ public class GcpStreamMessageGatewayProvider
         var dlqChannel = _channelFactory.CreateSyncChannel(dlqSubscription);
         try
         {
-            for (var i = 0; i < 10; i++)
+            for (var i = 0; i < 5; i++)
             {
-                var message = dlqChannel.Receive(TimeSpan.FromSeconds(5));
+                var message = dlqChannel.Receive(TimeSpan.FromSeconds(2));
                 if (message.Header.MessageType != MessageType.MT_NONE)
                 {
                     dlqChannel.Acknowledge(message);
                     return message;
                 }
 
-                Thread.Sleep(1000);
+                Thread.Sleep(200);
             }
 
             return new Message();
