@@ -689,7 +689,7 @@ jobs:
         run: dotnet restore
 
       - name: GCP Tests
-        run: dotnet test ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --filter "Category!=Spanner&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame-hang-timeout 15m --blame-hang-dump-type full --blame -v n
+        run: dotnet test ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --filter "Category!=Spanner&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame-hang-timeout 15m --blame-hang-dump-type full --blame -v n --framework net10.0
 
       - name: Upload timeout blame
         if: always()
