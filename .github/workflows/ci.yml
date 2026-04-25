@@ -689,7 +689,14 @@ jobs:
         run: dotnet restore
 
       - name: GCP Tests
-        run: dotnet test ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --filter "Category!=Spanner&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame-hang-timeout 5m --blame-hang-dump-type full --blame -v n
+        run: dotnet test ./tests/Paramore.Brighter.Gcp.Tests/Paramore.Brighter.Gcp.Tests.csproj --filter "Category!=Spanner&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame-hang-timeout 15m --blame-hang-dump-type full --blame -v n
+
+      - name: Upload timeout blame
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gcp-tests-timeout-blame
+          path: tests/Paramore.Brighter.Gcp.Tests/TestResults/
 
 #  TODO: Rafael Andrade is working on how to run RocketMQ on GHA
 #  rocketmq-ci:
