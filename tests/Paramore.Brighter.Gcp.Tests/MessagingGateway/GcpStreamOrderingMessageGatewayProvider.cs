@@ -111,7 +111,7 @@ public class GcpStreamOrderingMessageGatewayProvider
                 routingKey: routingKey,
                 messagePumpType: MessagePumpType.Proactor,
                 ackDeadlineSeconds: 60,
-                requeueCount: 5,
+                requeueCount: 7,
                 deadLetter: new DeadLetterPolicy(new RoutingKey(dlqTopic), new ChannelName(dlqSub))
                 {
                     AckDeadlineSeconds = 60,
