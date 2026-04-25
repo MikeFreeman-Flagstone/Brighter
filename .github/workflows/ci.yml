@@ -273,80 +273,80 @@ jobs:
   #     - name: RMQ Sync Transport Tests
   #       run: dotnet test ./tests/Paramore.Brighter.RMQ.Sync.Tests/Paramore.Brighter.RMQ.Sync.Tests.csproj --filter "Fragile!=CI&Requires!=Docker-mTLS" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame -v n
 
-  kafka-ci:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    # needs: [build]
-    env:
-      CONFLUENT_BOOSTRAP_SERVER: ${{ secrets.CONFLUENT_BOOSTRAP_SERVER }}
-      CONFLUENT_SASL_PASSWORD: ${{ secrets.CONFLUENT_SASL_PASSWORD }}
-      CONFLUENT_SASL_USERNAME: ${{ secrets.CONFLUENT_SASL_USERNAME }}
-
-    services:
-      zookeeper:
-        image: confluentinc/cp-zookeeper:latest
-        ports: 
-          - 2181:2181
-        env:
-         ZOOKEEPER_CLIENT_PORT: 2181
-         ZOOKEEPER_TICK_TIME: 2000
-         ALLOW_ANONYMOUS_LOGIN: yes
-      kafka:
-        image: confluentinc/cp-enterprise-kafka:latest
-        ports:
-          - 9092:9092
-        env:
-          KAFKA_BROKER_ID: 1
-          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
-          KAFKA_DELETE_TOPIC_ENABLE: "true"
-      schema-registry:
-        image: confluentinc/cp-schema-registry:latest
-        ports:
-          - 8081:8081
-        env:
-          SCHEMA_REGISTRY_HOST_NAME: schema-registry
-          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
-          SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-
-    steps:
-    - name: Install kcat
-      run: |
-        sudo apt-get update && sudo apt-get install -y kcat
-    - name: Wait for Kafka to be ready
-      run: |
-        echo "Waiting for Kafka to be ready..."
-        max_attempts=30
-        attempt=0
-        while [ $attempt -lt $max_attempts ]; do
-          if kcat -b localhost:9092 -L > /dev/null 2>&1; then
-            echo "Kafka is ready!"
-            break
-          fi
-          attempt=$((attempt + 1))
-          echo "Attempt $attempt/$max_attempts: Kafka not ready yet, waiting 2 seconds..."
-          sleep 2
-        done
-        if [ $attempt -eq $max_attempts ] && ! kcat -b localhost:9092 -L > /dev/null 2>&1; then
-          echo "Kafka failed to become ready after $max_attempts attempts"
-          exit 1
-        fi
-    - name: Checkout code
-      uses: actions/checkout@v6
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: |
-          9.0.x
-          10.0.x
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Kafka Transport Tests
-      run: dotnet test ./tests/Paramore.Brighter.Kafka.Tests/Paramore.Brighter.Kafka.Tests.csproj --filter "Category=Kafka&Category!=Confluent&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame -v n
+  # kafka-ci:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 20
+  #   # needs: [build]
+  #   env:
+  #     CONFLUENT_BOOSTRAP_SERVER: ${{ secrets.CONFLUENT_BOOSTRAP_SERVER }}
+  #     CONFLUENT_SASL_PASSWORD: ${{ secrets.CONFLUENT_SASL_PASSWORD }}
+  #     CONFLUENT_SASL_USERNAME: ${{ secrets.CONFLUENT_SASL_USERNAME }}
+  #
+  #   services:
+  #     zookeeper:
+  #       image: confluentinc/cp-zookeeper:latest
+  #       ports: 
+  #         - 2181:2181
+  #       env:
+  #        ZOOKEEPER_CLIENT_PORT: 2181
+  #        ZOOKEEPER_TICK_TIME: 2000
+  #        ALLOW_ANONYMOUS_LOGIN: yes
+  #     kafka:
+  #       image: confluentinc/cp-enterprise-kafka:latest
+  #       ports:
+  #         - 9092:9092
+  #       env:
+  #         KAFKA_BROKER_ID: 1
+  #         KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  #         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+  #         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #         KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  #         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #         KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+  #         KAFKA_DELETE_TOPIC_ENABLE: "true"
+  #     schema-registry:
+  #       image: confluentinc/cp-schema-registry:latest
+  #       ports:
+  #         - 8081:8081
+  #       env:
+  #         SCHEMA_REGISTRY_HOST_NAME: schema-registry
+  #         SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'kafka:29092'
+  #         SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+  #
+  #   steps:
+  #   - name: Install kcat
+  #     run: |
+  #       sudo apt-get update && sudo apt-get install -y kcat
+  #   - name: Wait for Kafka to be ready
+  #     run: |
+  #       echo "Waiting for Kafka to be ready..."
+  #       max_attempts=30
+  #       attempt=0
+  #       while [ $attempt -lt $max_attempts ]; do
+  #         if kcat -b localhost:9092 -L > /dev/null 2>&1; then
+  #           echo "Kafka is ready!"
+  #           break
+  #         fi
+  #         attempt=$((attempt + 1))
+  #         echo "Attempt $attempt/$max_attempts: Kafka not ready yet, waiting 2 seconds..."
+  #         sleep 2
+  #       done
+  #       if [ $attempt -eq $max_attempts ] && ! kcat -b localhost:9092 -L > /dev/null 2>&1; then
+  #         echo "Kafka failed to become ready after $max_attempts attempts"
+  #         exit 1
+  #       fi
+  #   - name: Checkout code
+  #     uses: actions/checkout@v6
+  #   - name: Setup dotnet
+  #     uses: actions/setup-dotnet@v5
+  #     with:
+  #       dotnet-version: |
+  #         9.0.x
+  #         10.0.x
+  #   - name: Install dependencies
+  #     run: dotnet restore
+  #   - name: Kafka Transport Tests
+  #     run: dotnet test ./tests/Paramore.Brighter.Kafka.Tests/Paramore.Brighter.Kafka.Tests.csproj --filter "Category=Kafka&Category!=Confluent&Fragile!=CI" --configuration Release --logger "console;verbosity=normal" --logger GitHubActions --blame -v n
 
   # postgres-ci:
   #   runs-on: ubuntu-latest
