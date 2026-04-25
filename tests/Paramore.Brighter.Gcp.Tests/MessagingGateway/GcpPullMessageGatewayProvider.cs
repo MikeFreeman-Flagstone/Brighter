@@ -117,6 +117,7 @@ public class GcpPullMessageGatewayProvider
             channelName: channelName,
             routingKey: routingKey,
             messagePumpType: MessagePumpType.Proactor,
+            ackDeadlineSeconds: 60,
             makeChannels: makeChannel,
             subscriptionMode: SubscriptionMode.Pull
         );

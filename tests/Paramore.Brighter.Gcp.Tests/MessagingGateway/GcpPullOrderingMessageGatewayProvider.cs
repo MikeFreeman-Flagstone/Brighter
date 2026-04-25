@@ -128,6 +128,7 @@ public class GcpPullOrderingMessageGatewayProvider
             channelName: channelName,
             routingKey: routingKey,
             messagePumpType: MessagePumpType.Proactor,
+            ackDeadlineSeconds: 60,
             makeChannels: makeChannel,
             subscriptionMode: SubscriptionMode.Pull,
             enableMessageOrdering: true
