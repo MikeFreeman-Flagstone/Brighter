@@ -276,7 +276,7 @@ jobs:
   kafka-ci:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    needs: [build]
+    # needs: [build]
     env:
       CONFLUENT_BOOSTRAP_SERVER: ${{ secrets.CONFLUENT_BOOSTRAP_SERVER }}
       CONFLUENT_SASL_PASSWORD: ${{ secrets.CONFLUENT_SASL_PASSWORD }}
