@@ -7,7 +7,6 @@ using Paramore.Brighter.Core.Tests.CommandProcessors.TestDoubles;
 using Paramore.Brighter.Core.Tests.MessageDispatch.TestDoubles;
 using Paramore.Brighter.Testing;
 using Paramore.Brighter.ServiceActivator;
-using Xunit;
 
 namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
 {
@@ -18,8 +17,8 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
         private const string ChannelName = "fakeChannel";
         private static readonly RoutingKey RoutingKey = new("fakekey");
 
-        [Fact]
-        public void When_Receive_Returns_All_Consumers_Are_Open()
+        [Test]
+        public async Task When_Receive_Returns_All_Consumers_Are_Open()
         {
             for (var iteration = 0; iteration < 50; iteration++)
             {
@@ -34,8 +33,8 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
                         .Select(c => c.Name.ToString())
                         .ToArray();
 
-                    Assert.True(notOpen.Length == 0,
-                        $"Iteration {iteration}: Receive() returned with consumers still Shut: [{string.Join(", ", notOpen)}]");
+                    await Assert.That(notOpen.Length == 0).IsTrue()
+                        .Because($"Iteration {iteration}: Receive() returned with consumers still Shut: [{string.Join(", ", notOpen)}]");
                 }
                 finally
                 {
@@ -44,7 +43,7 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
             }
         }
 
-        [Fact]
+        [Test]
         public async Task When_Shut_Called_Immediately_After_Receive_End_Completes()
         {
             var hangTimeout = TimeSpan.FromSeconds(10);
@@ -61,16 +60,16 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
                 var endTask = dispatcher.End();
                 var winner = await Task.WhenAny(endTask, Task.Delay(hangTimeout));
 
-                Assert.True(ReferenceEquals(winner, endTask),
-                    $"Iteration {iteration}: End() did not complete within {hangTimeout}; orphaned performers leaked. " +
-                    $"State={dispatcher.State}, openConsumers={dispatcher.Consumers.Count(c => c.State == ConsumerState.Open)}");
+                await Assert.That(ReferenceEquals(winner, endTask)).IsTrue()
+                    .Because($"Iteration {iteration}: End() did not complete within {hangTimeout}; orphaned performers leaked. " +
+                             $"State={dispatcher.State}, openConsumers={dispatcher.Consumers.Count(c => c.State == ConsumerState.Open)}");
 
-                Assert.Equal(DispatcherState.DS_STOPPED, dispatcher.State);
-                Assert.Empty(dispatcher.Consumers);
+                await Assert.That(dispatcher.State).IsEqualTo(DispatcherState.DS_STOPPED);
+                await Assert.That(dispatcher.Consumers).IsEmpty();
             }
         }
 
-        [Fact]
+        [Test]
         public async Task When_End_Called_Immediately_After_Receive_End_Completes()
         {
             var hangTimeout = TimeSpan.FromSeconds(10);
@@ -84,12 +83,12 @@ namespace Paramore.Brighter.Core.Tests.MessageDispatch.Reactor
                 var endTask = dispatcher.End();
                 var winner = await Task.WhenAny(endTask, Task.Delay(hangTimeout));
 
-                Assert.True(ReferenceEquals(winner, endTask),
-                    $"Iteration {iteration}: End() did not complete within {hangTimeout}; orphaned performers leaked. " +
-                    $"State={dispatcher.State}, openConsumers={dispatcher.Consumers.Count(c => c.State == ConsumerState.Open)}");
+                await Assert.That(ReferenceEquals(winner, endTask)).IsTrue()
+                    .Because($"Iteration {iteration}: End() did not complete within {hangTimeout}; orphaned performers leaked. " +
+                             $"State={dispatcher.State}, openConsumers={dispatcher.Consumers.Count(c => c.State == ConsumerState.Open)}");
 
-                Assert.Equal(DispatcherState.DS_STOPPED, dispatcher.State);
-                Assert.Empty(dispatcher.Consumers);
+                await Assert.That(dispatcher.State).IsEqualTo(DispatcherState.DS_STOPPED);
+                await Assert.That(dispatcher.Consumers).IsEmpty();
             }
         }
 
