@@ -30,7 +30,7 @@ public class AzureBlobArchiveProviderTests
         _storageLocationFunction = (message) => $"{message.Header.Topic}/{message.Id}".ToLower();
     }
     
-    [Test]
+    [Fact]
     public async Task GivenARequestToArchiveAMessage_TheMessageIsArchived()
     {
         var publication = new Publication
@@ -41,31 +41,27 @@ public class AzureBlobArchiveProviderTests
         
         var commandMessage = _commandMapper?.MapToMessage(_command, publication);
 
-        if (commandMessage == null)
-        {
-            Assert.Fail("Failed to map command to message");
-            return;
-        }
+        Assert.NotNull(commandMessage);
 
         var blobClient = GetClient(AccessTier.Cool).GetBlobClient(_storageLocationFunction?.Invoke(commandMessage));
         
         _provider?.ArchiveMessage(commandMessage);
 
-        Assert.That((bool)await blobClient.ExistsAsync(), Is.True);
+        Assert.True(await blobClient.ExistsAsync());
 
         var tags = (await blobClient.GetTagsAsync()).Value.Tags;
-        Assert.That(tags.Count, Is.EqualTo(0));
+        Assert.Empty(tags);
 
         var body = (await blobClient.DownloadContentAsync()).Value.Content.ToString();
         
-        Assert.That(body, Is.EqualTo(commandMessage.Body.Value));
+        Assert.Equal(commandMessage.Body.Value, body);
 
         var tier = await blobClient.GetPropertiesAsync();
-        Assert.That(tier.Value.AccessTier, Is.EqualTo(AccessTier.Cool.ToString()));
+        Assert.Equal(AccessTier.Cool.ToString(), tier.Value.AccessTier);
         
     }
 
-    [Test]
+    [Fact]
     public async Task GivenARequestToArchiveAMessage_WhenTagsAreTurnedOn_ThenTagsAreWritten()
     {
         var publication = new Publication
@@ -81,18 +77,18 @@ public class AzureBlobArchiveProviderTests
         _provider?.ArchiveMessage(eventMessage);
         
         var tier = await blobClient.GetPropertiesAsync();
-        Assert.That(tier.Value.AccessTier, Is.EqualTo(AccessTier.Hot.ToString()));
+        Assert.Equal(AccessTier.Hot.ToString(), tier.Value.AccessTier);
         
         var tags = (await blobClient.GetTagsAsync()).Value.Tags;
 
-        Assert.That(tags["topic"], Is.EqualTo(eventMessage.Header.Topic.Value));
-        Assert.That(tags["correlationId"], Is.EqualTo(eventMessage.Header.CorrelationId.Value));
-        Assert.That(tags["message_type"], Is.EqualTo(eventMessage.Header.MessageType.ToString()));
-        Assert.That(DateTime.Parse(tags["timestamp"]), Is.EqualTo(eventMessage.Header.TimeStamp.DateTime));
-        Assert.That(tags["content_type"], Is.EqualTo(eventMessage.Header.ContentType!.ToString()));
+        Assert.Equal(eventMessage.Header.Topic.Value, tags["topic"]);
+        Assert.Equal(eventMessage.Header.CorrelationId.Value, tags["correlationId"]);
+        Assert.Equal(eventMessage.Header.MessageType.ToString(), tags["message_type"]);
+        Assert.Equal(eventMessage.Header.TimeStamp.DateTime, DateTime.Parse(tags["timestamp"]));
+        Assert.Equal(eventMessage.Header.ContentType!.ToString(), tags["content_type"]);
     }
 
-    [Test]
+    [Fact]
     public async Task GivenARequestToArchiveAMessageAsync_TheMessageIsArchived()
     {
         var publication = new Publication
@@ -103,31 +99,27 @@ public class AzureBlobArchiveProviderTests
         
         var commandMessage = _commandMapper.MapToMessage(_command, publication);
         
-        if (commandMessage == null)
-        {
-            Assert.Fail("Failed to map command to message");
-            return;
-        }
+        Assert.NotNull(commandMessage);
 
         var blobClient = GetClient(AccessTier.Cool).GetBlobClient(_storageLocationFunction.Invoke(commandMessage));
         
         await _provider?.ArchiveMessageAsync(commandMessage, CancellationToken.None)!;
 
-        Assert.That((bool)await blobClient.ExistsAsync(), Is.True);
+        Assert.True(await blobClient.ExistsAsync());
 
         var tags = (await blobClient.GetTagsAsync()).Value.Tags;
-        Assert.That(tags.Count, Is.EqualTo(0));
+        Assert.Empty(tags);
 
         var body = (await blobClient.DownloadContentAsync()).Value.Content.ToString();
         
-        Assert.That(body, Is.EqualTo(commandMessage.Body.Value));
+        Assert.Equal(commandMessage.Body.Value, body);
 
         var tier = await blobClient.GetPropertiesAsync();
-        Assert.That(tier.Value.AccessTier, Is.EqualTo(AccessTier.Cool.ToString()));
+        Assert.Equal(AccessTier.Cool.ToString(), tier.Value.AccessTier);
         
     }
 
-    [Test]
+    [Fact]
     public async Task GivenARequestToArchiveAMessageAsync_WhenParallel_TheMessageIsArchived()
     {
         var cmdPublication = new Publication
@@ -162,10 +154,10 @@ public class AzureBlobArchiveProviderTests
         foreach (var message in messages)
         {
             var blobClient = containerClient.GetBlobClient(_storageLocationFunction.Invoke(message));
-            Assert.That((bool)await blobClient.ExistsAsync(), Is.True);
+            Assert.True(await blobClient.ExistsAsync());
 
             var tags = (await blobClient.GetTagsAsync()).Value.Tags;
-            Assert.That(tags.Count, Is.EqualTo(0));
+            Assert.Empty(tags);
 
             var body = (await blobClient.DownloadContentAsync()).Value.Content.ToString();
 
@@ -175,15 +167,15 @@ public class AzureBlobArchiveProviderTests
             else if (message.Header.MessageType == MessageType.MT_EVENT)
                 brighterBody = JsonSerializer.Serialize(superAwesomeEvents.First(c => c.Id == message.Id));
             
-            Assert.That(body, Is.EqualTo(brighterBody));
+            Assert.Equal(brighterBody, body);
 
             var tier = await blobClient.GetPropertiesAsync();
-            Assert.That(tier.Value.AccessTier, Is.EqualTo(AccessTier.Cool.ToString()));
+            Assert.Equal(AccessTier.Cool.ToString(), tier.Value.AccessTier);
         }
 
     }
 
-    [Test]
+    [Fact]
     public async Task GivenARequestToArchiveAMessageAsync_WhenTagsAreTurnedOn_ThenTagsAreWritten()
     {
         var publication = new Publication
@@ -199,15 +191,15 @@ public class AzureBlobArchiveProviderTests
         await _provider?.ArchiveMessageAsync(eventMessage, CancellationToken.None)!;
         
         var tier = await blobClient.GetPropertiesAsync();
-        Assert.That(tier.Value.AccessTier, Is.EqualTo(AccessTier.Hot.ToString()));
+        Assert.Equal(AccessTier.Hot.ToString(), tier.Value.AccessTier);
         
         var tags = (await blobClient.GetTagsAsync()).Value.Tags;
 
-        Assert.That(tags["topic"], Is.EqualTo(eventMessage.Header.Topic.Value));
-        Assert.That(tags["correlationId"], Is.EqualTo(eventMessage.Header.CorrelationId.Value));
-        Assert.That(tags["message_type"], Is.EqualTo(eventMessage.Header.MessageType.ToString()));
-        Assert.That(DateTime.Parse(tags["timestamp"]), Is.EqualTo(eventMessage.Header.TimeStamp.DateTime));
-        Assert.That(tags["content_type"], Is.EqualTo(eventMessage.Header.ContentType!.ToString()));
+        Assert.Equal(eventMessage.Header.Topic.Value, tags["topic"]);
+        Assert.Equal(eventMessage.Header.CorrelationId.Value, tags["correlationId"]);
+        Assert.Equal(eventMessage.Header.MessageType.ToString(), tags["message_type"]);
+        Assert.Equal(eventMessage.Header.TimeStamp.DateTime, DateTime.Parse(tags["timestamp"]));
+        Assert.Equal(eventMessage.Header.ContentType!.ToString(), tags["content_type"]);
     }
 
     private BlobContainerClient GetClient(AccessTier tier , bool tags = false )

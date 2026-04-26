@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using Paramore.Brighter.Azure.Tests.Helpers;
@@ -8,8 +8,8 @@ using Paramore.Brighter.Transforms.Transformers;
 
 namespace Paramore.Brighter.Azure.Tests.Transformers;
 
-[Category("Azure")]
-[Property("Fragile", "CI")]
+[Trait("Category", "Azure")]
+[Trait("Fragile", "CI")]
 public class LargeMessagePayloadAUnwrapTests : IDisposable
 {
     private readonly BlobContainerClient _client;
@@ -42,7 +42,7 @@ public class LargeMessagePayloadAUnwrapTests : IDisposable
         _pipelineBuilder = new TransformPipelineBuilder(mapperRegistry, messageTransformerFactory);
     }
     
-    [Test]
+    [Fact]
     public void When_unwrapping_a_large_message_async()
     {
         //arrange
@@ -78,8 +78,8 @@ public class LargeMessagePayloadAUnwrapTests : IDisposable
         
         //assert
         //contents should be from storage
-        Assert.Equals(contents, transformedMessage.Value);
-        Assert.That(_luggageStore.HasClaim(id));
+        Assert.Equal(contents, transformedMessage.Value);
+        Assert.True(_luggageStore.HasClaim(id));
     }
     
     public void Dispose()

@@ -1,4 +1,4 @@
-﻿using Azure.Identity;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Paramore.Brighter.Azure.Tests.Helpers;
 using Paramore.Brighter.Azure.Tests.TestDoubles;
@@ -8,8 +8,8 @@ using Paramore.Brighter.Transforms.Transformers;
 
 namespace Paramore.Brighter.Azure.Tests.Transformers;
 
-[Category("Azure")]
-[Property("Fragile", "CI")]
+[Trait("Category", "Azure")]
+[Trait("Fragile", "CI")]
 public class LargeMessagePayloadAsyncWrapTests : IDisposable
 {
     private WrapPipelineAsync<MyLargeCommand>? _transformPipeline;
@@ -48,7 +48,7 @@ public class LargeMessagePayloadAsyncWrapTests : IDisposable
         _pipelineBuilder = new TransformPipelineBuilderAsync(mapperRegistry, messageTransformerFactory, InstrumentationOptions.All);
     }
     
-    [Test]
+    [Fact]
     public async Task When_wrapping_a_large_message_async()
     {
         await _luggageStore.EnsureStoreExistsAsync();
@@ -58,14 +58,14 @@ public class LargeMessagePayloadAsyncWrapTests : IDisposable
         var message = await _transformPipeline.WrapAsync(_myCommand, new RequestContext(), _publication);
 
         //assert
-        Assert.That(message.Header.DataRef, Is.Not.Null);
-        Assert.That(message.Header.Bag.ContainsKey(ClaimCheckTransformer.CLAIM_CHECK));
-        Assert.That(message.Header.DataRef, Is.EqualTo((string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK]));
+        Assert.NotNull(message.Header.DataRef);
+        Assert.Contains(ClaimCheckTransformer.CLAIM_CHECK, message.Header.Bag.Keys);
+        Assert.Equal((string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK], message.Header.DataRef);
         
         _id = (string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK];
-        Assert.Equals($"Claim Check {_id}", message.Body.Value);
+        Assert.Equal($"Claim Check {_id}", message.Body.Value);
 
-        Assert.That(await _luggageStore.HasClaimAsync(_id, CancellationToken.None));
+        Assert.True(await _luggageStore.HasClaimAsync(_id, CancellationToken.None));
     }
     
     public void Dispose()

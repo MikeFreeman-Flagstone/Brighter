@@ -1,4 +1,4 @@
-﻿using Azure.Identity;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Paramore.Brighter.Azure.Tests.Helpers;
 using Paramore.Brighter.Azure.Tests.TestDoubles;
@@ -7,8 +7,8 @@ using Paramore.Brighter.Transforms.Transformers;
 
 namespace Paramore.Brighter.Azure.Tests.Transformers;
 
-[Category("Azure")]
-[Property("Fragile", "CI")]
+[Trait("Category", "Azure")]
+[Trait("Fragile", "CI")]
 public class LargeMessagePayloadWrapTests : IDisposable
 {
     private WrapPipeline<MyLargeCommand>? _transformPipeline;
@@ -47,7 +47,7 @@ public class LargeMessagePayloadWrapTests : IDisposable
         _pipelineBuilder = new TransformPipelineBuilder(mapperRegistry, messageTransformerFactory);
     }
     
-    [Test]
+    [Fact]
     public void When_wrapping_a_large_message()
     {
         _luggageStore.EnsureStoreExists();
@@ -57,14 +57,14 @@ public class LargeMessagePayloadWrapTests : IDisposable
         var message = _transformPipeline.Wrap(_myCommand, new RequestContext(), _publication);
 
         //assert
-        Assert.That(message.Header.DataRef, Is.Not.Null);
-        Assert.That(message.Header.Bag.ContainsKey(ClaimCheckTransformer.CLAIM_CHECK));
-        Assert.That(message.Header.DataRef, Is.EqualTo((string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK]));
+        Assert.NotNull(message.Header.DataRef);
+        Assert.Contains(ClaimCheckTransformer.CLAIM_CHECK, message.Header.Bag.Keys);
+        Assert.Equal((string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK], message.Header.DataRef);
         
         _id = (string)message.Header.Bag[ClaimCheckTransformer.CLAIM_CHECK];
-        Assert.Equals($"Claim Check {_id}", message.Body.Value);
+        Assert.Equal($"Claim Check {_id}", message.Body.Value);
 
-        Assert.That(_luggageStore.HasClaim(_id));
+        Assert.True(_luggageStore.HasClaim(_id));
     }
     
     public void Dispose()

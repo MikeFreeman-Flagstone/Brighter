@@ -1,4 +1,4 @@
-﻿using Azure.Identity;
+using Azure.Identity;
 using Azure.Storage.Blobs;
 using Paramore.Brighter.Azure.Tests.Helpers;
 using Paramore.Brighter.Transformers.Azure;
@@ -19,7 +19,7 @@ public class AzureBlobUploadAsyncTests : IAsyncDisposable
         _client = new BlobContainerClient(_bucketUrl, new AzureCliCredential());
     }
     
-    [Test]
+    [Fact]
     public async Task When_uploading_luggage_to_blob_async()
     {
         //arrange
@@ -44,12 +44,12 @@ public class AzureBlobUploadAsyncTests : IAsyncDisposable
 
         //assert
         //do we have a claim?
-        Assert.That(await luggageStore.HasClaimAsync(claim, CancellationToken.None));
+        Assert.True(await luggageStore.HasClaimAsync(claim, CancellationToken.None));
         
         //check for the contents indicated by the claim id on S3
         var result = await luggageStore.RetrieveAsync(claim, CancellationToken.None);
         var resultAsString = await new StreamReader(result).ReadToEndAsync();
-        Assert.Equals(testContent, resultAsString);
+        Assert.Equal(testContent, resultAsString);
 
         await luggageStore.DeleteAsync(claim, CancellationToken.None);
 

@@ -1,0 +1,17 @@
+{
+  "Namespace": "Paramore.Brighter.AzureServiceBus.Tests",
+  "MessagingGateway": {
+    "Publication": "Paramore.Brighter.MessagingGateway.AzureServiceBus.AzureServiceBusPublication",
+    "Subscription": "Paramore.Brighter.MessagingGateway.AzureServiceBus.AzureServiceBusSubscription",
+    "MessageGatewayProvider": "Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway.AzureServiceBusMessageGatewayProvider",
+    "Category": "ASB",
+    "CollectionName": "ASB",
+    "HasSupportToPublishConfirmation": false,
+    "HasSupportToDeadLetterQueue": true,
+    "HasSupportToDelayedMessages": true,
+    "HasSupportToValidateBrokerExistence": true,
+    "HasSupportToRequeue": true,
+    "ReceiveMessageTimeoutInMilliseconds": 5000,
+    "DelayBetweenReceiveMessageInMilliseconds": 1000
+  }
+}
