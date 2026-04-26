@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -63,7 +63,8 @@ public class AzureServiceBusMessageGatewayProvider
             routingKey: routingKey,
             makeChannels: makeChannel,
             subscriptionConfiguration: config,
-            requeueCount: setupDeadLetterQueue ? 3 : -1
+            requeueCount: setupDeadLetterQueue ? 3 : 1,
+            messagePumpType: MessagePumpType.Proactor
         );
     }
 
