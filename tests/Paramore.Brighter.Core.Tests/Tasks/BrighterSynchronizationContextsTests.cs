@@ -5,6 +5,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Paramore.Brighter.Core.Tests.TestHelpers;
 using Paramore.Brighter.Tasks;
 
 namespace Paramore.Brighter.Core.Tests.Tasks;
