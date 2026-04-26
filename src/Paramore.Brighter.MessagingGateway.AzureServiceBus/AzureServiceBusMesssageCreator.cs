@@ -257,9 +257,12 @@ public partial class AzureServiceBusMesssageCreator(AzureServiceBusSubscription 
             return defaultSourceUri;
         }
         
-        var source = property.ToString();
+        if (Uri.TryCreate(property.ToString(), UriKind.RelativeOrAbsolute, out var source))
+        {
+            return source;
+        }
 
-        return new Uri(source!);
+        return defaultSourceUri;
     }
     
    private TraceParent GetTraceParent(IBrokeredMessageWrapper azureServiceBusMessage)
