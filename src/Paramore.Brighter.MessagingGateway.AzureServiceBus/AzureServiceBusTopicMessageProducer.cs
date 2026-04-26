@@ -24,7 +24,9 @@ THE SOFTWARE. */
 #endregion
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
+using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Logging;
 using Paramore.Brighter.Logging;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus.AzureServiceBusWrappers;
@@ -41,6 +43,7 @@ public partial class AzureServiceBusTopicMessageProducer : AzureServiceBusMessag
     private static readonly ILogger s_logger = ApplicationLogging.CreateLogger<AzureServiceBusTopicMessageProducer>();
         
     private readonly IAdministrationClientWrapper _administrationClientWrapper;
+    private readonly SemaphoreSlim _ensureChannelLock = new(1, 1);
 
     /// <summary>
     /// An Azure Service Bus Message producer <see cref="IAmAMessageProducer"/>
@@ -64,8 +67,12 @@ public partial class AzureServiceBusTopicMessageProducer : AzureServiceBusMessag
         if (TopicCreated || Publication.MakeChannels.Equals(OnMissingChannel.Assume))
             return;
 
+        await _ensureChannelLock.WaitAsync();
         try
         {
+            if (TopicCreated)
+                return;
+
             if (await _administrationClientWrapper.TopicExistsAsync(channelName))
             {
                 TopicCreated = true;
@@ -80,12 +87,20 @@ public partial class AzureServiceBusTopicMessageProducer : AzureServiceBusMessag
             await _administrationClientWrapper.CreateTopicAsync(channelName);
             TopicCreated = true;
         }
+        catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.MessagingEntityAlreadyExists)
+        {
+            TopicCreated = true;
+        }
         catch (Exception e)
         {
             //The connection to Azure Service bus may have failed so we re-establish the connection.
             _administrationClientWrapper.Reset();
             Log.FailingToCheckOrCreateTopic(s_logger, e);
             throw;
+        }
+        finally
+        {
+            _ensureChannelLock.Release();
         }
     }
 

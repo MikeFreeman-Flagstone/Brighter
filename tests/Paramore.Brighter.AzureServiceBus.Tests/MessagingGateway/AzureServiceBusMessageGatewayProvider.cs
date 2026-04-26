@@ -7,6 +7,7 @@ using Azure.Messaging.ServiceBus;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus.AzureServiceBusWrappers;
 using Paramore.Brighter.MessagingGateway.AzureServiceBus.ClientProvider;
+using Paramore.Brighter.AzureServiceBus.Tests.TestDoubles;
 
 namespace Paramore.Brighter.AzureServiceBus.Tests.MessagingGateway;
 
@@ -57,7 +58,7 @@ public class AzureServiceBusMessageGatewayProvider
             config.MaxDeliveryCount = 3;
         }
 
-        return new AzureServiceBusSubscription(
+        return new AzureServiceBusSubscription<ASBTestCommand>(
             subscriptionName: new SubscriptionName(channelName.Value),
             channelName: channelName,
             routingKey: routingKey,
