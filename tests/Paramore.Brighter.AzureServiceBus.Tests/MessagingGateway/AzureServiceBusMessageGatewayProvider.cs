@@ -84,15 +84,27 @@ public class AzureServiceBusMessageGatewayProvider
     public IAmAChannelSync CreateChannel(AzureServiceBusSubscription subscription)
     {
         var consumerFactory = new AzureServiceBusConsumerFactory(_clientProvider);
-        var channelFactory = new AzureServiceBusChannelFactory(consumerFactory);
-        return channelFactory.CreateSyncChannel(subscription);
+        var consumer = consumerFactory.Create(subscription);
+        var retryConsumer = new RetryAzureServiceBusMessageConsumer(consumer, maxRetries: 10);
+
+        return new Channel(
+            subscription.ChannelName,
+            subscription.RoutingKey,
+            retryConsumer,
+            subscription.BufferSize);
     }
 
     public async Task<IAmAChannelAsync> CreateChannelAsync(AzureServiceBusSubscription subscription, CancellationToken cancellationToken = default)
     {
         var consumerFactory = new AzureServiceBusConsumerFactory(_clientProvider);
-        var channelFactory = new AzureServiceBusChannelFactory(consumerFactory);
-        return await channelFactory.CreateAsyncChannelAsync(subscription, cancellationToken);
+        var consumer = consumerFactory.Create(subscription);
+        var retryConsumer = new RetryAzureServiceBusMessageConsumer(consumer, maxRetries: 10);
+
+        return new ChannelAsync(
+            subscription.ChannelName,
+            subscription.RoutingKey,
+            retryConsumer,
+            subscription.BufferSize);
     }
 
     public void CleanUp(IAmAMessageProducerSync? producer, IAmAChannelSync? channel, IEnumerable<Message> messages)
