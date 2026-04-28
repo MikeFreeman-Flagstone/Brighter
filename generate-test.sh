@@ -59,4 +59,3 @@ if [ $error_count -gt 0 ]; then
 fi
 
 exit 0
-
