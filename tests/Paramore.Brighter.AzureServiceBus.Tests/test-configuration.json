@@ -7,7 +7,7 @@
     "Category": "ASB",
     "CollectionName": "ASB",
     "HasSupportToPublishConfirmation": false,
-    "HasSupportToDeadLetterQueue": true,
+    "HasSupportToDeadLetterQueue": false,
     "HasSupportToDelayedMessages": false,
     "HasSupportToValidateBrokerExistence": true,
     "HasSupportToRequeue": true,
