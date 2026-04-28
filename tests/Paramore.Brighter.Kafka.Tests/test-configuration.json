@@ -13,6 +13,7 @@
       "HasSupportToDelayedMessages": false,
       "HasSupportToPartitionKey": false,
       "HasSupportToValidateBrokerExistence": false,
+      "HasSupportToValidateInfrastructure": false,
       "HasSupportToRequeue": false,
       "ReceiveMessageTimeoutInMilliseconds": 15000
     },
@@ -28,6 +29,7 @@
       "HasSupportToDelayedMessages": false,
       "HasSupportToPartitionKey": true,
       "HasSupportToValidateBrokerExistence": false,
+      "HasSupportToValidateInfrastructure": false,
       "HasSupportToRequeue": false,
       "ReceiveMessageTimeoutInMilliseconds": 15000
     }

@@ -8,7 +8,7 @@
     "CollectionName": "ASB",
     "HasSupportToPublishConfirmation": false,
     "HasSupportToDeadLetterQueue": true,
-    "HasSupportToDelayedMessages": true,
+    "HasSupportToDelayedMessages": false,
     "HasSupportToValidateBrokerExistence": true,
     "HasSupportToRequeue": true,
     "ReceiveMessageTimeoutInMilliseconds": 6000

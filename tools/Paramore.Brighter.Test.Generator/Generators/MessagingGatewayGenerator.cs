@@ -126,10 +126,7 @@ public class MessageGatewayGenerator(ILogger<MessageGatewayGenerator> logger)
     /// <returns><c>true</c> if the template should be skipped; otherwise, <c>false</c>.</returns>
     private static bool SkipTest(MessagingGatewayConfiguration configuration, string fileName)
     {
-        if (
-            !configuration.HasSupportToPublishConfirmation
-            && fileName.Contains("confirming_posting")
-        )
+        if (!configuration.HasSupportToPublishConfirmation && fileName.Contains("confirming_posting"))
         {
             return true;
         }
@@ -154,10 +151,7 @@ public class MessageGatewayGenerator(ILogger<MessageGatewayGenerator> logger)
             return true;
         }
 
-        if (
-            !configuration.HasSupportToValidateBrokerExistence
-            && fileName.Contains("no_broker_created")
-        )
+        if (!configuration.HasSupportToValidateBrokerExistence && fileName.Contains("no_broker_created"))
         {
             return true;
         }
@@ -167,10 +161,7 @@ public class MessageGatewayGenerator(ILogger<MessageGatewayGenerator> logger)
             return true;
         }
 
-        if (
-            !configuration.HasSupportToValidateInfrastructure
-            && (fileName.Contains("assume_channel") || fileName.Contains("validate_channel"))
-        )
+        if (!configuration.HasSupportToValidateInfrastructure && fileName.Contains("infrastructure"))
         {
             return true;
         }

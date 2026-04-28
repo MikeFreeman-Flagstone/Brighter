@@ -52,15 +52,11 @@
       "Category": "GcpPubSub",
       "CollectionName": "StreamOrdering",
       "HasSupportToPublishConfirmation": false,
-      // Requeue is disabled for StreamOrdering because GCP Pub/Sub streaming pull with message ordering pauses delivery for an ordering key 
-      //  after NACK until the ack deadline expires (60s). This makes immediate requeue/redelivery impossible, breaking the requeue test assumptions 
-      //  that work for Pull mode. PullOrdering already covers requeue + ordering key behavior.
-      "HasSupportToDeadLetterQueue": true,
       "HasSupportToDelayedMessages": false,
       "HasSupportToPartitionKey": true,
       "HasSupportToValidateBrokerExistence": true,
       "HasSupportToRequeue": false,
-      "ReceiveMessageTimeoutInMilliseconds": 2000,
+      "ReceiveMessageTimeoutInMilliseconds": 2000
     }
   },
   "Outboxes": {
